@@ -19,6 +19,11 @@ under the License.
 
 # Superset
 
+This is the GISCON-EGYPT fork.
+Based on the 4.1.1 release.
+
+- Added Embedding config (diff it with the main repo's 4.1.1 tag) 
+
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/apache/superset?sort=semver)](https://github.com/apache/superset/tree/latest)
 [![Build Status](https://github.com/apache/superset/workflows/Python/badge.svg)](https://github.com/apache/superset/actions)
