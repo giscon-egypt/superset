@@ -50,9 +50,6 @@ export interface ChartMetadataConfig {
   labelExplanation?: string | null;
   queryObjectCount?: number;
   parseMethod?: ParseMethod;
-  // suppressContextMenu: true hides the default context menu for the chart.
-  // This is useful for viz plugins that define their own context menu.
-  suppressContextMenu?: boolean;
 }
 
 export default class ChartMetadata {
@@ -94,8 +91,6 @@ export default class ChartMetadata {
 
   parseMethod: ParseMethod;
 
-  suppressContextMenu?: boolean;
-
   constructor(config: ChartMetadataConfig) {
     const {
       name,
@@ -116,7 +111,6 @@ export default class ChartMetadata {
       labelExplanation = null,
       queryObjectCount = 1,
       parseMethod = 'json-bigint',
-      suppressContextMenu = false,
     } = config;
 
     this.name = name;
@@ -146,7 +140,6 @@ export default class ChartMetadata {
     this.labelExplanation = labelExplanation;
     this.queryObjectCount = queryObjectCount;
     this.parseMethod = parseMethod;
-    this.suppressContextMenu = suppressContextMenu;
   }
 
   canBeAnnotationType(type: string): boolean {

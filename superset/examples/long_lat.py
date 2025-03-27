@@ -15,7 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 import datetime
-import logging
 import random
 
 import geohash
@@ -36,8 +35,6 @@ from .helpers import (
     misc_dash_slices,
 )
 
-logger = logging.getLogger(__name__)
-
 
 def load_long_lat_data(only_metadata: bool = False, force: bool = False) -> None:
     """Loading lat/long data from a csv file in the repo"""
@@ -57,8 +54,8 @@ def load_long_lat_data(only_metadata: bool = False, force: bool = False) -> None
                 start + datetime.timedelta(hours=i * 24 / (len(pdf) - 1))
                 for i in range(len(pdf))
             ]
-            pdf["occupancy"] = [random.randint(1, 6) for _ in range(len(pdf))]  # noqa: S311
-            pdf["radius_miles"] = [random.uniform(1, 3) for _ in range(len(pdf))]  # noqa: S311
+            pdf["occupancy"] = [random.randint(1, 6) for _ in range(len(pdf))]
+            pdf["radius_miles"] = [random.uniform(1, 3) for _ in range(len(pdf))]
             pdf["geohash"] = pdf[["LAT", "LON"]].apply(
                 lambda x: geohash.encode(*x), axis=1
             )
@@ -88,10 +85,10 @@ def load_long_lat_data(only_metadata: bool = False, force: bool = False) -> None
                 },
                 index=False,
             )
-        logger.debug("Done loading table!")
-        logger.debug("-" * 80)
+        print("Done loading table!")
+        print("-" * 80)
 
-    logger.debug("Creating table reference")
+    print("Creating table reference")
     table = get_table_connector_registry()
     obj = db.session.query(table).filter_by(table_name=tbl_name).first()
     if not obj:
@@ -115,7 +112,7 @@ def load_long_lat_data(only_metadata: bool = False, force: bool = False) -> None
         "row_limit": 500000,
     }
 
-    logger.debug("Creating a slice")
+    print("Creating a slice")
     slc = Slice(
         slice_name="Mapbox Long/Lat",
         viz_type="mapbox",

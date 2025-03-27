@@ -17,12 +17,8 @@
  * under the License.
  */
 import fetchMock from 'fetch-mock';
-import {
-  render,
-  screen,
-  userEvent,
-  waitFor,
-} from 'spec/helpers/testing-library';
+import userEvent from '@testing-library/user-event';
+import { render, screen, waitFor } from 'spec/helpers/testing-library';
 import LeftPanel from 'src/features/datasets/AddDataset/LeftPanel';
 import { exampleDataset } from 'src/features/datasets/AddDataset/DatasetPanel/fixtures';
 
@@ -275,7 +271,7 @@ test('searches for a table name', async () => {
   });
 });
 
-test('renders a warning icon when a table name has a preexisting dataset', async () => {
+test('renders a warning icon when a table name has a pre-existing dataset', async () => {
   render(
     <LeftPanel
       setDataset={mockFun}
@@ -324,5 +320,5 @@ test('renders a warning icon when a table name has a preexisting dataset', async
   userEvent.type(tableSelect, 'Sheet2');
 
   // Sheet2 should now show the warning icon
-  expect(screen.getByRole('img', { name: 'warning' })).toBeInTheDocument();
+  expect(screen.getByRole('img', { name: 'alert-solid' })).toBeInTheDocument();
 });

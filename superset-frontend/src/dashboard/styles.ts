@@ -66,10 +66,36 @@ export const chartHeaderStyles = (theme: SupersetTheme) => css`
 `;
 
 export const filterCardPopoverStyle = (theme: SupersetTheme) => css`
+  .filter-card-popover {
+    width: 240px;
+    padding: 0;
+    border-radius: 4px;
+
+    &.ant-popover-placement-bottom {
+      padding-top: ${theme.gridUnit}px;
+    }
+
+    &.ant-popover-placement-left {
+      padding-right: ${theme.gridUnit * 3}px;
+    }
+
+    .ant-popover-inner {
+      box-shadow: 0 0 8px rgb(0 0 0 / 10%);
+    }
+
+    .ant-popover-inner-content {
+      padding: ${theme.gridUnit * 4}px;
+    }
+
+    .ant-popover-arrow {
+      display: none;
+    }
+  }
+
   .filter-card-tooltip {
-    &.antd5-tooltip-placement-bottom {
+    &.ant-tooltip-placement-bottom {
       padding-top: 0;
-      & .antd5-tooltip-arrow {
+      & .ant-tooltip-arrow {
         top: -13px;
       }
     }
@@ -77,10 +103,10 @@ export const filterCardPopoverStyle = (theme: SupersetTheme) => css`
 `;
 
 export const chartContextMenuStyles = (theme: SupersetTheme) => css`
-  .antd5-dropdown-menu.chart-context-menu {
+  .ant-dropdown-menu.chart-context-menu {
     min-width: ${theme.gridUnit * 43}px;
   }
-  .antd5-dropdown-menu-submenu.chart-context-submenu {
+  .ant-dropdown-menu-submenu.chart-context-submenu {
     max-width: ${theme.gridUnit * 60}px;
     min-width: ${theme.gridUnit * 40}px;
   }
@@ -91,7 +117,7 @@ export const focusStyle = (theme: SupersetTheme) => css`
   .ant-tabs-tabpane,
   .ant-tabs-tab-btn,
   .superset-button,
-  .superset-button.antd5-dropdown-trigger,
+  .superset-button.ant-dropdown-trigger,
   .header-controls span {
     &:focus-visible {
       box-shadow: 0 0 0 2px ${theme.colors.primary.dark1};
@@ -101,7 +127,7 @@ export const focusStyle = (theme: SupersetTheme) => css`
     }
     &:not(
         .superset-button,
-        .antd5-menu-item,
+        .ant-menu-item,
         a,
         .fave-unfave-icon,
         .ant-tabs-tabpane,

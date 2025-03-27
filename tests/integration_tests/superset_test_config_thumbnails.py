@@ -22,7 +22,7 @@ from sqlalchemy.engine import make_url
 from superset.config import *  # noqa: F403
 from superset.config import DATA_DIR
 
-SECRET_KEY = "dummy_secret_key_for_test_to_silence_warnings"  # noqa: S105
+SECRET_KEY = "dummy_secret_key_for_test_to_silence_warnings"
 AUTH_USER_REGISTRATION_ROLE = "alpha"
 SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(  # noqa: F405
     DATA_DIR,
@@ -45,7 +45,7 @@ SQL_SELECT_AS_CTA = True
 SQL_MAX_ROW = 666
 
 
-def GET_FEATURE_FLAGS_FUNC(ff):  # noqa: N802
+def GET_FEATURE_FLAGS_FUNC(ff):
     ff_copy = copy(ff)
     ff_copy["super"] = "set"
     return ff_copy
@@ -55,6 +55,7 @@ TESTING = True
 WTF_CSRF_ENABLED = False
 PUBLIC_ROLE_LIKE = "Gamma"
 AUTH_ROLE_PUBLIC = "Public"
+EMAIL_NOTIFICATIONS = False
 
 CACHE_CONFIG = {"CACHE_TYPE": "SimpleCache"}
 
@@ -74,6 +75,8 @@ CELERY_CONFIG = CeleryConfig
 
 FEATURE_FLAGS = {
     "foo": "bar",
+    "KV_STORE": False,
+    "SHARE_QUERIES_VIA_KV_STORE": False,
     "THUMBNAILS": True,
     "THUMBNAILS_SQLA_LISTENERS": False,
 }

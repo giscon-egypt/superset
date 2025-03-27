@@ -30,7 +30,7 @@ import {
 import Button from 'src/components/Button';
 import ControlHeader from 'src/explore/components/ControlHeader';
 import Modal from 'src/components/Modal';
-import { Divider } from 'src/components/Divider';
+import { Divider } from 'src/components';
 import Icons from 'src/components/Icons';
 import Select from 'src/components/Select/Select';
 import { Tooltip } from 'src/components/Tooltip';
@@ -65,7 +65,7 @@ const ContentStyleWrapper = styled.div`
       margin-top: 8px;
     }
 
-    .antd5-input-number {
+    .ant-input-number {
       width: 100%;
     }
 
@@ -75,7 +75,7 @@ const ContentStyleWrapper = styled.div`
       width: 100%;
     }
 
-    .antd5-divider-horizontal {
+    .ant-divider-horizontal {
       margin: 16px 0;
     }
 
@@ -84,7 +84,14 @@ const ContentStyleWrapper = styled.div`
       font-weight: ${theme.typography.weights.medium};
       color: ${theme.colors.grayscale.light2};
       line-height: 16px;
+      text-transform: uppercase;
       margin: 8px 0;
+    }
+
+    .vertical-radio {
+      display: block;
+      height: 40px;
+      line-height: 40px;
     }
 
     .section-title {
@@ -146,7 +153,6 @@ const getTooltipTitle = (
 
 export default function DateFilterLabel(props: DateFilterControlProps) {
   const {
-    name,
     onChange,
     onOpenPopover = noOp,
     onClosePopover = noOp,
@@ -302,11 +308,7 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
         <AdvancedFrame value={timeRangeValue} onChange={setTimeRangeValue} />
       )}
       {frame === 'Custom' && (
-        <CustomFrame
-          value={timeRangeValue}
-          onChange={setTimeRangeValue}
-          isOverflowingFilterBar={isOverflowingFilterBar}
-        />
+        <CustomFrame value={timeRangeValue} onChange={setTimeRangeValue} />
       )}
       {frame === 'No filter' && <div data-test={DateFilterTestKey.NoFilter} />}
       <Divider />
@@ -319,9 +321,7 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
         )}
         {!validTimeRange && (
           <IconWrapper className="warning">
-            <Icons.ExclamationCircleOutlined
-              iconColor={theme.colors.error.base}
-            />
+            <Icons.ErrorSolidSmall iconColor={theme.colors.error.base} />
             <span className="text error">{evalResponse}</span>
           </IconWrapper>
         )}
@@ -353,34 +353,34 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
 
   const title = (
     <IconWrapper>
-      <Icons.EditOutlined />
+      <Icons.EditAlt iconColor={theme.colors.grayscale.base} />
       <span className="text">{t('Edit time range')}</span>
     </IconWrapper>
   );
+
   const popoverContent = (
     <ControlPopover
-      autoAdjustOverflow={false}
-      trigger="click"
       placement="right"
+      trigger="click"
       content={overlayContent}
       title={title}
-      defaultOpen={show}
-      open={show}
-      onOpenChange={toggleOverlay}
+      defaultVisible={show}
+      visible={show}
+      onVisibleChange={toggleOverlay}
       overlayStyle={{ width: '600px' }}
-      destroyTooltipOnHide
-      getPopupContainer={nodeTrigger =>
+      getPopupContainer={triggerNode =>
         isOverflowingFilterBar
-          ? (nodeTrigger.parentNode as HTMLElement)
+          ? (triggerNode.parentNode as HTMLElement)
           : document.body
       }
-      overlayClassName="time-range-popover"
+      destroyTooltipOnHide
     >
-      <Tooltip placement="top" title={tooltipTitle}>
+      <Tooltip
+        placement="top"
+        title={tooltipTitle}
+        getPopupContainer={trigger => trigger.parentElement as HTMLElement}
+      >
         <DateLabel
-          name={name}
-          aria-labelledby={`filter-name-${props.name}`}
-          aria-describedby={`date-label-${props.name}`}
           label={actualTimeRange}
           isActive={show}
           isPlaceholder={actualTimeRange === NO_TIME_RANGE}
@@ -393,11 +393,12 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
 
   const modalContent = (
     <>
-      <Tooltip placement="top" title={tooltipTitle}>
+      <Tooltip
+        placement="top"
+        title={tooltipTitle}
+        getPopupContainer={trigger => trigger.parentElement as HTMLElement}
+      >
         <DateLabel
-          name={name}
-          aria-labelledby={`filter-name-${props.name}`}
-          aria-describedby={`date-label-${props.name}`}
           onClick={toggleOverlay}
           label={actualTimeRange}
           isActive={show}

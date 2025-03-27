@@ -14,8 +14,6 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from __future__ import annotations
-
 import logging
 import re
 from datetime import datetime
@@ -29,7 +27,6 @@ from sqlalchemy.dialects.mssql.base import SMALLDATETIME
 from superset.constants import TimeGrain
 from superset.db_engine_specs.base import BaseEngineSpec, LimitMethod
 from superset.errors import SupersetErrorType
-from superset.models.sql_types.mssql_sql_types import GUID
 from superset.utils.core import GenericDataType
 
 logger = logging.getLogger(__name__)
@@ -89,11 +86,6 @@ class MssqlEngineSpec(BaseEngineSpec):
             re.compile(r"^smalldatetime.*", re.IGNORECASE),
             SMALLDATETIME(),
             GenericDataType.TEMPORAL,
-        ),
-        (
-            re.compile(r"^uniqueidentifier.*", re.IGNORECASE),
-            GUID(),
-            GenericDataType.STRING,
         ),
     )
 
@@ -160,7 +152,7 @@ class MssqlEngineSpec(BaseEngineSpec):
     def extract_error_message(cls, ex: Exception) -> str:
         if str(ex).startswith("(8155,"):
             return (
-                f"{cls.engine} error: All your SQL functions need to "  # noqa: S608
+                f"{cls.engine} error: All your SQL functions need to "
                 "have an alias on MSSQL. For example: SELECT COUNT(*) AS C1 FROM TABLE1"
             )
         return f"{cls.engine} error: {cls._extract_error_message(ex)}"

@@ -21,16 +21,14 @@ import { scaleOrdinal, ScaleOrdinal } from 'd3-scale';
 import { ExtensibleFunction } from '../models';
 import { ColorsInitLookup, ColorsLookup } from './types';
 import stringifyAndTrim from './stringifyAndTrim';
-import getLabelsColorMap, {
-  LabelsColorMapSource,
-} from './LabelsColorMapSingleton';
+import getLabelsColorMap from './LabelsColorMapSingleton';
 import { getAnalogousColors } from './utils';
 import { FeatureFlag, isFeatureEnabled } from '../utils';
 
 // Use type augmentation to correct the fact that
 // an instance of CategoricalScale is also a function
 interface CategoricalColorScale {
-  (x: { toString(): string }, y?: number): string;
+  (x: { toString(): string }, y?: number, w?: string): string;
 }
 
 class CategoricalColorScale extends ExtensibleFunction {
@@ -52,20 +50,15 @@ class CategoricalColorScale extends ExtensibleFunction {
    * Constructor
    * @param {*} colors an array of colors
    * @param {*} forcedColors optional parameter that comes from parent
-   * @param {*} appliedColorScheme the color scheme applied to the chart
-   *
+   * (usually CategoricalColorNamespace)
    */
-  constructor(
-    colors: string[],
-    forcedColors: ColorsInitLookup = {},
-    appliedColorScheme?: string,
-  ) {
-    super((value: string, sliceId?: number) =>
-      this.getColor(value, sliceId, appliedColorScheme),
+  constructor(colors: string[], forcedColors: ColorsInitLookup = {}) {
+    super((value: string, sliceId?: number, colorScheme?: string) =>
+      this.getColor(value, sliceId, colorScheme),
     );
     // holds original color scheme colors
     this.originColors = colors;
-    // holds the extended color range (includes analogous colors)
+    // holds the extended color range (includes analagous colors)
     this.colors = colors;
     // holds the values of this specific slice (label+color)
     this.chartLabelsColorMap = new Map();
@@ -114,32 +107,19 @@ class CategoricalColorScale extends ExtensibleFunction {
    *
    * @param value the value of a label to get the color for
    * @param sliceId the ID of the current chart
-   * @param appliedColorScheme the color scheme applied to the chart
+   * @param colorScheme the original color scheme of the chart
    * @returns the color or the next available color
    */
-  getColor(
-    value?: string,
-    sliceId?: number,
-    appliedColorScheme?: string,
-  ): string {
+  getColor(value?: string, sliceId?: number, colorScheme?: string): string {
     const cleanedValue = stringifyAndTrim(value);
-    // priority: forced color (aka custom label colors) > shared color > scale color
+    // priority: forced color (i.e. custom label colors) > shared color > scale color
     const forcedColor = this.forcedColors?.[cleanedValue];
-    const { source } = this.labelsColorMapInstance;
-    const currentColorMap =
-      source === LabelsColorMapSource.Dashboard
-        ? this.labelsColorMapInstance.getColorMap()
-        : this.chartLabelsColorMap;
-    const isExistingLabel = currentColorMap.has(cleanedValue);
-    let color =
-      forcedColor ||
-      (isExistingLabel
-        ? (currentColorMap.get(cleanedValue) as string)
-        : this.scale(cleanedValue));
+    const isExistingLabel = this.chartLabelsColorMap.has(cleanedValue);
+    let color = forcedColor || this.scale(cleanedValue);
 
     // a forced color will always be used independently of the usage count
     if (!forcedColor && !isExistingLabel) {
-      if (isFeatureEnabled(FeatureFlag.UseAnalogousColors)) {
+      if (isFeatureEnabled(FeatureFlag.UseAnalagousColors)) {
         this.incrementColorRange();
       }
       if (
@@ -148,7 +128,7 @@ class CategoricalColorScale extends ExtensibleFunction {
         this.isColorUsed(color)
       ) {
         // fallback to least used color
-        color = this.getNextAvailableColor(cleanedValue, color);
+        color = this.getNextAvailableColor(color);
       }
     }
 
@@ -161,7 +141,7 @@ class CategoricalColorScale extends ExtensibleFunction {
         cleanedValue,
         color,
         sliceId,
-        appliedColorScheme,
+        colorScheme,
       );
     }
     return color;
@@ -184,76 +164,48 @@ class CategoricalColorScale extends ExtensibleFunction {
    * @param color the color to check
    * @returns the count of the color usage in this slice
    */
-  getColorUsageCount(color: string): number {
-    return Array.from(this.chartLabelsColorMap.values()).filter(
-      value => value === color,
-    ).length;
+  getColorUsageCount(currentColor: string): number {
+    let count = 0;
+    this.chartLabelsColorMap.forEach(color => {
+      if (color === currentColor) {
+        count += 1;
+      }
+    });
+    return count;
   }
 
   /**
-   * Lower chances of color collision by returning the least used color.
-   * Checks across colors of current slice within chartLabelsColorMap.
+   * Lower chances of color collision by returning the least used color
+   * Checks across colors of current slice within LabelsColorMapSingleton
    *
-   * @param currentLabel the current label
    * @param currentColor the current color
-   * @returns the least used color that is not the current color
+   * @returns the least used color that is not the excluded color
    */
-  getNextAvailableColor(currentLabel: string, currentColor: string): string {
-    // Precompute color usage counts for all colors
-    const colorUsageCounts = new Map(
-      this.colors.map(color => [color, this.getColorUsageCount(color)]),
+  getNextAvailableColor(currentColor: string) {
+    const colorUsageArray = this.colors.map(color => ({
+      color,
+      count: this.getColorUsageCount(color),
+    }));
+    const currentColorCount = this.getColorUsageCount(currentColor);
+    const otherColors = colorUsageArray.filter(
+      colorEntry => colorEntry.color !== currentColor,
+    );
+    // all other colors are used as much or more than currentColor
+    const hasNoneAvailable = otherColors.every(
+      colorEntry => colorEntry.count >= currentColorCount,
     );
 
-    // Get an ordered array of labels from the map
-    const orderedLabels = Array.from(this.chartLabelsColorMap.keys());
-    const currentLabelIndex = orderedLabels.indexOf(currentLabel);
-
-    // Helper to infer "previous" and "next" labels based on index
-    const getAdjacentLabelsColors = (): string[] => {
-      const previousLabel =
-        currentLabelIndex > 0 ? orderedLabels[currentLabelIndex - 1] : null;
-      const nextLabel =
-        currentLabelIndex < orderedLabels.length - 1
-          ? orderedLabels[currentLabelIndex + 1]
-          : null;
-
-      const previousColor = previousLabel
-        ? this.chartLabelsColorMap.get(previousLabel)
-        : null;
-      const nextColor = nextLabel
-        ? this.chartLabelsColorMap.get(nextLabel)
-        : null;
-
-      return [previousColor, nextColor].filter(color => color) as string[];
-    };
-
-    const adjacentColors = getAdjacentLabelsColors();
-
-    // Determine adjusted score (usage count + penalties)
-    const calculateScore = (color: string): number => {
-      /* istanbul ignore next */
-      const usageCount = colorUsageCounts.get(color) || 0;
-      const adjacencyPenalty = adjacentColors.includes(color) ? 100 : 0;
-      return usageCount + adjacencyPenalty;
-    };
-
-    // If there is any color that has never been used, prioritize it
-    const unusedColor = this.colors.find(
-      color => (colorUsageCounts.get(color) || 0) === 0,
-    );
-    if (unusedColor) {
-      return unusedColor;
+    // fallback to currentColor color
+    if (!otherColors.length || hasNoneAvailable) {
+      return currentColor;
     }
 
-    // If all colors are used, calculate scores and choose the best one
-    const otherColors = this.colors.filter(color => color !== currentColor);
+    // Finding the least used color
+    const leastUsedColor = otherColors.reduce((min, entry) =>
+      entry.count < min.count ? entry : min,
+    ).color;
 
-    // Find the color with the minimum score, defaulting to currentColor
-    return otherColors.reduce((bestColor, color) => {
-      const bestScore = calculateScore(bestColor);
-      const currentScore = calculateScore(color);
-      return currentScore < bestScore ? color : bestColor;
-    }, currentColor);
+    return leastUsedColor;
   }
 
   /**

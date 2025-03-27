@@ -88,32 +88,27 @@ class CreateCustomTagWithRelationshipsCommand(CreateMixin, BaseCommand):
     def validate(self) -> None:
         exceptions = []
         objects_to_tag = set(self._properties.get("objects_to_tag", []))
-
         for obj_type, obj_id in objects_to_tag:
             object_type = to_object_type(obj_type)
 
             # Validate object type
-            if not object_type:
-                exceptions.append(TagInvalidError(f"invalid object type {object_type}"))
-                continue
+            for obj_type, obj_id in objects_to_tag:
+                object_type = to_object_type(obj_type)
 
-            try:
-                if model := to_object_model(object_type, obj_id):
-                    try:
+                if not object_type:
+                    exceptions.append(
+                        TagInvalidError(f"invalid object type {object_type}")
+                    )
+                try:
+                    if model := to_object_model(object_type, obj_id):  # type: ignore
                         security_manager.raise_for_ownership(model)
-                    except SupersetSecurityException:
-                        if (
-                            not model.created_by
-                            or model.created_by != security_manager.current_user
-                        ):
-                            # skip the object if the user doesn't have access
-                            self._skipped_tagged_objects.add((obj_type, obj_id))
-            except Exception as e:
-                exceptions.append(TagInvalidError(str(e)))
+                except SupersetSecurityException:
+                    # skip the object if the user doesn't have access
+                    self._skipped_tagged_objects.add((obj_type, obj_id))
 
-        self._properties["objects_to_tag"] = (
-            set(objects_to_tag) - self._skipped_tagged_objects
-        )
+            self._properties["objects_to_tag"] = (
+                set(objects_to_tag) - self._skipped_tagged_objects
+            )
 
         if exceptions:
             raise TagInvalidError(exceptions=exceptions)

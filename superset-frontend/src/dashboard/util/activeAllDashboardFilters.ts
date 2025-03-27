@@ -20,7 +20,6 @@ import {
   DataMaskStateWithId,
   PartialFilters,
   JsonObject,
-  DataMaskWithId,
 } from '@superset-ui/core';
 import { ActiveFilters, ChartConfiguration } from '../types';
 
@@ -29,12 +28,9 @@ export const getRelevantDataMask = (
   prop: string,
 ): JsonObject | DataMaskStateWithId =>
   Object.values(dataMask)
-    .filter(item => item[prop as keyof DataMaskWithId])
+    .filter(item => item[prop])
     .reduce(
-      (prev, next) => ({
-        ...prev,
-        [next.id]: prop ? next[prop as keyof DataMaskWithId] : next,
-      }),
+      (prev, next) => ({ ...prev, [next.id]: prop ? next[prop] : next }),
       {},
     );
 
@@ -49,14 +45,13 @@ export const getAllActiveFilters = ({
   nativeFilters: PartialFilters;
   allSliceIds: number[];
 }): ActiveFilters => {
-  const activeFilters: ActiveFilters = {};
+  const activeFilters = {};
 
   // Combine native filters with cross filters, because they have similar logic
-  Object.values(dataMask).forEach(({ id: filterId, extraFormData = {} }) => {
+  Object.values(dataMask).forEach(({ id: filterId, extraFormData }) => {
     const scope =
       nativeFilters?.[filterId]?.chartsInScope ??
-      chartConfiguration?.[parseInt(filterId, 10)]?.crossFilters
-        ?.chartsInScope ??
+      chartConfiguration?.[filterId]?.crossFilters?.chartsInScope ??
       allSliceIds ??
       [];
     const filterType = nativeFilters?.[filterId]?.filterType;

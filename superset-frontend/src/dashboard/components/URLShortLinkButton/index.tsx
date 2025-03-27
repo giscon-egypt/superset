@@ -17,14 +17,13 @@
  * under the License.
  */
 import { useState } from 'react';
-import { getClientErrorObject, t, useTheme } from '@superset-ui/core';
+import { getClientErrorObject, t } from '@superset-ui/core';
 import Popover, { PopoverProps } from 'src/components/Popover';
 import CopyToClipboard from 'src/components/CopyToClipboard';
 import { getDashboardPermalink } from 'src/utils/urlUtils';
 import { useToasts } from 'src/components/MessageToasts/withToasts';
-import { shallowEqual, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from 'src/dashboard/types';
-import Icons from 'src/components/Icons';
 
 export type URLShortLinkButtonProps = {
   dashboardId: number;
@@ -41,16 +40,12 @@ export default function URLShortLinkButton({
   emailContent = '',
   emailSubject = '',
 }: URLShortLinkButtonProps) {
-  const theme = useTheme();
   const [shortUrl, setShortUrl] = useState('');
   const { addDangerToast } = useToasts();
-  const { dataMask, activeTabs } = useSelector(
-    (state: RootState) => ({
-      dataMask: state.dataMask,
-      activeTabs: state.dashboardState.activeTabs,
-    }),
-    shallowEqual,
-  );
+  const { dataMask, activeTabs } = useSelector((state: RootState) => ({
+    dataMask: state.dataMask,
+    activeTabs: state.dashboardState.activeTabs,
+  }));
 
   const getCopyUrl = async () => {
     try {
@@ -90,18 +85,12 @@ export default function URLShortLinkButton({
           <CopyToClipboard
             text={shortUrl}
             copyNode={
-              <Icons.CopyOutlined
-                iconSize="m"
-                iconColor={theme.colors.primary.dark1}
-              />
+              <i className="fa fa-clipboard" title={t('Copy to clipboard')} />
             }
           />
           &nbsp;&nbsp;
-          <a href={emailLink} aria-label="Email link">
-            <Icons.MailOutlined
-              iconSize="m"
-              iconColor={theme.colors.primary.dark1}
-            />
+          <a href={emailLink}>
+            <i className="fa fa-envelope" />
           </a>
         </div>
       }
@@ -114,9 +103,8 @@ export default function URLShortLinkButton({
           e.stopPropagation();
           getCopyUrl();
         }}
-        aria-label={t('Copy URL')}
       >
-        <Icons.LinkOutlined iconSize="m" className="short-link-trigger" />
+        <i className="short-link-trigger fa fa-link" />
         &nbsp;
       </span>
     </Popover>

@@ -88,19 +88,9 @@ class DatabaseExtraValidationError(ValidationError):
         )
 
 
-class DatabaseConnectionSyncPermissionsError(CommandException):
-    status = 500
-    message = _("Unable to sync permissions for this database connection.")
-
-
 class DatabaseNotFoundError(CommandException):
     status = 404
     message = _("Database not found.")
-
-
-class UserNotFoundInSessionError(CommandException):
-    status = 500
-    message = _("Could not validate the user in the current session.")
 
 
 class DatabaseSchemaUploadNotAllowed(CommandException):
@@ -168,7 +158,7 @@ class DatabaseTestConnectionUnexpectedError(SupersetErrorsException):
     message = _("Unexpected error occurred, please check your logs for details")
 
 
-class DatabaseTablesUnexpectedError(CommandException):
+class DatabaseTablesUnexpectedError(Exception):
     status = 422
     message = _("Unexpected error occurred, please check your logs for details")
 
@@ -212,15 +202,3 @@ class DatabaseOfflineError(SupersetErrorException):
 
 class InvalidParametersError(SupersetErrorsException):
     status = 422
-
-
-class DatasetValidationError(CommandException):
-    status = 422
-
-    def __init__(self, err: Exception) -> None:
-        super().__init__(
-            _(
-                "Dataset schema is invalid, caused by: %(error)s",
-                error=str(err),
-            )
-        )

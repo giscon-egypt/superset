@@ -19,6 +19,7 @@
 import { useState } from 'react';
 import { css, useTheme } from '@superset-ui/core';
 import { Radio } from 'src/components/Radio';
+import { Space } from 'src/components';
 import Icons from 'src/components/Icons';
 import Popover from 'src/components/Popover';
 
@@ -44,7 +45,7 @@ function HeaderWithRadioGroup(props: HeaderWithRadioGroupProps) {
     >
       <Popover
         trigger="click"
-        open={popoverVisible}
+        visible={popoverVisible}
         content={
           <div>
             <div
@@ -55,30 +56,31 @@ function HeaderWithRadioGroup(props: HeaderWithRadioGroupProps) {
             >
               {groupTitle}
             </div>
-            <Radio.GroupWrapper
-              spaceConfig={{
-                direction: 'vertical',
-                size: 4,
-                wrap: false,
-                align: 'start',
-              }}
+            <Radio.Group
               value={value}
               onChange={e => {
                 onChange(e.target.value);
                 setPopoverVisible(false);
               }}
-              options={groupOptions}
-            />
+            >
+              <Space direction="vertical">
+                {groupOptions.map(option => (
+                  <Radio key={option.value} value={option.value}>
+                    {option.label}
+                  </Radio>
+                ))}
+              </Space>
+            </Radio.Group>
           </div>
         }
         placement="bottomLeft"
-        arrow={{ pointAtCenter: true }}
+        arrowPointAtCenter
       >
         <Icons.SettingOutlined
           iconSize="m"
           iconColor={theme.colors.grayscale.light1}
           css={css`
-            margin-top: ${theme.gridUnit * 0.75}px;
+            margin-top: 3px; // we need exactly 3px to align the icon
             margin-right: ${theme.gridUnit}px;
           `}
           onClick={() => setPopoverVisible(true)}

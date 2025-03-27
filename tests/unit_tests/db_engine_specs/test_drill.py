@@ -20,16 +20,15 @@ from datetime import datetime
 from typing import Optional
 
 import pytest
-from pytest_mock import MockerFixture
 from sqlalchemy.engine.url import make_url
 
 from tests.unit_tests.db_engine_specs.utils import assert_convert_dttm
 from tests.unit_tests.fixtures.common import dttm  # noqa: F401
 
 
-def test_odbc_impersonation(mocker: MockerFixture) -> None:
+def test_odbc_impersonation() -> None:
     """
-    Test ``impersonate_user`` method when driver == odbc.
+    Test ``get_url_for_impersonation`` method when driver == odbc.
 
     The method adds the parameter ``DelegationUID`` to the query string.
     """
@@ -37,47 +36,31 @@ def test_odbc_impersonation(mocker: MockerFixture) -> None:
 
     from superset.db_engine_specs.drill import DrillEngineSpec
 
-    database = mocker.MagicMock()
-
     url = URL.create("drill+odbc")
     username = "DoAsUser"
-    url, _ = DrillEngineSpec.impersonate_user(
-        database=database,
-        username=username,
-        user_token=None,
-        url=url,
-        engine_kwargs={},
-    )
+    url = DrillEngineSpec.get_url_for_impersonation(url, True, username, None)
     assert url.query["DelegationUID"] == username
 
 
-def test_jdbc_impersonation(mocker: MockerFixture) -> None:
+def test_jdbc_impersonation() -> None:
     """
-    Test ``impersonate_user`` method when driver == jdbc.
+    Test ``get_url_for_impersonation`` method when driver == jdbc.
 
     The method adds the parameter ``impersonation_target`` to the query string.
     """
     from sqlalchemy.engine.url import URL
 
     from superset.db_engine_specs.drill import DrillEngineSpec
-
-    database = mocker.MagicMock()
 
     url = URL.create("drill+jdbc")
     username = "DoAsUser"
-    url, _ = DrillEngineSpec.impersonate_user(
-        database=database,
-        username=username,
-        user_token=None,
-        url=url,
-        engine_kwargs={},
-    )
+    url = DrillEngineSpec.get_url_for_impersonation(url, True, username, None)
     assert url.query["impersonation_target"] == username
 
 
-def test_sadrill_impersonation(mocker: MockerFixture) -> None:
+def test_sadrill_impersonation() -> None:
     """
-    Test ``impersonate_user`` method when driver == sadrill.
+    Test ``get_url_for_impersonation`` method when driver == sadrill.
 
     The method adds the parameter ``impersonation_target`` to the query string.
     """
@@ -85,23 +68,15 @@ def test_sadrill_impersonation(mocker: MockerFixture) -> None:
 
     from superset.db_engine_specs.drill import DrillEngineSpec
 
-    database = mocker.MagicMock()
-
     url = URL.create("drill+sadrill")
     username = "DoAsUser"
-    url, _ = DrillEngineSpec.impersonate_user(
-        database=database,
-        username=username,
-        user_token=None,
-        url=url,
-        engine_kwargs={},
-    )
+    url = DrillEngineSpec.get_url_for_impersonation(url, True, username, None)
     assert url.query["impersonation_target"] == username
 
 
-def test_invalid_impersonation(mocker: MockerFixture) -> None:
+def test_invalid_impersonation() -> None:
     """
-    Test ``impersonate_user`` method when driver == foobar.
+    Test ``get_url_for_impersonation`` method when driver == foobar.
 
     The method raises an exception because impersonation is not supported
     for drill+foobar.
@@ -111,19 +86,11 @@ def test_invalid_impersonation(mocker: MockerFixture) -> None:
     from superset.db_engine_specs.drill import DrillEngineSpec
     from superset.db_engine_specs.exceptions import SupersetDBAPIProgrammingError
 
-    database = mocker.MagicMock()
-
     url = URL.create("drill+foobar")
     username = "DoAsUser"
 
     with pytest.raises(SupersetDBAPIProgrammingError):
-        DrillEngineSpec.impersonate_user(
-            database=database,
-            username=username,
-            user_token=None,
-            url=url,
-            engine_kwargs={},
-        )
+        DrillEngineSpec.get_url_for_impersonation(url, True, username, None)
 
 
 @pytest.mark.parametrize(
@@ -139,7 +106,7 @@ def test_convert_dttm(
     expected_result: Optional[str],
     dttm: datetime,  # noqa: F811
 ) -> None:
-    from superset.db_engine_specs.drill import DrillEngineSpec as spec  # noqa: N813
+    from superset.db_engine_specs.drill import DrillEngineSpec as spec
 
     assert_convert_dttm(spec, target_type, expected_result, dttm)
 

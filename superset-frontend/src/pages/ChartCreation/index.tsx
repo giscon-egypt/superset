@@ -26,13 +26,11 @@ import {
   SupersetClient,
   t,
 } from '@superset-ui/core';
-import { withTheme, Theme } from '@emotion/react';
 import { getUrlParam } from 'src/utils/urlUtils';
 import { FilterPlugins, URL_PARAMS } from 'src/constants';
 import { Link, withRouter, RouteComponentProps } from 'react-router-dom';
 import Button from 'src/components/Button';
-import { AsyncSelect } from 'src/components';
-import { Steps } from 'src/components/Steps';
+import { AsyncSelect, Steps } from 'src/components';
 import withToasts from 'src/components/MessageToasts/withToasts';
 
 import VizTypeGallery, {
@@ -45,12 +43,10 @@ import {
   Dataset,
   DatasetSelectLabel,
 } from 'src/features/datasets/DatasetSelectLabel';
-import Icons from 'src/components/Icons';
 
 export interface ChartCreationProps extends RouteComponentProps {
   user: UserWithPermissionsAndRoles;
   addSuccessToast: (arg: string) => void;
-  theme: Theme;
 }
 
 export type ChartCreationState = {
@@ -129,31 +125,31 @@ const StyledContainer = styled.div`
 
     /* The following extra ampersands (&&&&) are used to boost selector specificity */
 
-    &&&& .antd5-steps-item-tail {
+    &&&& .ant-steps-item-tail {
       display: none;
     }
 
-    &&&& .antd5-steps-item-icon {
+    &&&& .ant-steps-item-icon {
       margin-right: ${theme.gridUnit * 2}px;
       width: ${theme.gridUnit * 5}px;
       height: ${theme.gridUnit * 5}px;
       line-height: ${theme.gridUnit * 5}px;
     }
 
-    &&&& .antd5-steps-item-title {
+    &&&& .ant-steps-item-title {
       line-height: ${theme.gridUnit * 5}px;
     }
 
-    &&&& .antd5-steps-item-content {
+    &&&& .ant-steps-item-content {
       overflow: unset;
 
-      .antd5-steps-item-description {
+      .ant-steps-item-description {
         margin-top: ${theme.gridUnit}px;
         padding-bottom: ${theme.gridUnit}px;
       }
     }
 
-    &&&& .antd5-tooltip-open {
+    &&&& .ant-tooltip-open {
       display: inline;
     }
 
@@ -294,13 +290,12 @@ export class ChartCreation extends PureComponent<
   }
 
   render() {
-    const { theme } = this.props;
     const isButtonDisabled = this.isBtnDisabled();
     const VIEW_INSTRUCTIONS_TEXT = t('view instructions');
     const datasetHelpText = this.state.canCreateDataset ? (
       <span data-test="dataset-write">
         <Link to="/dataset/add/" data-test="add-chart-new-dataset">
-          {t('Add a dataset')}
+          {t('Add a dataset')}{' '}
         </Link>
         {t('or')}{' '}
         <a
@@ -310,7 +305,7 @@ export class ChartCreation extends PureComponent<
           data-test="add-chart-new-dataset-instructions"
         >
           {`${VIEW_INSTRUCTIONS_TEXT} `}
-          <Icons.Full iconSize="m" iconColor={theme.colors.primary.dark1} />
+          <i className="fa fa-external-link" />
         </a>
         .
       </span>
@@ -322,7 +317,7 @@ export class ChartCreation extends PureComponent<
           target="_blank"
         >
           {`${VIEW_INSTRUCTIONS_TEXT} `}
-          <Icons.Full iconSize="m" iconColor={theme.colors.primary.dark1} />
+          <i className="fa fa-external-link" />
         </a>
         .
       </span>
@@ -387,4 +382,4 @@ export class ChartCreation extends PureComponent<
   }
 }
 
-export default withRouter(withToasts(withTheme(ChartCreation)));
+export default withRouter(withToasts(ChartCreation));

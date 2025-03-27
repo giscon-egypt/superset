@@ -29,7 +29,7 @@ import ListView from 'src/components/ListView';
 import SubMenu from 'src/features/home/SubMenu';
 
 import waitForComponentToPaint from 'spec/helpers/waitForComponentToPaint';
-import { act } from 'spec/helpers/testing-library';
+import { act } from 'react-dom/test-utils';
 
 // store needed for withToasts(AnnotationList)
 const mockStore = configureStore([thunk]);
@@ -92,15 +92,15 @@ describe('AnnotationList', () => {
   });
 
   it('renders', () => {
-    expect(wrapper.find(AnnotationList)).toBeTruthy();
+    expect(wrapper.find(AnnotationList)).toExist();
   });
 
   it('renders a SubMenu', () => {
-    expect(wrapper.find(SubMenu)).toBeTruthy();
+    expect(wrapper.find(SubMenu)).toExist();
   });
 
   it('renders a ListView', () => {
-    expect(wrapper.find(ListView)).toBeTruthy();
+    expect(wrapper.find(ListView)).toExist();
   });
 
   it('fetches annotation layer', () => {
@@ -120,7 +120,7 @@ describe('AnnotationList', () => {
   });
 
   it('renders a DeleteModal', () => {
-    expect(wrapper.find(DeleteModal)).toBeTruthy();
+    expect(wrapper.find(DeleteModal)).toExist();
   });
 
   it('deletes', async () => {

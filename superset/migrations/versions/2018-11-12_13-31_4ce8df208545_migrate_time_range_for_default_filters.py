@@ -44,7 +44,7 @@ class Dashboard(Base):
     json_metadata = Column(Text)
 
 
-def upgrade():  # noqa: C901
+def upgrade():
     bind = op.get_bind()
     session = db.Session(bind=bind)
 
@@ -76,7 +76,7 @@ def upgrade():  # noqa: C901
                                 val["__time_range"] = f"{__from} : {__to}"
                         json_metadata["default_filters"] = json.dumps(filters)
                         has_update = True
-                except Exception:  # noqa: S110
+                except Exception:
                     pass
 
             # filter_immune_slice_fields:

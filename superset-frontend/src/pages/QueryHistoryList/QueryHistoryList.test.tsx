@@ -21,7 +21,7 @@ import thunk from 'redux-thunk';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import fetchMock from 'fetch-mock';
-import { act } from 'spec/helpers/testing-library';
+import { act } from 'react-dom/test-utils';
 
 import waitForComponentToPaint from 'spec/helpers/waitForComponentToPaint';
 import { styledMount as mount } from 'spec/helpers/theming';
@@ -104,11 +104,11 @@ describe('QueryList', () => {
   });
 
   it('renders', () => {
-    expect(wrapper.find(QueryList)).toBeTruthy();
+    expect(wrapper.find(QueryList)).toExist();
   });
 
   it('renders a ListView', () => {
-    expect(wrapper.find(ListView)).toBeTruthy();
+    expect(wrapper.find(ListView)).toExist();
   });
 
   it('fetches data', () => {
@@ -121,7 +121,7 @@ describe('QueryList', () => {
   });
 
   it('renders a SyntaxHighlight', () => {
-    expect(wrapper.find(SyntaxHighlighter)).toBeTruthy();
+    expect(wrapper.find(SyntaxHighlighter)).toExist();
   });
 
   it('opens a query preview', () => {
@@ -134,7 +134,7 @@ describe('QueryList', () => {
     });
     wrapper.update();
 
-    expect(wrapper.find(QueryPreviewModal)).toBeTruthy();
+    expect(wrapper.find(QueryPreviewModal)).toExist();
   });
 
   it('searches', async () => {
@@ -151,7 +151,7 @@ describe('QueryList', () => {
   });
 
   it('renders a SubMenu', () => {
-    expect(wrapper.find(SubMenu)).toBeTruthy();
+    expect(wrapper.find(SubMenu)).toExist();
   });
 
   it('renders a SubMenu with Saved queries and Query History links', () => {

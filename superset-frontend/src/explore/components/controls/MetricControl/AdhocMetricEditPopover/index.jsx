@@ -30,7 +30,7 @@ import Tabs from 'src/components/Tabs';
 import Button from 'src/components/Button';
 import { Select } from 'src/components';
 import { Tooltip } from 'src/components/Tooltip';
-import { EmptyState } from 'src/components/EmptyState';
+import { EmptyStateSmall } from 'src/components/EmptyState';
 import { Form, FormItem } from 'src/components/Form';
 import { SQLEditor } from 'src/components/AsyncAceEditor';
 import sqlKeywords from 'src/SqlLab/utils/sqlKeywords';
@@ -389,18 +389,16 @@ export default class AdhocMetricEditPopover extends PureComponent {
                 />
               </FormItem>
             ) : datasource.type === DatasourceType.Table ? (
-              <EmptyState
+              <EmptyStateSmall
                 image="empty.svg"
-                size="small"
                 title={t('No saved metrics found')}
                 description={t(
                   'Add metrics to dataset in "Edit datasource" modal',
                 )}
               />
             ) : (
-              <EmptyState
+              <EmptyStateSmall
                 image="empty.svg"
-                size="small"
                 title={t('No saved metrics found')}
                 description={
                   <>
@@ -516,8 +514,6 @@ export default class AdhocMetricEditPopover extends PureComponent {
           >
             {t('Save')}
           </Button>
-          {/* TODO: Remove fa-icon */}
-          {/* eslint-disable-next-line icons/no-fa-icons-usage */}
           <i
             role="button"
             aria-label="Resize"

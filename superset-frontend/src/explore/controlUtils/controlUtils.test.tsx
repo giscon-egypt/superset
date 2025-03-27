@@ -20,7 +20,6 @@ import {
   DatasourceType,
   getChartControlPanelRegistry,
   t,
-  VizType,
 } from '@superset-ui/core';
 import {
   ControlConfig,
@@ -60,11 +59,8 @@ describe('controlUtils', () => {
       description: null,
     },
     controls: {},
-    form_data: { datasource: '1__table', viz_type: VizType.Table },
+    form_data: { datasource: '1__table', viz_type: 'table' },
     common: {},
-    slice: {
-      slice_id: 1,
-    },
   };
 
   beforeAll(() => {
@@ -160,7 +156,7 @@ describe('controlUtils', () => {
       expect(control?.value).toBeNull();
     });
 
-    it('returns null for nonexistent field', () => {
+    it('returns null for non-existent field', () => {
       const control = getControlState('NON_EXISTENT', 'table', state);
       expect(control).toBeNull();
     });

@@ -107,7 +107,7 @@ class Slice(  # pylint: disable=too-many-public-methods
         primaryjoin="and_(Slice.id == TaggedObject.object_id, "
         "TaggedObject.object_type == 'chart')",
         secondaryjoin="TaggedObject.tag_id == Tag.id",
-        viewonly=True,  # cascading deletion already handled by superset.tags.models.ObjectUpdater.after_delete  # noqa: E501
+        viewonly=True,  # cascading deletion already handled by superset.tags.models.ObjectUpdater.after_delete
     )
     table = relationship(
         "SqlaTable",
@@ -247,19 +247,16 @@ class Slice(  # pylint: disable=too-many-public-methods
         }
 
     @property
-    def digest(self) -> str | None:
+    def digest(self) -> str:
         return get_chart_digest(self)
 
     @property
-    def thumbnail_url(self) -> str | None:
+    def thumbnail_url(self) -> str:
         """
         Returns a thumbnail URL with a HEX digest. We want to avoid browser cache
         if the dashboard has changed
         """
-        if digest := self.digest:
-            return f"/api/v1/chart/{self.id}/thumbnail/{digest}/"
-
-        return None
+        return f"/api/v1/chart/{self.id}/thumbnail/{self.digest}/"
 
     @property
     def json_data(self) -> str:
@@ -380,7 +377,9 @@ def event_after_chart_changed(
     _mapper: Mapper, _connection: Connection, target: Slice
 ) -> None:
     cache_chart_thumbnail.delay(
-        current_user=get_current_user(), chart_id=target.id, force=True
+        current_user=get_current_user(),
+        chart_id=target.id,
+        force=True,
     )
 
 

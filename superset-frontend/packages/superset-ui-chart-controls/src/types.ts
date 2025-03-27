@@ -84,18 +84,9 @@ export interface Dataset {
   filter_select?: boolean;
   filter_select_enabled?: boolean;
   column_names?: string[];
-  catalog?: string;
-  schema?: string;
-  table_name?: string;
-  database?: Record<string, unknown>;
-  normalize_columns?: boolean;
-  always_filter_main_dttm?: boolean;
 }
 
 export interface ControlPanelState {
-  slice: {
-    slice_id: number;
-  };
   form_data: QueryFormData;
   datasource: Dataset | QueryResponse | null;
   controls: ControlStateMapping;
@@ -268,7 +259,6 @@ export interface BaseControlConfig<
     props: ControlPanelsContainerProps,
     controlData: AnyDict,
   ) => boolean;
-  disableStash?: boolean;
   hidden?:
     | boolean
     | ((props: ControlPanelsContainerProps, controlData: AnyDict) => boolean);
@@ -368,13 +358,6 @@ export type CustomControlItem = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: BaseControlConfig<any, any, any>;
 };
-
-export const isCustomControlItem = (obj: unknown): obj is CustomControlItem =>
-  typeof obj === 'object' &&
-  obj !== null &&
-  typeof ('name' in obj && obj.name) === 'string' &&
-  typeof ('config' in obj && obj.config) === 'object' &&
-  (obj as CustomControlItem).config !== null;
 
 // use ReactElement instead of ReactNode because `string`, `number`, etc. may
 // interfere with other ControlSetItem types
@@ -520,13 +503,6 @@ export enum SortSeriesType {
   Sum = 'sum',
   Avg = 'avg',
 }
-
-export type LegendPaddingType = {
-  top?: number;
-  bottom?: number;
-  left?: number;
-  right?: number;
-};
 
 export type SortSeriesData = {
   sort_series_type: SortSeriesType;

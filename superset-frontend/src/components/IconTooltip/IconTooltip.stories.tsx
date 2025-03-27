@@ -17,7 +17,6 @@
  * under the License.
  */
 import Icons from 'src/components/Icons';
-import { css, useTheme } from '@superset-ui/core';
 import { IconTooltip, Props } from '.';
 
 export default {
@@ -39,16 +38,10 @@ const PLACEMENTS = [
   'topRight',
 ];
 
-const theme = useTheme();
-
 export const InteractiveIconTooltip = (args: Props) => (
-  <div
-    css={css`
-      margin: ${theme.gridUnit * 10}px ${theme.gridUnit * 17.5}px;
-    `}
-  >
+  <div css={{ margin: '40px 70px' }}>
     <IconTooltip {...args}>
-      <Icons.InfoCircleOutlined />
+      <Icons.Info />
     </IconTooltip>
   </div>
 );

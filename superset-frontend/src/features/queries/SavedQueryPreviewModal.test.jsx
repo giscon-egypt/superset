@@ -23,7 +23,7 @@ import { styledMount as mount } from 'spec/helpers/theming';
 import Button from 'src/components/Button';
 import Modal from 'src/components/Modal';
 import waitForComponentToPaint from 'spec/helpers/waitForComponentToPaint';
-import { act } from 'spec/helpers/testing-library';
+import { act } from 'react-dom/test-utils';
 import SavedQueryPreviewModal from './SavedQueryPreviewModal';
 
 // store needed for withToasts(DatabaseList)
@@ -86,11 +86,11 @@ describe('SavedQueryPreviewModal', () => {
   });
 
   it('renders', () => {
-    expect(wrapper.find(SavedQueryPreviewModal)).toBeTruthy();
+    expect(wrapper.find(SavedQueryPreviewModal)).toExist();
   });
 
   it('renders a Modal', () => {
-    expect(wrapper.find(Modal)).toBeTruthy();
+    expect(wrapper.find(Modal)).toExist();
   });
 
   it('renders sql from saved query', () => {

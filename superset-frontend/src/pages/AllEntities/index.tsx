@@ -19,7 +19,9 @@
 import { useEffect, useState } from 'react';
 import { styled, t, css, SupersetTheme } from '@superset-ui/core';
 import { NumberParam, useQueryParam } from 'use-query-params';
-import AllEntitiesTable from 'src/features/allEntities/AllEntitiesTable';
+import AllEntitiesTable, {
+  TaggedObjects,
+} from 'src/features/allEntities/AllEntitiesTable';
 import Button from 'src/components/Button';
 import MetadataBar, {
   MetadataType,
@@ -34,7 +36,18 @@ import withToasts, { useToasts } from 'src/components/MessageToasts/withToasts';
 import { fetchObjectsByTagIds, fetchSingleTag } from 'src/features/tags/tags';
 import Loading from 'src/components/Loading';
 import getOwnerName from 'src/utils/getOwnerName';
-import { TaggedObject, TaggedObjects } from 'src/types/TaggedObject';
+
+interface TaggedObject {
+  id: number;
+  type: string;
+  name: string;
+  url: string;
+  changed_on: moment.MomentInput;
+  created_by: number | undefined;
+  creator: string;
+  owners: Owner[];
+  tags: Tag[];
+}
 
 const additionalItemsStyles = (theme: SupersetTheme) => css`
   display: flex;
@@ -54,6 +67,7 @@ const AllEntitiesContainer = styled.div`
     margin-bottom: ${theme.gridUnit * 2}px;
   }
   .select-control-label {
+    text-transform: uppercase;
     font-size: ${theme.gridUnit * 3}px;
     color: ${theme.colors.grayscale.base};
     margin-bottom: ${theme.gridUnit * 1}px;
@@ -138,12 +152,12 @@ function AllEntities() {
       return;
     }
     fetchObjectsByTagIds(
-      { tagIds: tag?.id !== undefined ? [tag.id] : '', types: null },
+      { tagIds: [tag?.id] || '', types: null },
       (data: TaggedObject[]) => {
-        const objects: TaggedObjects = { dashboard: [], chart: [], query: [] };
+        const objects = { dashboard: [], chart: [], query: [] };
         data.forEach(function (object) {
           const object_type = object.type;
-          objects[object_type as keyof TaggedObjects].push(object);
+          objects[object_type].push(object);
         });
         setObjects(objects);
         setLoading(false);

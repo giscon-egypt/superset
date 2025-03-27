@@ -17,14 +17,8 @@
  * under the License.
  */
 import { ReactChild } from 'react';
-import {
-  cleanup,
-  render,
-  screen,
-  userEvent,
-  waitFor,
-  within,
-} from 'spec/helpers/testing-library';
+import { render, screen, waitFor, within } from 'spec/helpers/testing-library';
+import userEvent from '@testing-library/user-event';
 import DatasourcePanel, {
   IDatasource,
   Props as DatasourcePanelProps,
@@ -117,7 +111,6 @@ test('should display items in controls', async () => {
 });
 
 test('should render the metrics', async () => {
-  jest.setTimeout(10000);
   render(
     <ExploreContainer>
       <DatasourcePanel {...props} />
@@ -151,45 +144,30 @@ test('should render the columns', async () => {
   ).toBeInTheDocument();
 });
 
-describe('DatasourcePanel', () => {
-  beforeAll(() => {
-    jest.setTimeout(30000);
+test('should render 0 search results', async () => {
+  render(<DatasourcePanel {...props} />, { useRedux: true, useDnd: true });
+  const searchInput = screen.getByPlaceholderText('Search Metrics & Columns');
+
+  search('nothing', searchInput);
+  expect(await screen.findAllByText('Showing 0 of 0')).toHaveLength(2);
+});
+
+test('should search and render matching columns', async () => {
+  render(
+    <ExploreContainer>
+      <DatasourcePanel {...props} />
+      <DndMetricSelect {...metricProps} />
+    </ExploreContainer>,
+    { useRedux: true, useDnd: true },
+  );
+  const searchInput = screen.getByPlaceholderText('Search Metrics & Columns');
+
+  search(columns[0].column_name, searchInput);
+
+  await waitFor(() => {
+    expect(screen.getByText(columns[0].column_name)).toBeInTheDocument();
+    expect(screen.queryByText(columns[1].column_name)).not.toBeInTheDocument();
   });
-
-  afterEach(async () => {
-    cleanup();
-    await new Promise(resolve => setTimeout(resolve, 0));
-  });
-
-  test('should search and render matching columns', async () => {
-    const { unmount } = render(
-      <ExploreContainer>
-        <DatasourcePanel {...props} />
-        <DndMetricSelect {...metricProps} />
-      </ExploreContainer>,
-      { useRedux: true, useDnd: true },
-    );
-
-    const searchInput = screen.getByPlaceholderText('Search Metrics & Columns');
-
-    await waitFor(() => {
-      expect(searchInput).toBeInTheDocument();
-    });
-
-    search(columns[0].column_name, searchInput);
-
-    await waitFor(
-      () => {
-        expect(screen.getByText(columns[0].column_name)).toBeInTheDocument();
-        expect(
-          screen.queryByText(columns[1].column_name),
-        ).not.toBeInTheDocument();
-      },
-      { timeout: 10000 },
-    );
-
-    unmount();
-  }, 15000);
 });
 
 test('should search and render matching metrics', async () => {
@@ -228,7 +206,7 @@ test('should render a warning', async () => {
   };
   render(<DatasourcePanel {...newProps} />, { useRedux: true, useDnd: true });
   expect(
-    await screen.findByRole('img', { name: 'warning' }),
+    await screen.findByRole('img', { name: 'alert-solid' }),
   ).toBeInTheDocument();
 });
 
@@ -262,7 +240,7 @@ test('should not render a save dataset modal when datasource is not query or dat
   render(<DatasourcePanel {...newProps} />, { useRedux: true, useDnd: true });
   expect(await screen.findByText(/metrics/i)).toBeInTheDocument();
 
-  expect(screen.queryByText(/create a dataset/i)).not.toBeInTheDocument();
+  expect(screen.queryByText(/create a dataset/i)).toBe(null);
 });
 
 test('should render only droppable metrics and columns', async () => {
@@ -283,7 +261,7 @@ test('should render only droppable metrics and columns', async () => {
     ],
     actions: { setControlValue: jest.fn() },
   };
-  const { getByTestId, unmount } = render(
+  const { getByTestId } = render(
     <ExploreContainer>
       <DatasourcePanel {...props} />
       <DndColumnSelect {...column1FilterProps} />
@@ -291,22 +269,14 @@ test('should render only droppable metrics and columns', async () => {
     </ExploreContainer>,
     { useRedux: true, useDnd: true },
   );
-
-  await waitFor(
-    () => {
-      const selections = getByTestId('fieldSelections');
-      expect(
-        within(selections).queryByText(columns[0].column_name),
-      ).not.toBeInTheDocument();
-      expect(
-        within(selections).getByText(columns[1].column_name),
-      ).toBeInTheDocument();
-      expect(
-        within(selections).getByText(columns[2].column_name),
-      ).toBeInTheDocument();
-    },
-    { timeout: 10000 },
-  );
-
-  unmount();
+  const selections = getByTestId('fieldSelections');
+  expect(
+    within(selections).queryByText(columns[0].column_name),
+  ).not.toBeInTheDocument();
+  expect(
+    within(selections).queryByText(columns[1].column_name),
+  ).toBeInTheDocument();
+  expect(
+    within(selections).queryByText(columns[2].column_name),
+  ).toBeInTheDocument();
 });

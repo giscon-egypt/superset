@@ -45,6 +45,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { isEqual, isEqualWith } from 'lodash';
 import { getChartDataRequest } from 'src/components/Chart/chartAction';
 import Loading from 'src/components/Loading';
+import BasicErrorAlert from 'src/components/ErrorMessage/BasicErrorAlert';
 import ErrorMessageWithStackTrace from 'src/components/ErrorMessage/ErrorMessageWithStackTrace';
 import { waitForAsyncData } from 'src/middleware/asyncEvent';
 import { FilterBarOrientation, RootState } from 'src/dashboard/types';
@@ -54,7 +55,6 @@ import {
 } from 'src/dashboard/actions/dashboardState';
 import { RESPONSIVE_WIDTH } from 'src/filters/components/common';
 import { FAST_DEBOUNCE } from 'src/constants';
-import ErrorAlert from 'src/components/ErrorMessage/ErrorAlert';
 import { dispatchHoverAction, dispatchFocusAction } from './utils';
 import { FilterControlProps } from './types';
 import { getFormData } from '../../utils';
@@ -106,7 +106,6 @@ const FilterValue: FC<FilterControlProps> = ({
   const dashboardId = useSelector<RootState, number>(
     state => state.dashboardInfo.id,
   );
-
   const [error, setError] = useState<ClientErrorObject>();
   const [formData, setFormData] = useState<Partial<QueryFormData>>({
     inView: false,
@@ -183,6 +182,7 @@ const FilterValue: FC<FilterControlProps> = ({
           if (isFeatureEnabled(FeatureFlag.GlobalAsyncQueries)) {
             // deal with getChartDataRequest transforming the response data
             const result = 'result' in json ? json.result[0] : json;
+
             if (response.status === 200) {
               setState([result]);
               handleFilterLoadFinish();
@@ -222,7 +222,7 @@ const FilterValue: FC<FilterControlProps> = ({
     datasetId,
     groupby,
     handleFilterLoadFinish,
-    filter,
+    JSON.stringify(filter),
     hasDataSource,
     isRefreshing,
     shouldRefresh,
@@ -288,8 +288,8 @@ const FilterValue: FC<FilterControlProps> = ({
 
   const filterState = useMemo(
     () => ({
-      validateStatus,
       ...filter.dataMask?.filterState,
+      validateStatus,
     }),
     [filter.dataMask?.filterState, validateStatus],
   );
@@ -306,13 +306,11 @@ const FilterValue: FC<FilterControlProps> = ({
     return (
       <ErrorMessageWithStackTrace
         error={error.errors?.[0]}
-        compact
         fallback={
-          <ErrorAlert
-            errorType={t('Network error')}
-            message={t('Network error while attempting to fetch resource')}
-            type="error"
-            compact
+          <BasicErrorAlert
+            title={t('Cannot load filter')}
+            body={error.error}
+            level="error"
           />
         }
       />

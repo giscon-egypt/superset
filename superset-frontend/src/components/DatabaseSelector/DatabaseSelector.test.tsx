@@ -17,18 +17,18 @@
  * under the License.
  */
 
+import { act } from 'react-dom/test-utils';
 import fetchMock from 'fetch-mock';
 import {
-  act,
-  defaultStore as store,
   render,
   screen,
-  userEvent,
   waitFor,
+  defaultStore as store,
 } from 'spec/helpers/testing-library';
+import userEvent from '@testing-library/user-event';
 import { api } from 'src/hooks/apiResources/queryApi';
 import DatabaseSelector, { DatabaseSelectorProps } from '.';
-import { EmptyState } from '../EmptyState';
+import { EmptyStateSmall } from '../EmptyState';
 
 const createProps = (): DatabaseSelectorProps => ({
   db: {
@@ -219,20 +219,20 @@ test('Refresh should work', async () => {
   await waitFor(() => {
     expect(fetchMock.calls(databaseApiRoute).length).toBe(1);
     expect(fetchMock.calls(schemaApiRoute).length).toBe(1);
-    expect(props.handleError).toHaveBeenCalledTimes(0);
-    expect(props.onDbChange).toHaveBeenCalledTimes(0);
-    expect(props.onSchemaChange).toHaveBeenCalledTimes(0);
+    expect(props.handleError).toBeCalledTimes(0);
+    expect(props.onDbChange).toBeCalledTimes(0);
+    expect(props.onSchemaChange).toBeCalledTimes(0);
   });
 
   // click schema reload
-  userEvent.click(screen.getByRole('button', { name: 'sync' }));
+  userEvent.click(screen.getByRole('button', { name: 'refresh' }));
 
   await waitFor(() => {
     expect(fetchMock.calls(databaseApiRoute).length).toBe(1);
     expect(fetchMock.calls(schemaApiRoute).length).toBe(2);
-    expect(props.handleError).toHaveBeenCalledTimes(0);
-    expect(props.onDbChange).toHaveBeenCalledTimes(0);
-    expect(props.onSchemaChange).toHaveBeenCalledTimes(0);
+    expect(props.handleError).toBeCalledTimes(0);
+    expect(props.onDbChange).toBeCalledTimes(0);
+    expect(props.onSchemaChange).toBeCalledTimes(0);
   });
 });
 
@@ -307,7 +307,7 @@ test('should show empty state if there are no options', async () => {
     <DatabaseSelector
       {...props}
       db={undefined}
-      emptyState={<EmptyState size="small" title="empty" />}
+      emptyState={<EmptyStateSmall title="empty" image="" />}
     />,
     { useRedux: true, store },
   );

@@ -16,16 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  render,
-  screen,
-  userEvent,
-  waitFor,
-} from 'spec/helpers/testing-library';
+import { render, screen, waitFor } from 'spec/helpers/testing-library';
+import userEvent from '@testing-library/user-event';
 import { supersetTheme } from '@superset-ui/core';
 import Icons from 'src/components/Icons';
 import Button from 'src/components/Button';
-import Popover from 'src/components/Popover';
+import Popover from '.';
 
 test('should render', () => {
   const { container } = render(<Popover />);
@@ -33,13 +29,13 @@ test('should render', () => {
 });
 
 test('should render a title when visible', () => {
-  render(<Popover title="Popover title" open />);
-  expect(screen.getByText('Popover title')).toBeInTheDocument();
+  render(<Popover title="Popover title" visible />);
+  expect(screen.getByText('Popover title')).toBeTruthy();
 });
 
 test('should render some content when visible', () => {
-  render(<Popover content="Content sample" open />);
-  expect(screen.getByText('Content sample')).toBeInTheDocument();
+  render(<Popover content="Content sample" visible />);
+  expect(screen.getByText('Content sample')).toBeTruthy();
 });
 
 test('it should not render a title or content when not visible', () => {
@@ -58,29 +54,29 @@ test('it should render content when not visible but forceRender=true', () => {
 test('renders with icon child', async () => {
   render(
     <Popover content="Content sample" title="Popover title">
-      <Icons.WarningOutlined>Click me</Icons.WarningOutlined>
+      <Icons.Alert>Click me</Icons.Alert>
     </Popover>,
   );
   expect(await screen.findByRole('img')).toBeInTheDocument();
 });
 
 test('fires an event when visibility is changed', async () => {
-  const onOpenChange = jest.fn();
+  const onVisibleChange = jest.fn();
   render(
     <Popover
       content="Content sample"
       title="Popover title"
-      onOpenChange={onOpenChange}
+      onVisibleChange={onVisibleChange}
     >
       <Button>Hover me</Button>
     </Popover>,
   );
   userEvent.hover(screen.getByRole('button'));
-  await waitFor(() => expect(onOpenChange).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(onVisibleChange).toHaveBeenCalledTimes(1));
 });
 
 test('renders with theme', () => {
-  render(<Popover content="Content sample" title="Popover title" open />);
+  render(<Popover content="Content sample" title="Popover title" visible />);
   const title = screen.getByText('Popover title');
   expect(title).toHaveStyle({
     fontSize: supersetTheme.gridUnit * 3.5,

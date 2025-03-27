@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// eslint-disable-next-line no-restricted-imports
-import { ConfigProvider } from 'antd'; // TODO: Remove antd
+import { ConfigProvider } from 'antd';
 import { styled, t } from '@superset-ui/core';
 import ReactCronPicker, { Locale, CronProps } from 'react-js-cron';
 

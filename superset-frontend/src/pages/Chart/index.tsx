@@ -43,10 +43,7 @@ import { getItem, LocalStorageKeys } from 'src/utils/localStorageHelpers';
 import { getFormDataWithDashboardContext } from 'src/explore/controlUtils/getFormDataWithDashboardContext';
 
 const isValidResult = (rv: JsonObject): boolean =>
-  rv?.result?.form_data && rv?.result?.dataset;
-
-const hasDatasetId = (rv: JsonObject): boolean =>
-  isDefined(rv?.result?.dataset?.id);
+  rv?.result?.form_data && isDefined(rv?.result?.dataset?.id);
 
 const fetchExploreData = async (exploreUrlParams: URLSearchParams) => {
   try {
@@ -55,19 +52,7 @@ const fetchExploreData = async (exploreUrlParams: URLSearchParams) => {
       endpoint: 'api/v1/explore/',
     })(exploreUrlParams);
     if (isValidResult(rv)) {
-      if (hasDatasetId(rv)) {
-        return rv;
-      }
-      // Since there's no dataset id but the API responded with a valid payload,
-      // we assume the dataset was deleted, so we preserve some values from previous
-      // state so if the user decide to swap the datasource, the chart config remains
-      fallbackExploreInitialData.form_data = {
-        ...rv.result.form_data,
-        ...fallbackExploreInitialData.form_data,
-      };
-      if (rv.result?.slice) {
-        fallbackExploreInitialData.slice = rv.result.slice;
-      }
+      return rv;
     }
     let message = t('Failed to load chart data');
     const responseError = rv?.result?.message;
@@ -99,10 +84,9 @@ const getDashboardContextFormData = () => {
   if (dashboardContext) {
     const sliceId = getUrlParam(URL_PARAMS.sliceId) || 0;
     const {
-      colorScheme,
       labelsColor,
       labelsColorMap,
-      sharedLabelsColors,
+      colorScheme,
       chartConfiguration,
       nativeFilters,
       filterBoxFilters,
@@ -114,18 +98,15 @@ const getDashboardContextFormData = () => {
       filters: getAppliedFilterValues(sliceId, filterBoxFilters),
       nativeFilters,
       chartConfiguration,
-      dataMask,
       colorScheme,
+      dataMask,
       labelsColor,
       labelsColorMap,
-      sharedLabelsColors,
       sliceId,
       allSliceIds: [sliceId],
       extraControls: {},
     });
-    Object.assign(dashboardContextWithFilters, {
-      dashboardId,
-    });
+    Object.assign(dashboardContextWithFilters, { dashboardId });
     return dashboardContextWithFilters;
   }
   return null;

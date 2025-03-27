@@ -143,7 +143,7 @@ const SearchWrapper = styled.div`
     margin-bottom: ${theme.gridUnit}px;
     margin-left: ${theme.gridUnit * 3}px;
     margin-right: ${theme.gridUnit * 3}px;
-    .antd5-input-affix-wrapper {
+    .ant-input-affix-wrapper {
       padding-left: ${theme.gridUnit * 2}px;
     }
   `}
@@ -302,6 +302,7 @@ const HighlightLabel = styled.div`
     font-weight: ${theme.typography.weights.bold};
     text-align: center;
     padding: ${theme.gridUnit * 0.5}px ${theme.gridUnit}px;
+    text-transform: uppercase;
     cursor: pointer;
 
     div {
@@ -618,7 +619,7 @@ export default function VizTypeGallery(props: VizTypeGalleryProps) {
       },
       [Sections.Tags]: {
         title: t('Tags'),
-        icon: <Icons.NumberOutlined iconSize="m" />,
+        icon: <Icons.Tags iconSize="m" />,
         selectors: tags,
       },
     }),
@@ -699,7 +700,7 @@ export default function VizTypeGallery(props: VizTypeGalleryProps) {
           defaultActiveKey={Sections.Category}
         >
           {Object.keys(sectionMap).map(sectionId => {
-            const section = sectionMap[sectionId as keyof typeof sectionMap];
+            const section = sectionMap[sectionId];
 
             return (
               <AntdCollapse.Panel
@@ -737,13 +738,13 @@ export default function VizTypeGallery(props: VizTypeGalleryProps) {
           data-test={`${VIZ_TYPE_CONTROL_TEST_ID}__search-input`}
           prefix={
             <InputIconAlignment>
-              <Icons.SearchOutlined iconSize="m" />
+              <Icons.Search iconSize="m" />
             </InputIconAlignment>
           }
           suffix={
             <InputIconAlignment>
               {searchInputValue && (
-                <Icons.CloseOutlined iconSize="m" onClick={stopSearching} />
+                <Icons.XLarge iconSize="m" onClick={stopSearching} />
               )}
             </InputIconAlignment>
           }
@@ -793,14 +794,7 @@ export default function VizTypeGallery(props: VizTypeGalleryProps) {
             </SectionTitle>
             <TagsWrapper>
               {selectedVizMetadata?.tags.map(tag => (
-                <Label
-                  key={tag}
-                  css={({ gridUnit }) => css`
-                    margin-bottom: ${gridUnit * 2}px;
-                  `}
-                >
-                  {tag}
-                </Label>
+                <Label key={tag}>{tag}</Label>
               ))}
             </TagsWrapper>
             <Description>

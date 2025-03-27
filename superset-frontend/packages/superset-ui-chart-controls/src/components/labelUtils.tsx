@@ -23,17 +23,20 @@ import { ColumnMeta, Metric } from '@superset-ui/chart-controls';
 
 const TooltipSectionWrapper = styled.div`
   ${({ theme }) => css`
-    display: -webkit-box;
-    -webkit-line-clamp: 40;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
+    display: flex;
+    flex-direction: column;
     font-size: ${theme.typography.sizes.s}px;
     line-height: 1.2;
 
     &:not(:last-of-type) {
       margin-bottom: ${theme.gridUnit * 2}px;
+    }
+    &:last-of-type {
+      display: -webkit-box;
+      -webkit-line-clamp: 40;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   `}
 `;

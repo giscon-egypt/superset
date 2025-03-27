@@ -24,26 +24,18 @@ import Icons from 'src/components/Icons';
 import { ToastType, ToastMeta } from './types';
 
 const ToastContainer = styled.div`
-  ${({ theme }) => css`
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-    span {
-      padding: 0 ${theme.gridUnit * 2}px;
-    }
-
-    .toast__close,
-    .toast__close span {
-      padding: 0;
-    }
-  `}
+  span {
+    padding: 0 11px;
+  }
 `;
 
-const notificationStyledIcon = (theme: SupersetTheme) => css`
+const StyledIcon = (theme: SupersetTheme) => css`
   min-width: ${theme.gridUnit * 5}px;
   color: ${theme.colors.grayscale.base};
-  margin-right: 0;
 `;
 
 interface ToastPresenterProps {
@@ -85,18 +77,16 @@ export default function Toast({ toast, onCloseToast }: ToastPresenterProps) {
   }, [handleClosePress, toast.duration]);
 
   let className = 'toast--success';
-  let icon = (
-    <Icons.CheckCircleFilled css={theme => notificationStyledIcon(theme)} />
-  );
+  let icon = <Icons.CircleCheckSolid css={theme => StyledIcon(theme)} />;
 
   if (toast.toastType === ToastType.Warning) {
-    icon = <Icons.ExclamationCircleFilled css={notificationStyledIcon} />;
+    icon = <Icons.WarningSolid css={StyledIcon} />;
     className = 'toast--warning';
   } else if (toast.toastType === ToastType.Danger) {
-    icon = <Icons.ExclamationCircleFilled css={notificationStyledIcon} />;
+    icon = <Icons.ErrorSolid css={StyledIcon} />;
     className = 'toast--danger';
   } else if (toast.toastType === ToastType.Info) {
-    icon = <Icons.InfoCircleFilled css={notificationStyledIcon} />;
+    icon = <Icons.InfoSolid css={StyledIcon} />;
     className = 'toast--info';
   }
 
@@ -108,9 +98,8 @@ export default function Toast({ toast, onCloseToast }: ToastPresenterProps) {
     >
       {icon}
       <Interweave content={toast.text} noHtml={!toast.allowHtml} />
-      <Icons.CloseOutlined
-        iconSize="m"
-        className="toast__close pointer"
+      <i
+        className="fa fa-close pull-right pointer"
         role="button"
         tabIndex={0}
         onClick={handleClosePress}

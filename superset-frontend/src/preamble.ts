@@ -18,13 +18,12 @@
  */
 import { setConfig as setHotLoaderConfig } from 'react-hot-loader';
 import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only';
-import dayjs from 'dayjs';
+import moment from 'moment';
 // eslint-disable-next-line no-restricted-imports
 import {
   configure,
   makeApi,
-  // eslint-disable-next-line no-restricted-imports
-  supersetTheme, // TODO: DO not import theme directly
+  supersetTheme,
   initFeatureFlags,
 } from '@superset-ui/core';
 import { merge } from 'lodash';
@@ -45,7 +44,7 @@ const bootstrapData = getBootstrapData();
 // Configure translation
 if (typeof window !== 'undefined') {
   configure({ languagePack: bootstrapData.common.language_pack });
-  dayjs.locale(bootstrapData.common.locale);
+  moment.locale(bootstrapData.common.locale);
 } else {
   configure();
 }

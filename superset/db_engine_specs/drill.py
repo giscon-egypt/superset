@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, TYPE_CHECKING
+from typing import Any
 from urllib import parse
 
 from sqlalchemy import types
@@ -27,9 +27,6 @@ from sqlalchemy.engine.url import URL
 from superset.constants import TimeGrain
 from superset.db_engine_specs.base import BaseEngineSpec
 from superset.db_engine_specs.exceptions import SupersetDBAPIProgrammingError
-
-if TYPE_CHECKING:
-    from superset.models.core import Database
 
 
 class DrillEngineSpec(BaseEngineSpec):
@@ -102,27 +99,31 @@ class DrillEngineSpec(BaseEngineSpec):
         return parse.unquote(sqlalchemy_uri.database).replace("/", ".")
 
     @classmethod
-    def impersonate_user(
+    def get_url_for_impersonation(
         cls,
-        database: Database,
-        username: str | None,
-        user_token: str | None,
         url: URL,
-        engine_kwargs: dict[str, Any],
-    ) -> tuple[URL, dict[str, Any]]:
-        if username is None:
-            return url, engine_kwargs
+        impersonate_user: bool,
+        username: str | None,
+        access_token: str | None,
+    ) -> URL:
+        """
+        Return a modified URL with the username set.
 
-        if url.drivername == "drill+odbc":
-            url = url.update_query_dict({"DelegationUID": username})
-        elif url.drivername in {"drill+sadrill", "drill+jdbc"}:
-            url = url.update_query_dict({"impersonation_target": username})
-        else:
-            raise SupersetDBAPIProgrammingError(
-                f"impersonation is not supported for {url.drivername}"
-            )
+        :param url: SQLAlchemy URL object
+        :param impersonate_user: Flag indicating if impersonation is enabled
+        :param username: Effective username
+        """
+        if impersonate_user and username is not None:
+            if url.drivername == "drill+odbc":
+                url = url.update_query_dict({"DelegationUID": username})
+            elif url.drivername in ["drill+sadrill", "drill+jdbc"]:
+                url = url.update_query_dict({"impersonation_target": username})
+            else:
+                raise SupersetDBAPIProgrammingError(
+                    f"impersonation is not supported for {url.drivername}"
+                )
 
-        return url, engine_kwargs
+        return url
 
     @classmethod
     def fetch_data(

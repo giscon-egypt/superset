@@ -238,7 +238,7 @@ if (isFeatureEnabled(FeatureFlag.TaggingSystem)) {
   });
 }
 
-const frontEndRoutes: Record<string, boolean> = routes
+const frontEndRoutes = routes
   .map(r => r.path)
   .reduce(
     (acc, curr) => ({
@@ -248,10 +248,10 @@ const frontEndRoutes: Record<string, boolean> = routes
     {},
   );
 
-export const isFrontendRoute = (path?: string): boolean => {
+export function isFrontendRoute(path?: string) {
   if (path) {
     const basePath = path.split(/[?#]/)[0]; // strip out query params and link bookmarks
     return !!frontEndRoutes[basePath];
   }
   return false;
-};
+}

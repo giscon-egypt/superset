@@ -18,16 +18,16 @@
  */
 import { FunctionComponent, useState, useEffect, ChangeEvent } from 'react';
 
-import { css, styled, t, useTheme } from '@superset-ui/core';
+import { styled, t } from '@superset-ui/core';
 import { useSingleViewResource } from 'src/views/CRUD/hooks';
 import { RangePicker } from 'src/components/DatePicker';
-import { extendedDayjs } from 'src/utils/dates';
+import moment from 'moment';
 import Icons from 'src/components/Icons';
 import Modal from 'src/components/Modal';
+import { StyledIcon } from 'src/views/CRUD/utils';
 import withToasts from 'src/components/MessageToasts/withToasts';
 import { JsonEditor } from 'src/components/AsyncAceEditor';
 
-import { OnlyKeyWithType } from 'src/utils/types';
 import { AnnotationObject } from './types';
 
 interface AnnotationModalProps {
@@ -91,7 +91,6 @@ const AnnotationModal: FunctionComponent<AnnotationModalProps> = ({
   onHide,
   show,
 }) => {
-  const theme = useTheme();
   const [disableSave, setDisableSave] = useState<boolean>(true);
   const [currentAnnotation, setCurrentAnnotation] =
     useState<AnnotationObject | null>(null);
@@ -184,7 +183,7 @@ const AnnotationModal: FunctionComponent<AnnotationModalProps> = ({
       start_dttm: currentAnnotation ? currentAnnotation.start_dttm : '',
     };
 
-    data[target.name as OnlyKeyWithType<typeof data, string>] = target.value;
+    data[target.name] = target.value;
     setCurrentAnnotation(data);
   };
 
@@ -199,23 +198,18 @@ const AnnotationModal: FunctionComponent<AnnotationModalProps> = ({
     setCurrentAnnotation(data);
   };
 
-  const onDateChange = (dates: any, dateString: Array<string>) => {
-    if (!dates?.[0] || !dates?.[1]) {
-      const data = {
-        ...currentAnnotation,
-        start_dttm: '',
-        end_dttm: '',
-        short_descr: currentAnnotation?.short_descr ?? '',
-      };
-      setCurrentAnnotation(data);
-      return;
-    }
-
+  const onDateChange = (value: any, dateString: Array<string>) => {
     const data = {
       ...currentAnnotation,
-      start_dttm: dates[0].format('YYYY-MM-DD HH:mm'),
-      end_dttm: dates[1].format('YYYY-MM-DD HH:mm'),
-      short_descr: currentAnnotation?.short_descr ?? '',
+      end_dttm:
+        currentAnnotation && dateString[1].length
+          ? moment(dateString[1]).format('YYYY-MM-DD HH:mm')
+          : '',
+      short_descr: currentAnnotation ? currentAnnotation.short_descr : '',
+      start_dttm:
+        currentAnnotation && dateString[0].length
+          ? moment(dateString[0]).format('YYYY-MM-DD HH:mm')
+          : '',
     };
     setCurrentAnnotation(data);
   };
@@ -279,19 +273,9 @@ const AnnotationModal: FunctionComponent<AnnotationModalProps> = ({
       title={
         <h4 data-test="annotation-modal-title">
           {isEditMode ? (
-            <Icons.EditOutlined
-              iconSize="l"
-              css={css`
-                margin: auto ${theme.gridUnit * 2}px auto 0;
-              `}
-            />
+            <Icons.EditAlt css={StyledIcon} />
           ) : (
-            <Icons.PlusOutlined
-              iconSize="l"
-              css={css`
-                margin: auto ${theme.gridUnit * 2}px auto 0;
-              `}
-            />
+            <Icons.PlusLarge css={StyledIcon} />
           )}
           {isEditMode ? t('Edit annotation') : t('Add annotation')}
         </h4>
@@ -320,15 +304,15 @@ const AnnotationModal: FunctionComponent<AnnotationModalProps> = ({
         <RangePicker
           placeholder={[t('Start date'), t('End date')]}
           format="YYYY-MM-DD HH:mm"
-          onCalendarChange={onDateChange}
+          onChange={onDateChange}
           showTime={{ format: 'hh:mm a' }}
           use12Hours
           value={
             currentAnnotation?.start_dttm?.length ||
             currentAnnotation?.end_dttm?.length
               ? [
-                  extendedDayjs(currentAnnotation.start_dttm),
-                  extendedDayjs(currentAnnotation.end_dttm),
+                  moment(currentAnnotation.start_dttm),
+                  moment(currentAnnotation.end_dttm),
                 ]
               : null
           }

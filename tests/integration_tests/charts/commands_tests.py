@@ -104,18 +104,16 @@ class TestExportChartsCommand(SupersetTestCase):
             "query_context": None,
         }
 
-    @patch("superset.utils.core.g")
     @patch("superset.security.manager.g")
     @pytest.mark.usefixtures("load_energy_table_with_slice")
-    def test_export_chart_command_no_access(self, utils_mock_g, manager_mock_g):
+    def test_export_chart_command_no_access(self, mock_g):
         """Test that users can't export datasets they don't have access to"""
-        manager_mock_g.user = security_manager.find_user("gamma")
-        utils_mock_g.user = manager_mock_g.user
+        mock_g.user = security_manager.find_user("gamma")
 
         example_chart = db.session.query(Slice).all()[0]
         command = ExportChartsCommand([example_chart.id])
         contents = command.run()
-        with self.assertRaises(ChartNotFoundError):  # noqa: PT027
+        with self.assertRaises(ChartNotFoundError):
             next(contents)
 
     @patch("superset.security.manager.g")
@@ -124,7 +122,7 @@ class TestExportChartsCommand(SupersetTestCase):
         mock_g.user = security_manager.find_user("admin")
         command = ExportChartsCommand([-1])
         contents = command.run()
-        with self.assertRaises(ChartNotFoundError):  # noqa: PT027
+        with self.assertRaises(ChartNotFoundError):
             next(contents)
 
     @patch("superset.security.manager.g")
@@ -202,7 +200,7 @@ class TestImportChartsCommand(SupersetTestCase):
             "color_picker": {"a": 1, "b": 135, "g": 122, "r": 0},
             "datasource": dataset.uid if dataset else None,
             "js_columns": ["color"],
-            "js_data_mutator": "data => data.map(d => ({\\n    ...d,\\n    color: colors.hexToRGB(d.extraProps.color)\\n}));",  # noqa: E501
+            "js_data_mutator": "data => data.map(d => ({\\n    ...d,\\n    color: colors.hexToRGB(d.extraProps.color)\\n}));",
             "js_onclick_href": "",
             "js_tooltip": "",
             "line_column": "path_json",
@@ -391,7 +389,6 @@ class TestChartsUpdateCommand(SupersetTestCase):
     @patch("superset.utils.core.g")
     @patch("superset.security.manager.g")
     @pytest.mark.usefixtures("load_energy_table_with_slice")
-    @pytest.mark.skip(reason="This test will be changed to use the api/v1/data")
     def test_query_context_update_command(self, mock_sm_g, mock_g):
         """
         Test that a user can generate the chart query context
@@ -420,27 +417,22 @@ class TestChartsUpdateCommand(SupersetTestCase):
 
 class TestChartWarmUpCacheCommand(SupersetTestCase):
     def test_warm_up_cache_command_chart_not_found(self):
-        with self.assertRaises(WarmUpCacheChartNotFoundError):  # noqa: PT027
+        with self.assertRaises(WarmUpCacheChartNotFoundError):
             ChartWarmUpCacheCommand(99999, None, None).run()
 
     @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
-    @pytest.mark.skip(reason="This test will be changed to use the api/v1/data")
     def test_warm_up_cache(self):
         slc = self.get_slice("Top 10 Girl Name Share")
         result = ChartWarmUpCacheCommand(slc.id, None, None).run()
-        assert result == {
-            "chart_id": slc.id,
-            "viz_error": None,
-            "viz_status": "success",
-        }
+        self.assertEqual(
+            result, {"chart_id": slc.id, "viz_error": None, "viz_status": "success"}
+        )
 
         # can just pass in chart as well
         result = ChartWarmUpCacheCommand(slc, None, None).run()
-        assert result == {
-            "chart_id": slc.id,
-            "viz_error": None,
-            "viz_status": "success",
-        }
+        self.assertEqual(
+            result, {"chart_id": slc.id, "viz_error": None, "viz_status": "success"}
+        )
 
 
 class TestFavoriteChartCommand(SupersetTestCase):
@@ -473,16 +465,16 @@ class TestFavoriteChartCommand(SupersetTestCase):
             example_chart_id = 1234
 
             with override_user(security_manager.find_user("admin")):
-                with self.assertRaises(ChartNotFoundError):  # noqa: PT027
+                with self.assertRaises(ChartNotFoundError):
                     AddFavoriteChartCommand(example_chart_id).run()
 
-                with self.assertRaises(ChartNotFoundError):  # noqa: PT027
+                with self.assertRaises(ChartNotFoundError):
                     DelFavoriteChartCommand(example_chart_id).run()
 
     @pytest.mark.usefixtures("load_energy_table_with_slice")
     @patch("superset.daos.base.BaseDAO.find_by_id")
     def test_fave_unfave_chart_command_forbidden(self, mock_find_by_id):
-        """Test that faving / unfaving raises an exception for a chart the user doesn't own"""  # noqa: E501
+        """Test that faving / unfaving raises an exception for a chart the user doesn't own"""
         with self.client.application.test_request_context():
             example_chart = db.session.query(Slice).all()[0]
             mock_find_by_id.return_value = example_chart
@@ -491,8 +483,8 @@ class TestFavoriteChartCommand(SupersetTestCase):
             assert example_chart is not None
 
             with override_user(security_manager.find_user("gamma")):
-                with self.assertRaises(ChartForbiddenError):  # noqa: PT027
+                with self.assertRaises(ChartForbiddenError):
                     AddFavoriteChartCommand(example_chart.id).run()
 
-                with self.assertRaises(ChartForbiddenError):  # noqa: PT027
+                with self.assertRaises(ChartForbiddenError):
                     DelFavoriteChartCommand(example_chart.id).run()

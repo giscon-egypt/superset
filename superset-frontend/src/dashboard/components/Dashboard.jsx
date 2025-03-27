@@ -18,7 +18,7 @@
  */
 import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { t } from '@superset-ui/core';
+import { isFeatureEnabled, t, FeatureFlag } from '@superset-ui/core';
 
 import { PluginContext } from 'src/components/DynamicPlugins';
 import Loading from 'src/components/Loading';
@@ -26,7 +26,11 @@ import getBootstrapData from 'src/utils/getBootstrapData';
 import getChartIdsFromLayout from '../util/getChartIdsFromLayout';
 import getLayoutComponentFromChartId from '../util/getLayoutComponentFromChartId';
 
-import { slicePropShape } from '../util/propShapes';
+import {
+  slicePropShape,
+  dashboardInfoPropShape,
+  dashboardStatePropShape,
+} from '../util/propShapes';
 import {
   LOG_ACTIONS_HIDE_BROWSER_TAB,
   LOG_ACTIONS_MOUNT_DASHBOARD,
@@ -47,10 +51,8 @@ const propTypes = {
     logEvent: PropTypes.func.isRequired,
     clearDataMaskState: PropTypes.func.isRequired,
   }).isRequired,
-  dashboardId: PropTypes.number.isRequired,
-  editMode: PropTypes.bool,
-  isPublished: PropTypes.bool,
-  hasUnsavedChanges: PropTypes.bool,
+  dashboardInfo: dashboardInfoPropShape.isRequired,
+  dashboardState: dashboardStatePropShape.isRequired,
   slices: PropTypes.objectOf(slicePropShape).isRequired,
   activeFilters: PropTypes.object.isRequired,
   chartConfiguration: PropTypes.object,
@@ -60,7 +62,6 @@ const propTypes = {
   impressionId: PropTypes.string.isRequired,
   timeout: PropTypes.number,
   userId: PropTypes.string,
-  children: PropTypes.node,
 };
 
 const defaultProps = {
@@ -94,13 +95,13 @@ class Dashboard extends PureComponent {
 
   componentDidMount() {
     const bootstrapData = getBootstrapData();
-    const { editMode, isPublished, layout } = this.props;
+    const { dashboardState, layout } = this.props;
     const eventData = {
       is_soft_navigation: Logger.timeOriginOffset > 0,
-      is_edit_mode: editMode,
+      is_edit_mode: dashboardState.editMode,
       mount_duration: Logger.getTimestamp(),
       is_empty: isDashboardEmpty(layout),
-      is_published: isPublished,
+      is_published: dashboardState.isPublished,
       bootstrap_data_length: bootstrapData.length,
     };
     const directLinkComponentId = getLocationHash();
@@ -128,7 +129,7 @@ class Dashboard extends PureComponent {
     const currentChartIds = getChartIdsFromLayout(this.props.layout);
     const nextChartIds = getChartIdsFromLayout(nextProps.layout);
 
-    if (this.props.dashboardId !== nextProps.dashboardId) {
+    if (this.props.dashboardInfo.id !== nextProps.dashboardInfo.id) {
       // single-page-app navigation check
       return;
     }
@@ -155,15 +156,14 @@ class Dashboard extends PureComponent {
   }
 
   applyCharts() {
-    const {
-      activeFilters,
-      ownDataCharts,
-      chartConfiguration,
-      hasUnsavedChanges,
-      editMode,
-    } = this.props;
+    const { hasUnsavedChanges, editMode } = this.props.dashboardState;
+
     const { appliedFilters, appliedOwnDataCharts } = this;
-    if (!chartConfiguration) {
+    const { activeFilters, ownDataCharts, chartConfiguration } = this.props;
+    if (
+      isFeatureEnabled(FeatureFlag.DashboardCrossFilters) &&
+      !chartConfiguration
+    ) {
       // For a first loading we need to wait for cross filters charts data loaded to get all active filters
       // for correct comparing  of filters to avoid unnecessary requests
       return;
@@ -224,7 +224,6 @@ class Dashboard extends PureComponent {
       ownDataCharts,
       this.appliedOwnDataCharts,
     );
-
     [...allKeys].forEach(filterKey => {
       if (
         !currFilterKeys.includes(filterKey) &&
@@ -232,12 +231,12 @@ class Dashboard extends PureComponent {
       ) {
         // filterKey is removed?
         affectedChartIds.push(
-          ...getRelatedCharts(filterKey, appliedFilters[filterKey], slices),
+          ...getRelatedCharts(appliedFilters, activeFilters, slices)[filterKey],
         );
       } else if (!appliedFilterKeys.includes(filterKey)) {
         // filterKey is newly added?
         affectedChartIds.push(
-          ...getRelatedCharts(filterKey, activeFilters[filterKey], slices),
+          ...getRelatedCharts(activeFilters, appliedFilters, slices)[filterKey],
         );
       } else {
         // if filterKey changes value,
@@ -252,7 +251,9 @@ class Dashboard extends PureComponent {
           )
         ) {
           affectedChartIds.push(
-            ...getRelatedCharts(filterKey, activeFilters[filterKey], slices),
+            ...getRelatedCharts(activeFilters, appliedFilters, slices)[
+              filterKey
+            ],
           );
         }
 

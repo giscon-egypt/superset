@@ -18,7 +18,7 @@
  */
 
 import { css, styled, t } from '@superset-ui/core';
-import dayjs from 'dayjs';
+import moment from 'moment';
 import { useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ListView from 'src/components/ListView';
@@ -32,7 +32,6 @@ import {
   useSingleViewResource,
 } from 'src/views/CRUD/hooks';
 import { AlertObject, LogObject } from 'src/features/alerts/types';
-import { AnnotationObject } from 'src/features/annotations/types';
 
 const PAGE_SIZE = 25;
 
@@ -120,7 +119,7 @@ function ExecutionLog({
             original: { scheduled_dttm: scheduledDttm },
           },
         }: any) =>
-          dayjs(new Date(scheduledDttm)).format('YYYY-MM-DD hh:mm:ss a'),
+          moment(new Date(scheduledDttm)).format('YYYY-MM-DD hh:mm:ss a'),
         accessor: 'scheduled_dttm',
         Header: t('Scheduled at (UTC)'),
       },
@@ -129,9 +128,7 @@ function ExecutionLog({
           row: {
             original: { start_dttm: startDttm },
           },
-        }: {
-          row: { original: AnnotationObject };
-        }) => dayjs(new Date(startDttm)).format('YYYY-MM-DD hh:mm:ss a'),
+        }: any) => moment(new Date(startDttm)).format('YYYY-MM-DD hh:mm:ss a'),
         Header: t('Start at (UTC)'),
         accessor: 'start_dttm',
       },
@@ -140,9 +137,7 @@ function ExecutionLog({
           row: {
             original: { start_dttm: startDttm, end_dttm: endDttm },
           },
-        }: {
-          row: { original: AnnotationObject };
-        }) =>
+        }: any) =>
           fDuration(new Date(startDttm).getTime(), new Date(endDttm).getTime()),
         Header: t('Duration'),
         disableSortBy: true,

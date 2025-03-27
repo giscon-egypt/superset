@@ -189,7 +189,7 @@ def _delete_old_permissions(
     - Deletes the ViewMenu if it's an orphan now
     """
     # Delete old permissions
-    for old_pvm, new_pvms in pvm_map.items():  # noqa: B007
+    for old_pvm, new_pvms in pvm_map.items():
         old_permission_name = old_pvm.permission.name
         old_view_name = old_pvm.view_menu.name
         logger.info(f"Going to delete pvm: {old_pvm}")
@@ -212,7 +212,7 @@ def _delete_old_permissions(
             session.delete(old_pvm.view_menu)
 
 
-def migrate_roles(  # noqa: C901
+def migrate_roles(
     session: Session,
     pvm_key_map: PvmMigrationMapType,
     commit: bool = False,
@@ -252,7 +252,7 @@ def migrate_roles(  # noqa: C901
 
 def get_reversed_new_pvms(pvm_map: PvmMigrationMapType) -> dict[str, tuple[str, ...]]:
     reversed_pvms: dict[str, tuple[str, ...]] = {}
-    for old_pvm, new_pvms in pvm_map.items():  # noqa: B007
+    for old_pvm, new_pvms in pvm_map.items():
         if old_pvm.view not in reversed_pvms:
             reversed_pvms[old_pvm.view] = (old_pvm.permission,)
         else:

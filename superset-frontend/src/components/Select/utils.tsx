@@ -17,8 +17,7 @@
  * under the License.
  */
 import { ensureIsArray, t } from '@superset-ui/core';
-// eslint-disable-next-line no-restricted-imports
-import AntdSelect, { LabeledValue as AntdLabeledValue } from 'antd/lib/select'; // TODO: Remove antd
+import AntdSelect, { LabeledValue as AntdLabeledValue } from 'antd/lib/select';
 import { ReactElement, RefObject } from 'react';
 import Icons from 'src/components/Icons';
 import { StyledHelperText, StyledLoadingText, StyledSpin } from './styles';
@@ -51,8 +50,8 @@ export function getValue(
 }
 
 export function isEqual(a: V | LabeledValue, b: V | LabeledValue, key: string) {
-  const actualA = isObject(a) && key in a ? a[key as keyof LabeledValue] : a;
-  const actualB = isObject(b) && key in b ? b[key as keyof LabeledValue] : b;
+  const actualA = isObject(a) && key in a ? a[key] : a;
+  const actualB = isObject(b) && key in b ? b[key] : b;
   // When comparing the values we use the equality
   // operator to automatically convert different types
   // eslint-disable-next-line eqeqeq
@@ -85,15 +84,10 @@ export function hasOption(
  * */
 export const propertyComparator =
   (property: string) => (a: AntdLabeledValue, b: AntdLabeledValue) => {
-    const propertyA = a[property as keyof LabeledValue];
-    const propertyB = b[property as keyof LabeledValue];
-    if (typeof propertyA === 'string' && typeof propertyB === 'string') {
-      return propertyA.localeCompare(propertyB);
+    if (typeof a[property] === 'string' && typeof b[property] === 'string') {
+      return a[property].localeCompare(b[property]);
     }
-    if (typeof propertyA === 'number' && typeof propertyB === 'number') {
-      return propertyA - propertyB;
-    }
-    return String(propertyA).localeCompare(String(propertyB)); // fallback to string comparison
+    return (a[property] as number) - (b[property] as number);
   };
 
 export const sortSelectedFirstHelper = (
@@ -192,10 +186,8 @@ export const handleFilterOptionHelper = (
     const searchValue = search.trim().toLowerCase();
     if (optionFilterProps?.length) {
       return optionFilterProps.some(prop => {
-        const optionProp = option?.[prop as keyof LabeledValue]
-          ? String(option[prop as keyof LabeledValue])
-              .trim()
-              .toLowerCase()
+        const optionProp = option?.[prop]
+          ? String(option[prop]).trim().toLowerCase()
           : '';
         return optionProp.includes(searchValue);
       });
@@ -208,9 +200,7 @@ export const handleFilterOptionHelper = (
 export const hasCustomLabels = (options: SelectOptionsType) =>
   options?.some(opt => !!opt?.customLabel);
 
-export const renderSelectOptions = (
-  options: SelectOptionsType,
-): JSX.Element[] =>
+export const renderSelectOptions = (options: SelectOptionsType) =>
   options.map(opt => {
     const isOptObject = typeof opt === 'object';
     const label = isOptObject ? opt?.label || opt.value : opt;
@@ -223,10 +213,7 @@ export const renderSelectOptions = (
     );
   });
 
-export const mapValues = (
-  values: SelectOptionsType,
-  labelInValue: boolean,
-): (Record<string, any> | any)[] =>
+export const mapValues = (values: SelectOptionsType, labelInValue: boolean) =>
   labelInValue
     ? values.map(opt => ({
         key: opt.value,
@@ -235,7 +222,7 @@ export const mapValues = (
       }))
     : values.map(opt => opt.value);
 
-export const mapOptions = (values: SelectOptionsType): Record<string, any>[] =>
+export const mapOptions = (values: SelectOptionsType) =>
   values.map(opt => ({
     children: opt.label,
     key: opt.value,

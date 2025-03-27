@@ -171,7 +171,7 @@ def generate_erd(file_path: str) -> None:
     """
     data = introspect_models()
     templates_path = os.path.dirname(__file__)
-    env = jinja2.Environment(loader=jinja2.FileSystemLoader(templates_path))  # noqa: S701
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(templates_path))
 
     # Load the template
     template = env.get_template("erd.template.puml")

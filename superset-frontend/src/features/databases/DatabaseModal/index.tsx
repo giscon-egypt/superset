@@ -21,8 +21,6 @@ import {
   styled,
   SupersetTheme,
   getExtensionsRegistry,
-  css,
-  useTheme,
 } from '@superset-ui/core';
 
 import {
@@ -38,8 +36,7 @@ import {
 
 import { useHistory } from 'react-router-dom';
 import { setItem, LocalStorageKeys } from 'src/utils/localStorageHelpers';
-// eslint-disable-next-line no-restricted-imports
-import { UploadChangeParam, UploadFile } from 'antd/lib/upload/interface'; // TODO: Remove antd
+import { UploadChangeParam, UploadFile } from 'antd/lib/upload/interface';
 import Tabs from 'src/components/Tabs';
 import { AntdSelect, Upload } from 'src/components';
 import Alert from 'src/components/Alert';
@@ -51,7 +48,6 @@ import withToasts from 'src/components/MessageToasts/withToasts';
 import ValidatedInput from 'src/components/Form/LabeledErrorBoundInput';
 import ErrorMessageWithStackTrace from 'src/components/ErrorMessage/ErrorMessageWithStackTrace';
 import ErrorAlert from 'src/components/ImportModal/ErrorAlert';
-import Icons from 'src/components/Icons';
 import {
   testDatabaseConnection,
   useSingleViewResource,
@@ -64,7 +60,6 @@ import {
 import { useCommonConf } from 'src/features/databases/state';
 import Loading from 'src/components/Loading';
 import { isEmpty, pick } from 'lodash';
-import { OnlyKeyWithType } from 'src/utils/types';
 import {
   DatabaseObject,
   DatabaseForm,
@@ -73,7 +68,6 @@ import {
   Engines,
   ExtraJson,
   CustomTextType,
-  DatabaseParameters,
 } from '../types';
 import ExtraOptions from './ExtraOptions';
 import SqlAlchemyForm from './SqlAlchemyForm';
@@ -143,7 +137,7 @@ const SSHTunnelContainer = styled.div`
   `};
 `;
 
-export interface DatabaseModalProps {
+interface DatabaseModalProps {
   addDangerToast: (msg: string) => void;
   addSuccessToast: (msg: string) => void;
   onDatabaseAdd?: (database?: DatabaseObject) => void;
@@ -160,7 +154,6 @@ export enum ActionType {
   EditorChange,
   ExtraEditorChange,
   ExtraInputChange,
-  EncryptedExtraInputChange,
   Fetched,
   InputChange,
   ParametersChange,
@@ -192,7 +185,6 @@ export type DBReducerActionType =
       type:
         | ActionType.ExtraEditorChange
         | ActionType.ExtraInputChange
-        | ActionType.EncryptedExtraInputChange
         | ActionType.TextChange
         | ActionType.QueryChange
         | ActionType.InputChange
@@ -275,14 +267,6 @@ export function dbReducer(
         extra: JSON.stringify({
           ...extraJson,
           [action.payload.name]: actionPayloadJson,
-        }),
-      };
-    case ActionType.EncryptedExtraInputChange:
-      return {
-        ...trimmedState,
-        masked_encrypted_extra: JSON.stringify({
-          ...JSON.parse(trimmedState.masked_encrypted_extra || '{}'),
-          [action.payload.name]: action.payload.value,
         }),
       };
     case ActionType.ExtraInputChange:
@@ -370,26 +354,19 @@ export function dbReducer(
         // Formatting wrapping google sheets table catalog
         const catalogCopy: CatalogObject[] = [...trimmedState.catalog];
         const idx = action.payload.type?.split('-')[1];
-        const catalogToUpdate: CatalogObject =
-          catalogCopy[parseInt(idx, 10)] || {};
-        if (action.payload.value !== undefined) {
-          catalogToUpdate[action.payload.name as keyof CatalogObject] =
-            action.payload.value;
-        }
+        const catalogToUpdate: CatalogObject = catalogCopy[idx] || {};
+        catalogToUpdate[action.payload.name] = action.payload.value;
 
         // insert updated catalog to existing state
         catalogCopy.splice(parseInt(idx, 10), 1, catalogToUpdate);
 
         // format catalog for state
         // eslint-disable-next-line array-callback-return
-        parametersCatalog = catalogCopy.reduce<Record<string, string>>(
-          (obj, item: CatalogObject) => {
-            const catalog = { ...obj };
-            catalog[item.name as keyof CatalogObject] = item.value;
-            return catalog;
-          },
-          {},
-        );
+        parametersCatalog = catalogCopy.reduce((obj, item: any) => {
+          const catalog = { ...obj };
+          catalog[item.name] = item.value;
+          return catalog;
+        }, {});
 
         return {
           ...trimmedState,
@@ -564,7 +541,6 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
   databaseId,
   dbEngine,
 }) => {
-  const theme = useTheme();
   const [db, setDB] = useReducer<
     Reducer<Partial<DatabaseObject> | null, DBReducerActionType>
   >(dbReducer, null);
@@ -648,13 +624,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
   const connectionAlert = getConnectionAlert();
   const isEditMode = !!databaseId;
   const hasAlert =
-    connectionAlert ||
-    !!(
-      db?.engine &&
-      engineSpecificAlertMapping[
-        db.engine as keyof typeof engineSpecificAlertMapping
-      ]
-    );
+    connectionAlert || !!(db?.engine && engineSpecificAlertMapping[db.engine]);
   const useSqlAlchemyForm =
     db?.configuration_method === ConfigurationMethod.SqlalchemyUri;
   const useTabLayout = isEditMode || useSqlAlchemyForm;
@@ -858,28 +828,20 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
          */
         if (
           parameters_schema[paramConfig]['x-encrypted-extra'] &&
-          dbToUpdate.parameters?.[paramConfig as keyof DatabaseParameters]
+          dbToUpdate.parameters?.[paramConfig]
         ) {
-          if (
-            typeof dbToUpdate.parameters?.[
-              paramConfig as keyof DatabaseParameters
-            ] === 'object'
-          ) {
+          if (typeof dbToUpdate.parameters?.[paramConfig] === 'object') {
             // add new encrypted extra to masked_encrypted_extra object
             additionalEncryptedExtra[paramConfig] =
-              dbToUpdate.parameters?.[paramConfig as keyof DatabaseParameters];
+              dbToUpdate.parameters?.[paramConfig];
             // The backend expects `masked_encrypted_extra` as a string for historical
             // reasons.
-            dbToUpdate.parameters[
-              paramConfig as OnlyKeyWithType<DatabaseParameters, string>
-            ] = JSON.stringify(
-              dbToUpdate.parameters[paramConfig as keyof DatabaseParameters],
+            dbToUpdate.parameters[paramConfig] = JSON.stringify(
+              dbToUpdate.parameters[paramConfig],
             );
           } else {
             additionalEncryptedExtra[paramConfig] = JSON.parse(
-              dbToUpdate.parameters?.[
-                paramConfig as OnlyKeyWithType<DatabaseParameters, string>
-              ] || '{}',
+              dbToUpdate.parameters?.[paramConfig] || '{}',
             );
           }
         }
@@ -1340,7 +1302,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
   useEffect(() => {
     if (importingModal) {
       document
-        ?.getElementsByClassName('ant-upload-list-item-name')[0]
+        .getElementsByClassName('ant-upload-list-item-name')[0]
         .scrollIntoView();
     }
   }, [importingModal]);
@@ -1572,14 +1534,12 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
             type="info"
             showIcon
             message={
-              engineSpecificAlertMapping[
-                db.engine as keyof typeof engineSpecificAlertMapping
-              ]?.message || connectionAlert?.DEFAULT?.message
+              engineSpecificAlertMapping[db.engine]?.message ||
+              connectionAlert?.DEFAULT?.message
             }
             description={
-              engineSpecificAlertMapping[
-                db.engine as keyof typeof engineSpecificAlertMapping
-              ]?.description || connectionAlert?.DEFAULT?.description + ipAlert
+              engineSpecificAlertMapping[db.engine]?.description ||
+              connectionAlert?.DEFAULT?.description + ipAlert
             }
           />
         </StyledAlertMargin>
@@ -1613,9 +1573,8 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
             description={t(
               'We are unable to connect to your database. Click "See more" for database-provided information that may help troubleshoot the issue.',
             )}
-            descriptionDetails={
-              alertErrors?.[0] || validationErrors?.description
-            }
+            subtitle={alertErrors?.[0] || validationErrors?.description}
+            copyText={validationErrors?.description}
           />
         </ErrorAlertContainer>
       );
@@ -1693,16 +1652,6 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
         }
         onExtraInputChange={({ target }: { target: HTMLInputElement }) =>
           onChange(ActionType.ExtraInputChange, {
-            name: target.name,
-            value: target.value,
-          })
-        }
-        onEncryptedExtraInputChange={({
-          target,
-        }: {
-          target: HTMLInputElement;
-        }) =>
-          onChange(ActionType.EncryptedExtraInputChange, {
             name: target.name,
             value: target.value,
           })
@@ -1835,24 +1784,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
       centered
       show={show}
       title={
-        <h4>
-          {isEditMode ? (
-            <Icons.EditOutlined
-              iconSize="l"
-              css={css`
-                margin: auto ${theme.gridUnit * 2}px auto 0;
-              `}
-            />
-          ) : (
-            <Icons.InsertRowAboveOutlined
-              iconSize="l"
-              css={css`
-                margin: auto ${theme.gridUnit * 2}px auto 0;
-              `}
-            />
-          )}
-          {isEditMode ? t('Edit database') : t('Connect a database')}
-        </h4>
+        <h4>{isEditMode ? t('Edit database') : t('Connect a database')}</h4>
       }
       footer={modalFooter}
       maskClosable={false}
@@ -2013,17 +1945,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
       width="500px"
       centered
       show={show}
-      title={
-        <h4>
-          <Icons.InsertRowAboveOutlined
-            iconSize="l"
-            css={css`
-              margin: auto ${theme.gridUnit * 2}px auto 0;
-            `}
-          />
-          {t('Connect a database')}
-        </h4>
-      }
+      title={<h4>{t('Connect a database')}</h4>}
       footer={renderModalFooter()}
       maskClosable={false}
     >

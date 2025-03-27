@@ -32,13 +32,13 @@ import Table, {
   TableSize,
   OnChangeFunction,
 } from 'src/components/Table';
-import { EmptyState } from 'src/components/EmptyState';
+import { EmptyStateBig } from 'src/components/EmptyState';
 import ChartImage from 'src/assets/images/chart.svg';
 import Icons from 'src/components/Icons';
 import { useToasts } from 'src/components/MessageToasts/withToasts';
 import { useListViewResource } from 'src/views/CRUD/hooks';
 import { FilterOperator } from 'src/components/ListView';
-import { extendedDayjs } from 'src/utils/dates';
+import moment from 'moment';
 import TruncatedList from 'src/components/TruncatedList';
 
 interface DatasetUsageProps {
@@ -92,9 +92,7 @@ const columns: ColumnsType<Chart> = [
     sorter: true,
     defaultSortOrder: 'descend',
     render: (value, record) =>
-      record.last_saved_at
-        ? extendedDayjs.utc(record.last_saved_at).fromNow()
-        : null,
+      record.last_saved_at ? moment.utc(record.last_saved_at).fromNow() : null,
   },
   {
     key: 'last_saved_by.first_name',
@@ -147,7 +145,7 @@ const emptyStateButtonText = (
   </>
 );
 
-const StyledEmptyState = styled(EmptyState)`
+const StyledEmptyStateBig = styled(EmptyStateBig)`
   margin: ${({ theme }) => 13 * theme.gridUnit}px 0;
 `;
 
@@ -250,9 +248,8 @@ const DatasetUsage = ({ datasetId }: DatasetUsageProps) => {
         onChange={onChange}
       />
       {!data.length && !loading ? (
-        <StyledEmptyState
+        <StyledEmptyStateBig
           image={<ChartImage />}
-          size="large"
           title={t('No charts')}
           description={t('This dataset is not used to power any charts.')}
           buttonText={emptyStateButtonText}

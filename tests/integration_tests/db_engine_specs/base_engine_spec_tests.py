@@ -30,7 +30,7 @@ from superset.db_engine_specs.base import (
 from superset.db_engine_specs.mysql import MySQLEngineSpec
 from superset.db_engine_specs.sqlite import SqliteEngineSpec
 from superset.errors import ErrorLevel, SupersetError, SupersetErrorType
-from superset.sql_parse import Table
+from superset.sql_parse import ParsedQuery, Table
 from superset.utils.database import get_example_database
 from tests.integration_tests.db_engine_specs.base_tests import TestDbEngineSpec
 from tests.integration_tests.test_app import app
@@ -61,18 +61,18 @@ class TestDbEngineSpecs(TestDbEngineSpec):
         q10 = "select * from mytable limit 20, x"
         q11 = "select * from mytable limit x offset 20"
 
-        assert engine_spec_class.get_limit_from_sql(q0) is None
-        assert engine_spec_class.get_limit_from_sql(q1) == 10
-        assert engine_spec_class.get_limit_from_sql(q2) == 20
-        assert engine_spec_class.get_limit_from_sql(q3) is None
-        assert engine_spec_class.get_limit_from_sql(q4) == 20
-        assert engine_spec_class.get_limit_from_sql(q5) == 10
-        assert engine_spec_class.get_limit_from_sql(q6) == 10
-        assert engine_spec_class.get_limit_from_sql(q7) is None
-        assert engine_spec_class.get_limit_from_sql(q8) is None
-        assert engine_spec_class.get_limit_from_sql(q9) is None
-        assert engine_spec_class.get_limit_from_sql(q10) is None
-        assert engine_spec_class.get_limit_from_sql(q11) is None
+        self.assertEqual(engine_spec_class.get_limit_from_sql(q0), None)
+        self.assertEqual(engine_spec_class.get_limit_from_sql(q1), 10)
+        self.assertEqual(engine_spec_class.get_limit_from_sql(q2), 20)
+        self.assertEqual(engine_spec_class.get_limit_from_sql(q3), None)
+        self.assertEqual(engine_spec_class.get_limit_from_sql(q4), 20)
+        self.assertEqual(engine_spec_class.get_limit_from_sql(q5), 10)
+        self.assertEqual(engine_spec_class.get_limit_from_sql(q6), 10)
+        self.assertEqual(engine_spec_class.get_limit_from_sql(q7), None)
+        self.assertEqual(engine_spec_class.get_limit_from_sql(q8), None)
+        self.assertEqual(engine_spec_class.get_limit_from_sql(q9), None)
+        self.assertEqual(engine_spec_class.get_limit_from_sql(q10), None)
+        self.assertEqual(engine_spec_class.get_limit_from_sql(q11), None)
 
     def test_wrapped_semi_tabs(self):
         self.sql_limit_regex(
@@ -141,7 +141,7 @@ class TestDbEngineSpecs(TestDbEngineSpec):
         )
 
     def test_get_datatype(self):
-        assert "VARCHAR" == BaseEngineSpec.get_datatype("VARCHAR")
+        self.assertEqual("VARCHAR", BaseEngineSpec.get_datatype("VARCHAR"))
 
     def test_limit_with_implicit_offset(self):
         self.sql_limit_regex(
@@ -198,26 +198,29 @@ class TestDbEngineSpecs(TestDbEngineSpec):
         for engine in load_engine_specs():
             if engine is not BaseEngineSpec:
                 # make sure time grain functions have been defined
-                assert len(engine.get_time_grain_expressions()) > 0
+                self.assertGreater(len(engine.get_time_grain_expressions()), 0)
                 # make sure all defined time grains are supported
                 defined_grains = {grain.duration for grain in engine.get_time_grains()}
                 intersection = time_grains.intersection(defined_grains)
-                self.assertSetEqual(defined_grains, intersection, engine)  # noqa: PT009
+                self.assertSetEqual(defined_grains, intersection, engine)
 
     def test_get_time_grain_expressions(self):
         time_grains = MySQLEngineSpec.get_time_grain_expressions()
-        assert list(time_grains.keys()) == [
-            None,
-            "PT1S",
-            "PT1M",
-            "PT1H",
-            "P1D",
-            "P1W",
-            "P1M",
-            "P3M",
-            "P1Y",
-            "1969-12-29T00:00:00Z/P1W",
-        ]
+        self.assertEqual(
+            list(time_grains.keys()),
+            [
+                None,
+                "PT1S",
+                "PT1M",
+                "PT1H",
+                "P1D",
+                "P1W",
+                "P1M",
+                "P3M",
+                "P1Y",
+                "1969-12-29T00:00:00Z/P1W",
+            ],
+        )
 
     def test_get_table_names(self):
         inspector = mock.Mock()
@@ -252,11 +255,11 @@ class TestDbEngineSpecs(TestDbEngineSpec):
             expected = ["STRING", "STRING", "FLOAT"]
         else:
             expected = ["VARCHAR(255)", "VARCHAR(255)", "FLOAT"]
-        assert col_names == expected
+        self.assertEqual(col_names, expected)
 
     def test_convert_dttm(self):
         dttm = self.get_dttm()
-        assert BaseEngineSpec.convert_dttm("", dttm, db_extra=None) is None
+        self.assertIsNone(BaseEngineSpec.convert_dttm("", dttm, db_extra=None))
 
     def test_pyodbc_rows_to_tuples(self):
         # Test for case when pyodbc.Row is returned (odbc driver)
@@ -269,7 +272,7 @@ class TestDbEngineSpecs(TestDbEngineSpec):
             (2, 2, datetime.datetime(2018, 10, 19, 23, 39, 16, 660000)),
         ]
         result = BaseEngineSpec.pyodbc_rows_to_tuples(data)
-        self.assertListEqual(result, expected)  # noqa: PT009
+        self.assertListEqual(result, expected)
 
     def test_pyodbc_rows_to_tuples_passthrough(self):
         # Test for case when tuples are returned
@@ -278,7 +281,7 @@ class TestDbEngineSpecs(TestDbEngineSpec):
             (2, 2, datetime.datetime(2018, 10, 19, 23, 39, 16, 660000)),
         ]
         result = BaseEngineSpec.pyodbc_rows_to_tuples(data)
-        self.assertListEqual(result, data)  # noqa: PT009
+        self.assertListEqual(result, data)
 
     @mock.patch("superset.models.core.Database.db_engine_spec", BaseEngineSpec)
     @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
@@ -305,9 +308,23 @@ class TestDbEngineSpecs(TestDbEngineSpec):
         }
         sql = table.get_query_str(query_obj)
         assert (
-            "ORDER BY \n            case\n              when gender='boy' then 'male'\n              else 'female'\n            end\n             ASC"  # noqa: E501
+            "ORDER BY \n            case\n              when gender='boy' then 'male'\n              else 'female'\n            end\n             ASC"
             in sql
         )
+
+
+def test_is_readonly():
+    def is_readonly(sql: str) -> bool:
+        return BaseEngineSpec.is_readonly_query(ParsedQuery(sql))
+
+    assert is_readonly("SHOW LOCKS test EXTENDED")
+    assert not is_readonly("SET hivevar:desc='Legislators'")
+    assert not is_readonly("UPDATE t1 SET col1 = NULL")
+    assert is_readonly("EXPLAIN SELECT 1")
+    assert is_readonly("SELECT 1")
+    assert is_readonly("WITH (SELECT 1) bla SELECT * from bla")
+    assert is_readonly("SHOW CATALOGS")
+    assert is_readonly("SHOW TABLES")
 
 
 def test_time_grain_denylist():
@@ -432,7 +449,8 @@ def test_validate_parameters_missing():
         assert errors == [
             SupersetError(
                 message=(
-                    "One or more parameters are missing: database, host, port, username"
+                    "One or more parameters are missing: "
+                    "database, host, port, username"
                 ),
                 error_type=SupersetErrorType.CONNECTION_MISSING_PARAMETERS_ERROR,
                 level=ErrorLevel.WARNING,

@@ -36,9 +36,9 @@ import { recurseReactClone } from './utils';
 interface CRUDCollectionProps {
   allowAddItem?: boolean;
   allowDeletes?: boolean;
-  collection: Record<PropertyKey, any>[];
-  columnLabels?: Record<PropertyKey, any>;
-  columnLabelTooltips?: Record<PropertyKey, any>;
+  collection: Array<object>;
+  columnLabels?: object;
+  columnLabelTooltips?: object;
   emptyMessage?: ReactNode;
   expandFieldset?: ReactNode;
   extraButtons?: ReactNode;
@@ -58,8 +58,8 @@ interface CRUDCollectionProps {
     record: any,
   ) => ReactNode)[];
   onChange?: (arg0: any) => void;
-  tableColumns: any[];
-  sortColumns: string[];
+  tableColumns: Array<any>;
+  sortColumns: Array<string>;
   stickyHeader?: boolean;
 }
 
@@ -72,14 +72,14 @@ enum SortOrder {
 }
 
 interface CRUDCollectionState {
-  collection: Record<PropertyKey, any>;
-  collectionArray: Record<PropertyKey, any>[];
-  expandedColumns: Record<PropertyKey, any>;
+  collection: object;
+  collectionArray: Array<object>;
+  expandedColumns: object;
   sortColumn: string;
   sort: SortOrder;
 }
 
-function createCollectionArray(collection: Record<PropertyKey, any>) {
+function createCollectionArray(collection: object) {
   return Object.keys(collection).map(k => collection[k]);
 }
 
@@ -89,7 +89,7 @@ function createKeyedCollection(arr: Array<object>) {
     id: o.id || nanoid(),
   }));
 
-  const collection: Record<PropertyKey, any> = {};
+  const collection = {};
   collectionArray.forEach((o: any) => {
     collection[o.id] = o;
   });
@@ -152,9 +152,6 @@ const StyledButtonWrapper = styled.span`
   ${({ theme }) => `
     margin-top: ${theme.gridUnit * 3}px;
     margin-left: ${theme.gridUnit * 3}px;
-    button>span>:first-of-type {
-      margin-right: 0;
-    }
   `}
 `;
 
@@ -304,8 +301,7 @@ export default class CRUDCollection extends PureComponent<
 
         // newly ordered collection
         const sorted = [...this.state.collectionArray].sort(
-          (a: Record<PropertyKey, any>, b: Record<PropertyKey, any>) =>
-            compareSort(a[col], b[col]),
+          (a: object, b: object) => compareSort(a[col], b[col]),
         );
         const newCollection =
           sort === SortOrder.Asc ? sorted : sorted.reverse();
@@ -403,8 +399,6 @@ export default class CRUDCollection extends PureComponent<
             role="button"
             aria-label="Toggle expand"
             tabIndex={0}
-            // TODO: Remove fa-icon
-            // eslint-disable-next-line icons/no-fa-icons-usage
             className={`fa fa-caret-${
               isExpanded ? 'down' : 'right'
             } text-primary pointer`}
@@ -421,7 +415,7 @@ export default class CRUDCollection extends PureComponent<
       )),
     );
     if (allowAddItem) {
-      tds.push(<td key="add" aria-label="Add" />);
+      tds.push(<td key="add" />);
     }
     if (allowDeletes) {
       tds.push(
@@ -430,14 +424,13 @@ export default class CRUDCollection extends PureComponent<
           data-test="crud-delete-option"
           className="text-primary"
         >
-          <Icons.DeleteOutlined
+          <Icons.Trash
             aria-label="Delete item"
             className="pointer"
             data-test="crud-delete-icon"
             role="button"
             tabIndex={0}
             onClick={this.deleteItem.bind(this, record.id)}
-            iconSize="l"
           />
         </td>,
       );
@@ -490,10 +483,7 @@ export default class CRUDCollection extends PureComponent<
                 onClick={this.onAddItem}
                 data-test="add-item-button"
               >
-                <Icons.PlusOutlined
-                  iconSize="m"
-                  data-test="crud-add-table-item"
-                />
+                <i data-test="crud-add-table-item" className="fa fa-plus" />{' '}
                 {t('Add item')}
               </Button>
             </StyledButtonWrapper>

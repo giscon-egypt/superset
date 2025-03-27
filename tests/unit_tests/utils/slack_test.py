@@ -153,12 +153,7 @@ The server responded with: missing scope: channels:read"""
     def test_filter_channels_by_specified_types(self, mocker):
         mock_data = {
             "channels": [
-                {
-                    "id": "C12345",
-                    "name": "general",
-                    "is_member": False,
-                    "is_private": False,
-                },
+                {"name": "general", "id": "C12345", "type": "public"},
             ],
             "response_metadata": {"next_cursor": None},
         }
@@ -169,14 +164,7 @@ The server responded with: missing scope: channels:read"""
         mocker.patch("superset.utils.slack.get_slack_client", return_value=mock_client)
 
         result = get_channels_with_search(types=["public"])
-        assert result == [
-            {
-                "id": "C12345",
-                "name": "general",
-                "is_member": False,
-                "is_private": False,
-            }
-        ]
+        assert result == [{"name": "general", "id": "C12345", "type": "public"}]
 
     def test_handle_pagination_multiple_pages(self, mocker):
         mock_data_page1 = {

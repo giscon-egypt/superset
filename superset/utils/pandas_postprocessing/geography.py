@@ -40,7 +40,7 @@ def geohash_decode(
     try:
         lonlat_df = DataFrame()
         lonlat_df["latitude"], lonlat_df["longitude"] = zip(
-            *df[geohash].apply(geohash_lib.decode), strict=False
+            *df[geohash].apply(geohash_lib.decode)
         )
         return _append_columns(
             df, lonlat_df, {"latitude": latitude, "longitude": longitude}
@@ -109,7 +109,7 @@ def geodetic_parse(
             geodetic_df["latitude"],
             geodetic_df["longitude"],
             geodetic_df["altitude"],
-        ) = zip(*df[geodetic].apply(_parse_location), strict=False)
+        ) = zip(*df[geodetic].apply(_parse_location))
         columns = {"latitude": latitude, "longitude": longitude}
         if altitude:
             columns["altitude"] = altitude

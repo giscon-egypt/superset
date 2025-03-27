@@ -86,7 +86,7 @@ def upgrade():
                         del params[field]
 
                 slc.params = json.dumps(params, sort_keys=True)
-        except Exception:  # noqa: S110
+        except Exception:
             pass
 
     session.commit()

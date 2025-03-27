@@ -50,15 +50,13 @@ import type {
   CursorPosition,
 } from 'src/SqlLab/types';
 import type { DatabaseObject } from 'src/features/databases/types';
-import { debounce, throttle, isEmpty } from 'lodash';
+import { debounce, throttle, isBoolean, isEmpty } from 'lodash';
 import Modal from 'src/components/Modal';
 import Mousetrap from 'mousetrap';
 import Button from 'src/components/Button';
 import Timer from 'src/components/Timer';
 import ResizableSidebar from 'src/components/ResizableSidebar';
-import { Dropdown } from 'src/components/Dropdown';
-import { Skeleton } from 'src/components';
-import { Switch } from 'src/components/Switch';
+import { AntdDropdown, AntdSwitch, Skeleton } from 'src/components';
 import { Input } from 'src/components/Input';
 import { Menu } from 'src/components/Menu';
 import Icons from 'src/components/Icons';
@@ -101,7 +99,7 @@ import {
   LocalStorageKeys,
   setItem,
 } from 'src/utils/localStorageHelpers';
-import { EmptyState } from 'src/components/EmptyState';
+import { EmptyStateBig } from 'src/components/EmptyState';
 import Alert from 'src/components/Alert';
 import getBootstrapData from 'src/utils/getBootstrapData';
 import useLogAction from 'src/logger/useLogAction';
@@ -282,10 +280,9 @@ const SqlEditor: FC<Props> = ({
     if (unsavedQueryEditor?.id === queryEditor.id) {
       dbId = unsavedQueryEditor.dbId || dbId;
       latestQueryId = unsavedQueryEditor.latestQueryId || latestQueryId;
-      hideLeftBar =
-        typeof unsavedQueryEditor.hideLeftBar === 'boolean'
-          ? unsavedQueryEditor.hideLeftBar
-          : hideLeftBar;
+      hideLeftBar = isBoolean(unsavedQueryEditor.hideLeftBar)
+        ? unsavedQueryEditor.hideLeftBar
+        : hideLeftBar;
     }
     return {
       hasSqlStatement: Boolean(queryEditor.sql?.trim().length > 0),
@@ -486,28 +483,20 @@ const SqlEditor: FC<Props> = ({
           const cursorPosition = editor.getCursorPosition();
           const totalLine = session.getLength();
           const currentRow = editor.getFirstVisibleRow();
-          const semicolonEnd = editor.find(';', {
+          let end = editor.find(';', {
             backwards: false,
             skipCurrent: true,
-          });
-          let end;
-          if (semicolonEnd) {
-            ({ end } = semicolonEnd);
-          }
+          })?.end;
           if (!end || end.row < cursorPosition.row) {
             end = {
               row: totalLine + 1,
               column: 0,
             };
           }
-          const semicolonStart = editor.find(';', {
+          let start = editor.find(';', {
             backwards: true,
             skipCurrent: true,
-          });
-          let start;
-          if (semicolonStart) {
-            start = semicolonStart.end;
-          }
+          })?.end;
           let currentLine = start?.row;
           if (
             !currentLine ||
@@ -709,7 +698,7 @@ const SqlEditor: FC<Props> = ({
         <Menu.Item css={{ display: 'flex', justifyContent: 'space-between' }}>
           {' '}
           <span>{t('Render HTML')}</span>{' '}
-          <Switch
+          <AntdSwitch
             checked={renderHTMLEnabled}
             onChange={handleToggleRenderHTMLEnabled}
           />{' '}
@@ -717,7 +706,7 @@ const SqlEditor: FC<Props> = ({
         <Menu.Item css={{ display: 'flex', justifyContent: 'space-between' }}>
           {' '}
           <span>{t('Autocomplete')}</span>{' '}
-          <Switch
+          <AntdSwitch
             checked={autocompleteEnabled}
             onChange={handleToggleAutocompleteEnabled}
           />{' '}
@@ -869,14 +858,9 @@ const SqlEditor: FC<Props> = ({
               <span>
                 <ShareSqlLabQuery queryEditorId={queryEditor.id} />
               </span>
-              <Dropdown
-                dropdownRender={() => renderDropdown()}
-                trigger={['click']}
-              >
-                <Button buttonSize="xsmall" type="link" showMarginRight={false}>
-                  <Icons.EllipsisOutlined />
-                </Button>
-              </Dropdown>
+              <AntdDropdown overlay={renderDropdown()} trigger={['click']}>
+                <Icons.MoreHoriz iconColor={theme.colors.grayscale.base} />
+              </AntdDropdown>
             </div>
           </>
         )}
@@ -982,9 +966,8 @@ const SqlEditor: FC<Props> = ({
           <Skeleton active />
         </div>
       ) : showEmptyState && !hasSqlStatement ? (
-        <EmptyState
+        <EmptyStateBig
           image="vector.svg"
-          size="large"
           title={t('Select a database to write a query')}
           description={t(
             'Choose one of the available databases from the panel on the left.',

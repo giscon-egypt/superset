@@ -22,21 +22,14 @@ import { EditableTabs } from 'src/components/Tabs';
 import { connect } from 'react-redux';
 import URI from 'urijs';
 import type { QueryEditor, SqlLabRootState } from 'src/SqlLab/types';
-import {
-  FeatureFlag,
-  styled,
-  t,
-  isFeatureEnabled,
-  css,
-} from '@superset-ui/core';
+import { FeatureFlag, styled, t, isFeatureEnabled } from '@superset-ui/core';
 import { Logger } from 'src/logger/LogUtils';
 import { Tooltip } from 'src/components/Tooltip';
 import { detectOS } from 'src/utils/common';
 import * as Actions from 'src/SqlLab/actions/sqlLab';
-import { EmptyState } from 'src/components/EmptyState';
+import { EmptyStateBig } from 'src/components/EmptyState';
 import getBootstrapData from 'src/utils/getBootstrapData';
 import { locationContext } from 'src/pages/SqlLab/LocationContext';
-import Icons from 'src/components/Icons';
 import SqlEditor from '../SqlEditor';
 import SqlEditorTabHeader from '../SqlEditorTabHeader';
 
@@ -84,7 +77,6 @@ class TabbedSqlEditors extends PureComponent<TabbedSqlEditorsProps> {
     // the reducer.
     const bootstrapData = getBootstrapData();
     const queryParameters = URI(window.location).search(true);
-    const path = URI(window.location).path();
     const {
       id,
       name,
@@ -104,13 +96,10 @@ class TabbedSqlEditors extends PureComponent<TabbedSqlEditorsProps> {
       ...bootstrapData.requested_query,
       ...queryParameters,
     } as Record<string, string>;
-    const permalink = path.match(/\/p\/\w+/)?.[0].slice(3);
 
     // Popping a new tab based on the querystring
-    if (permalink || id || sql || savedQueryId || datasourceKey || queryId) {
-      if (permalink) {
-        this.props.actions.popPermalink(permalink);
-      } else if (id) {
+    if (id || sql || savedQueryId || datasourceKey || queryId) {
+      if (id) {
         this.props.actions.popStoredQuery(id);
       } else if (savedQueryId) {
         this.props.actions.popSavedQuery(savedQueryId);
@@ -143,7 +132,7 @@ class TabbedSqlEditors extends PureComponent<TabbedSqlEditorsProps> {
         };
         this.props.actions.addQueryEditor(newQueryEditor);
       }
-      this.popNewTab(pick(urlParams, Object.keys(queryParameters ?? {})));
+      this.popNewTab(pick(urlParams, Object.keys(queryParameters)));
     } else if (isNewQuery || this.props.queryEditors.length === 0) {
       this.newQueryEditor();
 
@@ -254,13 +243,7 @@ class TabbedSqlEditors extends PureComponent<TabbedSqlEditorsProps> {
               : t('New tab (Ctrl + t)')
           }
         >
-          <Icons.PlusCircleOutlined
-            iconSize="s"
-            css={css`
-              vertical-align: middle;
-            `}
-            data-test="add-tab-icon"
-          />
+          <i data-test="add-tab-icon" className="fa fa-plus-circle" />
         </Tooltip>
       </StyledTab>
     );
@@ -272,9 +255,8 @@ class TabbedSqlEditors extends PureComponent<TabbedSqlEditorsProps> {
         tab={emptyTab}
         closable={false}
       >
-        <EmptyState
+        <EmptyStateBig
           image="empty_sql_chart.svg"
-          size="large"
           description={t('Add a new tab to create SQL Query')}
         />
       </EditableTabs.TabPane>
@@ -302,13 +284,7 @@ class TabbedSqlEditors extends PureComponent<TabbedSqlEditorsProps> {
                 : t('New tab (Ctrl + t)')
             }
           >
-            <Icons.PlusCircleOutlined
-              iconSize="l"
-              css={css`
-                vertical-align: middle;
-              `}
-              data-test="add-tab-icon"
-            />
+            <i data-test="add-tab-icon" className="fa fa-plus-circle" />
           </Tooltip>
         }
       >

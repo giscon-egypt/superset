@@ -31,8 +31,7 @@ import {
 } from 'react';
 import { isEqual } from 'lodash';
 import { StaticMap } from 'react-map-gl';
-import DeckGL from '@deck.gl/react';
-import type { Layer } from '@deck.gl/core';
+import DeckGL, { Layer } from 'deck.gl/typed';
 import { JsonObject, JsonValue, styled, usePrevious } from '@superset-ui/core';
 import Tooltip, { TooltipProps } from './components/Tooltip';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -113,6 +112,7 @@ export const DeckGLContainer = memo(
             height={height}
             layers={layers()}
             viewState={viewState}
+            glOptions={{ preserveDrawingBuffer: true }}
             onViewStateChange={onViewStateChange}
           >
             <StaticMap

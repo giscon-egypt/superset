@@ -20,10 +20,10 @@ import { AriaAttributes } from 'react';
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only';
-import 'enzyme-matchers';
+import 'jest-enzyme';
 import jQuery from 'jquery';
-import Enzyme from 'enzyme';
-import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
+import { configure } from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
 // https://jestjs.io/docs/jest-object#jestmockmodulename-factory-options
 // in order to mock modules in test case, so avoid absolute import module
 import { configure as configureTranslation } from '../../packages/superset-ui-core/src/translation';
@@ -33,17 +33,16 @@ import { ResizeObserver } from './ResizeObserver';
 import setupSupersetClient from './setupSupersetClient';
 import CacheStorage from './CacheStorage';
 
-Enzyme.configure({ adapter: new Adapter() });
+configure({ adapter: new Adapter() });
 
 const exposedProperties = ['window', 'navigator', 'document'];
 
 const { defaultView } = document;
 if (defaultView != null) {
   Object.keys(defaultView).forEach(property => {
-    if (typeof global[property as keyof typeof global] === 'undefined') {
+    if (typeof global[property] === 'undefined') {
       exposedProperties.push(property);
-      // @ts-ignore due to string-type index signature doesn't apply for `typeof globalThis`.
-      global[property] = defaultView[property as keyof typeof defaultView];
+      global[property] = defaultView[property];
     }
   });
 }
@@ -111,22 +110,13 @@ jest.mock('src/components/Icons/Icon', () => ({
     />
   ),
   StyledIcon: ({
-    component: Component,
     role,
     'aria-label': ariaLabel,
     ...rest
   }: {
-    component: React.ComponentType<any>;
     role: string;
     'aria-label': AriaAttributes['aria-label'];
-  }) => (
-    <Component
-      role={role ?? 'img'}
-      alt={ariaLabel}
-      aria-label={ariaLabel}
-      {...rest}
-    />
-  ),
+  }) => <span role={role ?? 'img'} aria-label={ariaLabel} {...rest} />,
 }));
 
 process.env.WEBPACK_MODE = 'test';

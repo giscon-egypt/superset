@@ -72,6 +72,7 @@ from superset.sql.parse import SQLScript
 from superset.sql_parse import (
     has_table_query,
     insert_rls_in_predicate,
+    ParsedQuery,
     sanitize_clause,
 )
 from superset.superset_typing import (
@@ -174,17 +175,11 @@ def convert_uuids(obj: Any) -> Any:
     return obj
 
 
-class UUIDMixin:  # pylint: disable=too-few-public-methods
+class ImportExportMixin:
     uuid = sa.Column(
         UUIDType(binary=True), primary_key=False, unique=True, default=uuid.uuid4
     )
 
-    @property
-    def short_uuid(self) -> str:
-        return str(self.uuid)[:8]
-
-
-class ImportExportMixin(UUIDMixin):
     export_parent: Optional[str] = None
     # The name of the attribute
     # with the SQL Alchemy back reference
@@ -259,7 +254,7 @@ class ImportExportMixin(UUIDMixin):
         return schema
 
     @classmethod
-    def import_from_dict(  # noqa: C901
+    def import_from_dict(
         # pylint: disable=too-many-arguments,too-many-branches,too-many-locals
         cls,
         dict_rep: dict[Any, Any],
@@ -335,13 +330,13 @@ class ImportExportMixin(UUIDMixin):
             is_new_obj = True
             # Create new DB object
             obj = cls(**dict_rep)
-            logger.debug("Importing new %s %s", obj.__tablename__, str(obj))
+            logger.info("Importing new %s %s", obj.__tablename__, str(obj))
             if cls.export_parent and parent:
                 setattr(obj, cls.export_parent, parent)
             db.session.add(obj)
         else:
             is_new_obj = False
-            logger.debug("Updating %s %s", obj.__tablename__, str(obj))
+            logger.info("Updating %s %s", obj.__tablename__, str(obj))
             # Update columns
             for k, v in dict_rep.items():
                 setattr(obj, k, v)
@@ -372,7 +367,7 @@ class ImportExportMixin(UUIDMixin):
                         db.session.query(child_class).filter(and_(*delete_filters))
                     ).difference(set(added))
                     for o in to_delete:
-                        logger.debug("Deleting %s %s", child, str(obj))
+                        logger.info("Deleting %s %s", child, str(obj))
                         db.session.delete(o)
 
         return obj
@@ -722,8 +717,6 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
     }
     fetch_values_predicate = None
 
-    normalize_columns = False
-
     @property
     def type(self) -> str:
         raise NotImplementedError()
@@ -885,12 +878,7 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
         mutate: bool = True,
     ) -> QueryStringExtended:
         sqlaq = self.get_sqla_query(**query_obj)
-        sql = self.database.compile_sqla_query(
-            sqlaq.sqla_query,
-            catalog=self.catalog,
-            schema=self.schema,
-            is_virtual=bool(self.sql),
-        )
+        sql = self.database.compile_sqla_query(sqlaq.sqla_query)
         sql = self._apply_cte(sql, sqlaq.cte)
 
         if mutate:
@@ -1051,9 +1039,6 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
         """
         Render sql with template engine (Jinja).
         """
-        if not self.sql:
-            return ""
-
         sql = self.sql.strip("\t\r\n; ")
         if template_processor:
             try:
@@ -1087,9 +1072,13 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
         or a virtual table with it's own subquery. If the FROM is referencing a
         CTE, the CTE is returned as the second value in the return tuple.
         """
+
         from_sql = self.get_rendered_sql(template_processor) + "\n"
-        parsed_script = SQLScript(from_sql, engine=self.db_engine_spec.engine)
-        if parsed_script.has_mutation():
+        parsed_query = ParsedQuery(from_sql, engine=self.db_engine_spec.engine)
+        if not (
+            parsed_query.is_unknown()
+            or self.db_engine_spec.is_readonly_query(parsed_query)
+        ):
             raise QueryObjectValidationError(
                 _("Virtual dataset query must be read-only")
             )
@@ -1145,7 +1134,7 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
         return {}
 
     @staticmethod
-    def filter_values_handler(  # pylint: disable=too-many-arguments  # noqa: C901
+    def filter_values_handler(  # pylint: disable=too-many-arguments
         values: Optional[FilterValues],
         operator: str,
         target_generic_type: utils.GenericDataType,
@@ -1380,7 +1369,7 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
             if engine.dialect.identifier_preparer._double_percents:
                 sql = sql.replace("%%", "%")
 
-            df = pd.read_sql_query(sql=self.text(sql), con=engine)
+            df = pd.read_sql_query(sql=sql, con=engine)
             # replace NaN with None to ensure it can be serialized to JSON
             df = df.replace({np.nan: None})
             return df["column_values"].to_list()
@@ -1432,7 +1421,7 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
         col = self.make_sqla_column_compatible(col, label)
         return col
 
-    def get_sqla_query(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,too-many-statements  # noqa: C901
+    def get_sqla_query(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,too-many-statements
         self,
         apply_fetch_values_predicate: bool = False,
         columns: Optional[list[Column]] = None,
@@ -1566,7 +1555,7 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
 
         # Since orderby may use adhoc metrics, too; we need to process them first
         orderby_exprs: list[ColumnElement] = []
-        for orig_col, ascending in orderby:  # noqa: B007
+        for orig_col, ascending in orderby:
             col: Union[AdhocMetric, ColumnElement] = orig_col
             if isinstance(col, dict):
                 col = cast(AdhocMetric, col)
@@ -1978,7 +1967,7 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
 
         self.make_orderby_compatible(select_exprs, orderby_exprs)
 
-        for col, (_orig_col, ascending) in zip(orderby_exprs, orderby, strict=False):  # noqa: B007
+        for col, (orig_col, ascending) in zip(orderby_exprs, orderby):
             if not db_engine_spec.allows_alias_in_orderby and isinstance(col, Label):
                 # if engine does not allow using SELECT alias in ORDER BY
                 # revert to the underlying column

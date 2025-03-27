@@ -117,9 +117,6 @@ export function getDataRecordFormatter({
     if (typeof value === 'string') {
       return value;
     }
-    if (typeof value === 'bigint') {
-      return String(value);
-    }
     if (timeFormatter && dtype === GenericDataType.Temporal) {
       return timeFormatter(value);
     }

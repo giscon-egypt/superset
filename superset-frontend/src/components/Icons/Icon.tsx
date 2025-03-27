@@ -18,14 +18,39 @@
  */
 
 import { FC, SVGProps, useEffect, useRef, useState } from 'react';
+import AntdIcon from '@ant-design/icons';
+import { styled } from '@superset-ui/core';
 import TransparentIcon from 'src/assets/images/icons/transparent.svg';
-import { IconType } from './types';
-import { BaseIconComponent } from './BaseIcon';
+import IconType from './IconType';
 
-export const Icon = (props: IconType) => {
+const AntdIconComponent = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  iconColor,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  iconSize,
+  viewBox,
+  ...rest
+}: Omit<IconType, 'ref' | 'css'>) => (
+  <AntdIcon viewBox={viewBox || '0 0 24 24'} {...rest} />
+);
+
+export const StyledIcon = styled(AntdIconComponent)<IconType>`
+  ${({ iconColor }) => iconColor && `color: ${iconColor};`};
+  font-size: ${({ iconSize, theme }) =>
+    iconSize
+      ? `${theme.typography.sizes[iconSize] || theme.typography.sizes.m}px`
+      : '24px'};
+`;
+
+export interface IconProps extends IconType {
+  fileName: string;
+}
+
+export const Icon = (props: IconProps) => {
+  const { fileName, ...iconProps } = props;
   const [, setLoaded] = useState(false);
   const ImportedSVG = useRef<FC<SVGProps<SVGSVGElement>>>();
-  const { fileName } = props;
+  const name = fileName.replace('_', '-');
 
   useEffect(() => {
     let cancelled = false;
@@ -43,10 +68,14 @@ export const Icon = (props: IconType) => {
     };
   }, [fileName, ImportedSVG]);
 
+  const whatRole = props?.onClick ? 'button' : 'img';
+
   return (
-    <BaseIconComponent
+    <StyledIcon
       component={ImportedSVG.current || TransparentIcon}
-      {...props}
+      aria-label={name}
+      role={whatRole}
+      {...iconProps}
     />
   );
 };

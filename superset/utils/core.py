@@ -74,7 +74,6 @@ from sqlalchemy.types import TypeEngine
 from typing_extensions import TypeGuard
 
 from superset.constants import (
-    DEFAULT_USER_AGENT,
     EXTRA_FORM_DATA_APPEND_KEYS,
     EXTRA_FORM_DATA_OVERRIDE_EXTRA_KEYS,
     EXTRA_FORM_DATA_OVERRIDE_REGULAR_MAPPINGS,
@@ -104,7 +103,6 @@ from superset.utils.hashing import md5_sha_from_dict, md5_sha_from_str
 
 if TYPE_CHECKING:
     from superset.connectors.sqla.models import BaseDatasource, TableColumn
-    from superset.models.core import Database
     from superset.models.sql_lab import Query
 
 logging.getLogger("MARKDOWN").setLevel(logging.INFO)
@@ -281,14 +279,14 @@ class QuerySource(Enum):
 class QueryStatus(StrEnum):
     """Enum-type class for query statuses"""
 
-    STOPPED = "stopped"
-    FAILED = "failed"
-    PENDING = "pending"
-    RUNNING = "running"
-    SCHEDULED = "scheduled"
-    SUCCESS = "success"
-    FETCHING = "fetching"
-    TIMED_OUT = "timed_out"
+    STOPPED: str = "stopped"
+    FAILED: str = "failed"
+    PENDING: str = "pending"
+    RUNNING: str = "running"
+    SCHEDULED: str = "scheduled"
+    SUCCESS: str = "success"
+    FETCHING: str = "fetching"
+    TIMED_OUT: str = "timed_out"
 
 
 class DashboardStatus(StrEnum):
@@ -702,7 +700,7 @@ def send_email_smtp(  # pylint: disable=invalid-name,too-many-arguments,too-many
         'test@example.com', 'foo', '<b>Foo</b> bar',['/dev/null'], dryrun=True)
     """
     smtp_mail_from = config["SMTP_MAIL_FROM"]
-    smtp_mail_to = recipients_string_to_list(to)
+    smtp_mail_to = get_email_address_list(to)
 
     msg = MIMEMultipart(mime_subtype)
     msg["Subject"] = subject
@@ -713,14 +711,14 @@ def send_email_smtp(  # pylint: disable=invalid-name,too-many-arguments,too-many
 
     recipients = smtp_mail_to
     if cc:
-        smtp_mail_cc = recipients_string_to_list(cc)
+        smtp_mail_cc = get_email_address_list(cc)
         msg["Cc"] = ", ".join(smtp_mail_cc)
         recipients = recipients + smtp_mail_cc
 
     smtp_mail_bcc = []
     if bcc:
         # don't add bcc in header
-        smtp_mail_bcc = recipients_string_to_list(bcc)
+        smtp_mail_bcc = get_email_address_list(bcc)
         recipients = recipients + smtp_mail_bcc
 
     msg["Date"] = formatdate(localtime=True)
@@ -813,13 +811,7 @@ def send_mime_email(
     smtp.quit()
 
 
-def recipients_string_to_list(address_string: str | None) -> list[str]:
-    """
-    Returns the list of target recipients for alerts and reports.
-
-    Strips values and converts a comma/semicolon separated
-    string into a list.
-    """
+def get_email_address_list(address_string: str) -> list[str]:
     address_string_list: list[str] = []
     if isinstance(address_string, str):
         address_string_list = re.split(r",|\s|;", address_string)
@@ -889,7 +881,7 @@ def form_data_to_adhoc(form_data: dict[str, Any], clause: str) -> AdhocFilterCla
     return result
 
 
-def merge_extra_form_data(form_data: dict[str, Any]) -> None:  # noqa: C901
+def merge_extra_form_data(form_data: dict[str, Any]) -> None:
     """
     Merge extra form data (appends and overrides) into the main payload
     and add applied time extras to the payload.
@@ -927,13 +919,14 @@ def merge_extra_form_data(form_data: dict[str, Any]) -> None:  # noqa: C901
         "adhoc_filters", []
     )
     adhoc_filters.extend(
-        {"isExtra": True, **adhoc_filter} for adhoc_filter in append_adhoc_filters
+        {"isExtra": True, **adhoc_filter}  # type: ignore
+        for adhoc_filter in append_adhoc_filters
     )
     if append_filters:
         for key, value in form_data.items():
             if re.match("adhoc_filter.*", key):
                 value.extend(
-                    simple_filter_to_adhoc({"isExtra": True, **fltr})
+                    simple_filter_to_adhoc({"isExtra": True, **fltr})  # type: ignore
                     for fltr in append_filters
                     if fltr
                 )
@@ -943,7 +936,7 @@ def merge_extra_form_data(form_data: dict[str, Any]) -> None:  # noqa: C901
                 adhoc_filter["comparator"] = form_data["time_range"]
 
 
-def merge_extra_filters(form_data: dict[str, Any]) -> None:  # noqa: C901
+def merge_extra_filters(form_data: dict[str, Any]) -> None:
     # extra_filters are temporary/contextual filters (using the legacy constructs)
     # that are external to the slice definition. We use those for dynamic
     # interactive filters.
@@ -1292,19 +1285,6 @@ def get_user_email() -> str | None:
         return None
 
 
-def get_user_roles() -> list[str] | None:
-    """
-    Get the roles (if defined) associated with the current user.
-
-    :returns: The sorted list of roles
-    """
-
-    try:
-        return sorted([role.name for role in g.user.roles])
-    except Exception:  # pylint: disable=broad-except
-        return None
-
-
 @contextmanager
 def override_user(user: User | None, force: bool = True) -> Iterator[Any]:
     """
@@ -1386,11 +1366,11 @@ def time_function(
     return (stop - start) * 1000.0, response
 
 
-def MediumText() -> Variant:  # pylint:disable=invalid-name  # noqa: N802
+def MediumText() -> Variant:  # pylint:disable=invalid-name
     return Text().with_variant(MEDIUMTEXT(), "mysql")
 
 
-def LongText() -> Variant:  # pylint:disable=invalid-name  # noqa: N802
+def LongText() -> Variant:  # pylint:disable=invalid-name
     return Text().with_variant(LONGTEXT(), "mysql")
 
 
@@ -1679,7 +1659,7 @@ class DateColumn:
 
 def normalize_dttm_col(
     df: pd.DataFrame,
-    dttm_cols: tuple[DateColumn, ...] = tuple(),  # noqa: C408
+    dttm_cols: tuple[DateColumn, ...] = tuple(),
 ) -> None:
     for _col in dttm_cols:
         if _col.col_label not in df.columns:
@@ -1695,26 +1675,18 @@ def normalize_dttm_col(
                     utc=False,
                     unit=unit,
                     origin="unix",
-                    errors="coerce",
+                    errors="raise",
                     exact=False,
                 )
             else:
                 # Column has already been formatted as a timestamp.
-                try:
-                    df[_col.col_label] = dttm_series.apply(
-                        lambda x: pd.Timestamp(x) if pd.notna(x) else pd.NaT
-                    )
-                except ValueError:
-                    logger.warning(
-                        "Unable to convert column %s to datetime, ignoring",
-                        _col.col_label,
-                    )
+                df[_col.col_label] = dttm_series.apply(pd.Timestamp)
         else:
             df[_col.col_label] = pd.to_datetime(
                 df[_col.col_label],
                 utc=False,
                 format=_col.timestamp_format,
-                errors="coerce",
+                errors="raise",
                 exact=False,
             )
         if _col.offset:
@@ -1824,23 +1796,3 @@ def to_int(v: Any, value_if_invalid: int = 0) -> int:
         return int(v)
     except (ValueError, TypeError):
         return value_if_invalid
-
-
-def get_query_source_from_request() -> QuerySource | None:
-    if not request or not request.referrer:
-        return None
-    if "/superset/dashboard/" in request.referrer:
-        return QuerySource.DASHBOARD
-    if "/explore/" in request.referrer:
-        return QuerySource.CHART
-    if "/sqllab/" in request.referrer:
-        return QuerySource.SQL_LAB
-    return None
-
-
-def get_user_agent(database: Database, source: QuerySource | None) -> str:
-    source = source or get_query_source_from_request()
-    if user_agent_func := current_app.config["USER_AGENT_FUNC"]:
-        return user_agent_func(database, source)
-
-    return DEFAULT_USER_AGENT

@@ -66,15 +66,13 @@ def test_get_table_comment_empty(mocker: MockerFixture):
     )
 
 
-def test_get_prequeries(mocker: MockerFixture) -> None:
+def test_get_prequeries() -> None:
     """
     Test the ``get_prequeries`` method.
     """
     from superset.db_engine_specs.db2 import Db2EngineSpec
 
-    database = mocker.MagicMock()
-
-    assert Db2EngineSpec.get_prequeries(database) == []
-    assert Db2EngineSpec.get_prequeries(database, schema="my_schema") == [
+    assert Db2EngineSpec.get_prequeries() == []
+    assert Db2EngineSpec.get_prequeries(schema="my_schema") == [
         'set current_schema "my_schema"'
     ]

@@ -17,24 +17,11 @@
  * under the License.
  */
 
-import { ConfigType } from 'dayjs';
-import Tag from 'src/types/TagType';
-import Owner from './Owner';
-
 export interface TaggedObject {
-  id: number;
-  type: string;
-  name: string;
-  url: string;
-  changed_on: ConfigType;
-  created_by: number | undefined;
-  creator: string;
-  owners: Owner[];
-  tags: Tag[];
+  id: string | number;
+  tag_id: number;
+  object_id: number;
+  object_type: number;
 }
 
-export interface TaggedObjects {
-  dashboard: TaggedObject[];
-  chart: TaggedObject[];
-  query: TaggedObject[];
-}
+export default TaggedObject;

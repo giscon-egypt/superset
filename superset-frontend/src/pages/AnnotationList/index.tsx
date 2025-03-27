@@ -22,12 +22,11 @@ import { useParams, Link, useHistory } from 'react-router-dom';
 import {
   css,
   t,
-  useTheme,
   styled,
   SupersetClient,
   getClientErrorObject,
 } from '@superset-ui/core';
-import dayjs from 'dayjs';
+import moment from 'moment';
 import rison from 'rison';
 
 import ActionsBar, { ActionProps } from 'src/components/ListView/ActionsBar';
@@ -41,7 +40,6 @@ import { createErrorHandler } from 'src/views/CRUD/utils';
 
 import { AnnotationObject } from 'src/features/annotations/types';
 import AnnotationModal from 'src/features/annotations/AnnotationModal';
-import Icons from 'src/components/Icons';
 
 const PAGE_SIZE = 25;
 
@@ -69,7 +67,6 @@ function AnnotationList({
   addDangerToast,
   addSuccessToast,
 }: AnnotationListProps) {
-  const theme = useTheme();
   const { annotationLayerId }: any = useParams();
   const {
     state: {
@@ -173,9 +170,7 @@ function AnnotationList({
           row: {
             original: { start_dttm: startDttm },
           },
-        }: {
-          row: { original: AnnotationObject };
-        }) => dayjs(new Date(startDttm)).format('ll'),
+        }: any) => moment(new Date(startDttm)).format('ll'),
         Header: t('Start'),
         accessor: 'start_dttm',
       },
@@ -184,18 +179,12 @@ function AnnotationList({
           row: {
             original: { end_dttm: endDttm },
           },
-        }: {
-          row: { original: AnnotationObject };
-        }) => dayjs(new Date(endDttm)).format('ll'),
+        }: any) => moment(new Date(endDttm)).format('ll'),
         Header: t('End'),
         accessor: 'end_dttm',
       },
       {
-        Cell: ({
-          row: { original },
-        }: {
-          row: { original: AnnotationObject };
-        }) => {
+        Cell: ({ row: { original } }: any) => {
           const handleEdit = () => handleAnnotationEdit(original);
           const handleDelete = () => setAnnotationCurrentlyDeleting(original);
           const actions = [
@@ -203,14 +192,14 @@ function AnnotationList({
               label: 'edit-action',
               tooltip: t('Edit annotation'),
               placement: 'bottom',
-              icon: 'EditOutlined',
+              icon: 'Edit',
               onClick: handleEdit,
             },
             {
               label: 'delete-action',
               tooltip: t('Delete annotation'),
               placement: 'bottom',
-              icon: 'DeleteOutlined',
+              icon: 'Trash',
               onClick: handleDelete,
             },
           ];
@@ -229,15 +218,7 @@ function AnnotationList({
   subMenuButtons.push({
     name: (
       <>
-        <Icons.PlusOutlined
-          iconColor={theme.colors.primary.light5}
-          iconSize="m"
-          css={css`
-            margin: auto ${theme.gridUnit * 2}px auto 0;
-            vertical-align: text-top;
-          `}
-        />
-        {t('Annotation')}
+        <i className="fa fa-plus" /> {t('Annotation')}
       </>
     ),
     buttonStyle: 'primary',
@@ -270,15 +251,7 @@ function AnnotationList({
     },
     buttonText: (
       <>
-        <Icons.PlusOutlined
-          iconColor={theme.colors.primary.light5}
-          iconSize="m"
-          css={css`
-            margin: auto ${theme.gridUnit * 2}px auto 0;
-            vertical-align: text-top;
-          `}
-        />
-        {t('Annotation')}
+        <i className="fa fa-plus" /> {t('Annotation')}
       </>
     ),
   };

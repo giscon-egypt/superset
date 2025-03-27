@@ -22,12 +22,12 @@ from enum import Enum
 
 from superset.utils.backports import StrEnum
 
-DEFAULT_USER_AGENT = "Apache Superset"
+USER_AGENT = "Apache Superset"
 
 NULL_STRING = "<NULL>"
 EMPTY_STRING = "<empty string>"
 
-CHANGE_ME_SECRET_KEY = "CHANGE_ME_TO_A_COMPLEX_RANDOM_SECRET"  # noqa: S105
+CHANGE_ME_SECRET_KEY = "CHANGE_ME_TO_A_COMPLEX_RANDOM_SECRET"
 
 # UUID for the examples database
 EXAMPLES_DB_UUID = "a2dc77af-e654-49bb-b321-40f6b559a1ee"
@@ -169,11 +169,10 @@ MODEL_API_RW_METHOD_PERMISSION_MAP = {
     "delete_object": "write",
     "copy_dash": "write",
     "get_connection": "write",
-    "upload_metadata": "upload",
+    "excel_metadata": "excel_upload",
+    "columnar_metadata": "columnar_upload",
+    "csv_metadata": "csv_upload",
     "slack_channels": "write",
-    "put_filters": "write",
-    "put_colors": "write",
-    "sync_permissions": "write",
 }
 
 EXTRA_FORM_DATA_APPEND_KEYS = {

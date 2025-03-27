@@ -18,12 +18,8 @@
  */
 
 import { FC } from 'react';
-import {
-  render,
-  waitFor,
-  screen,
-  userEvent,
-} from 'spec/helpers/testing-library';
+import { render, waitFor, screen } from 'spec/helpers/testing-library';
+import userEvent from '@testing-library/user-event';
 import type { TimezoneSelectorProps } from './index';
 
 const loadComponent = (mockCurrentTime?: string) => {
@@ -60,7 +56,7 @@ test('render timezones in correct order for daylight saving time', async () => {
 
   // first option is always current timezone
   expect(options[0]).toHaveTextContent('GMT -04:00 (Eastern Daylight Time)');
-  expect(options[1]).toHaveTextContent('GMT -11:00 (Pacific/Midway)');
-  expect(options[2]).toHaveTextContent('GMT -11:00 (Pacific/Niue)');
-  expect(options[3]).toHaveTextContent('GMT -11:00 (Pacific/Pago_Pago)');
+  expect(options[1]).toHaveTextContent('GMT -11:00 (Pacific/Pago_Pago)');
+  expect(options[2]).toHaveTextContent('GMT -10:00 (Hawaii Standard Time)');
+  expect(options[3]).toHaveTextContent('GMT -09:30 (Pacific/Marquesas)');
 });

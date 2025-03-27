@@ -47,7 +47,6 @@ from superset.tags.schemas import (
     openapi_spec_methods_override,
     TaggedObjectEntityResponseSchema,
     TagGetResponseSchema,
-    TagPostBulkResponseSchema,
     TagPostBulkSchema,
     TagPostSchema,
     TagPutSchema,
@@ -133,8 +132,6 @@ class TagRestApi(BaseSupersetModelRestApi):
     openapi_spec_component_schemas = (
         TagGetResponseSchema,
         TaggedObjectEntityResponseSchema,
-        TagPostBulkResponseSchema,
-        TagPostBulkSchema,
     )
     apispec_parameter_schemas = {
         "delete_tags_schema": delete_tags_schema,
@@ -146,8 +143,8 @@ class TagRestApi(BaseSupersetModelRestApi):
         """Deterministic string representation of the API instance for etag_cache."""
         return (
             "Superset.tags.api.TagRestApi@v"
-            f"{self.appbuilder.app.config['VERSION_STRING']}"
-            f"{self.appbuilder.app.config['VERSION_SHA']}"
+            f'{self.appbuilder.app.config["VERSION_STRING"]}'
+            f'{self.appbuilder.app.config["VERSION_SHA"]}'
         )
 
     @expose("/", methods=("POST",))
@@ -214,21 +211,40 @@ class TagRestApi(BaseSupersetModelRestApi):
         """Bulk create tags and tagged objects
         ---
         post:
-          summary: Bulk create tags and tagged objects
+          summary: Get all objects associated with a tag
+          parameters:
+          - in: path
+            schema:
+              type: integer
+            name: tag_id
           requestBody:
             description: Tag schema
             required: true
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/TagPostBulkSchema'
+                  type: object
+                  properties:
+                    tags:
+                      description: list of tag names to add to object
+                      type: array
+                      items:
+                        type: string
+                    objects_to_tag:
+                      description: list of object names to add to object
+                      type: array
+                      items:
+                        type: array
           responses:
             200:
-              description: Bulk created tags and tagged objects
+              description: Tag added to favorites
               content:
                 application/json:
                   schema:
-                    $ref: '#/components/schemas/TagPostBulkResponseSchema'
+                    type: object
+                    properties:
+                      result:
+                        type: object
             302:
               description: Redirects to the current digest
             400:
@@ -251,7 +267,6 @@ class TagRestApi(BaseSupersetModelRestApi):
                 tagged_item: dict[str, Any] = self.add_model_schema.load(
                     {
                         "name": tag.get("name"),
-                        "description": tag.get("description"),
                         "objects_to_tag": tag.get("objects_to_tag"),
                     }
                 )
@@ -653,7 +668,8 @@ class TagRestApi(BaseSupersetModelRestApi):
     @safe
     @statsd_metrics
     @event_logger.log_this_with_context(
-        action=lambda self, *args, **kwargs: f"{self.__class__.__name__}.add_favorite",
+        action=lambda self, *args, **kwargs: f"{self.__class__.__name__}"
+        f".add_favorite",
         log_to_statsd=False,
     )
     def add_favorite(self, pk: int) -> Response:

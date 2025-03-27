@@ -18,13 +18,11 @@
  */
 import { FunctionComponent, useState, useRef, ChangeEvent } from 'react';
 
-import SchemaForm, { FormProps } from '@rjsf/core';
-import { FormValidation } from '@rjsf/utils';
-import validator from '@rjsf/validator-ajv8';
+import SchemaForm, { FormProps, FormValidation } from 'react-jsonschema-form';
 import { Row, Col } from 'src/components';
 import { Input, TextArea } from 'src/components/Input';
 import { t, styled } from '@superset-ui/core';
-import { parseDate } from 'chrono-node';
+import * as chrono from 'chrono-node';
 import ModalTrigger, { ModalTriggerRef } from 'src/components/ModalTrigger';
 import { Form, FormItem } from 'src/components/Form';
 import Button from 'src/components/Button';
@@ -47,10 +45,11 @@ const getJSONSchema = () => {
     Object.entries(jsonSchema.properties).forEach(
       ([key, value]: [string, any]) => {
         if (value.default && value.format === 'date-time') {
-          const parsedDate = parseDate(value.default);
           jsonSchema.properties[key] = {
             ...value,
-            default: parsedDate ? parsedDate.toISOString() : null,
+            default: value.default
+              ? chrono.parseDate(value.default)?.toISOString()
+              : null,
           };
         }
       },
@@ -68,11 +67,11 @@ const getValidator = () => {
   const rules: any = getValidationRules();
   return (formData: Record<string, any>, errors: FormValidation) => {
     rules.forEach((rule: any) => {
-      const test = validators[rule.name as keyof typeof validators];
+      const test = validators[rule.name];
       const args = rule.arguments.map((name: string) => formData[name]);
       const container = rule.container || rule.arguments.slice(-1)[0];
-      if (!test(args[0], args[1])) {
-        errors[container]?.addError(rule.message);
+      if (!test(...args)) {
+        errors[container].addError(rule.message);
       }
     });
     return errors;
@@ -152,7 +151,7 @@ const ScheduleQueryButton: FunctionComponent<ScheduleQueryButtonProps> = ({
   const onScheduleSubmit = ({
     formData,
   }: {
-    formData?: Omit<FormProps<Record<string, any>>, 'schema'>;
+    formData: Omit<FormProps<Record<string, any>>, 'schema'>;
   }) => {
     const query = {
       label,
@@ -203,8 +202,7 @@ const ScheduleQueryButton: FunctionComponent<ScheduleQueryButtonProps> = ({
               schema={getJSONSchema()}
               uiSchema={getUISchema()}
               onSubmit={onScheduleSubmit}
-              customValidate={getValidator()}
-              validator={validator}
+              validate={getValidator()}
             >
               <Button
                 buttonStyle="primary"

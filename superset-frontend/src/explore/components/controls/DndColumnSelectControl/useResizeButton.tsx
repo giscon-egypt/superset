@@ -132,8 +132,6 @@ export default function useResizeButton(
   }, [onMouseUp]);
 
   return [
-    // TODO: Remove fa-icon
-    // eslint-disable-next-line icons/no-fa-icons-usage
     <i
       role="button"
       aria-label="Resize"

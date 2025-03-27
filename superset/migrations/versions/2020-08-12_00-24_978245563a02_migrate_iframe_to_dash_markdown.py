@@ -121,7 +121,7 @@ def upgrade():
         )
         for i, dashboard in enumerate(dashboards):
             print(
-                f"scanning dashboard ({i + 1}/{len(dashboards)}) dashboard: {dashboard.id} >>>>"  # noqa: E501
+                f"scanning dashboard ({i + 1}/{len(dashboards)}) dashboard: {dashboard.id} >>>>"
             )
 
             # remove iframe slices from dashboard

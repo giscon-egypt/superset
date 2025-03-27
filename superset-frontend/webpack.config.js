@@ -32,7 +32,6 @@ const {
 } = require('webpack-manifest-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const parsedArgs = require('yargs').argv;
-const Visualizer = require('webpack-visualizer-plugin2');
 const getProxyConfig = require('./webpack.proxy-config');
 const packageConfig = require('./package');
 
@@ -46,6 +45,8 @@ const {
   mode = 'development',
   devserverPort = 9000,
   measure = false,
+  analyzeBundle = false,
+  analyzerPort = 8888,
   nameChunks = false,
 } = parsedArgs;
 const isDevMode = mode !== 'production';
@@ -155,8 +156,18 @@ if (!isDevMode) {
     }),
   );
 
-  // Runs type checking on a separate process to speed up the build
-  plugins.push(new ForkTsCheckerWebpackPlugin());
+  plugins.push(
+    // runs type checking on a separate process to speed up the build
+    new ForkTsCheckerWebpackPlugin({
+      eslint: {
+        files: './{src,packages,plugins}/**/*.{ts,tsx,js,jsx}',
+        memoryLimit: 4096,
+        options: {
+          ignorePath: './.eslintignore',
+        },
+      },
+    }),
+  );
 }
 
 const PREAMBLE = [path.join(APP_DIR, '/src/preamble.ts')];
@@ -230,9 +241,6 @@ const config = {
     {
       message:
         /export 'withTooltipPropTypes' \(imported as 'vxTooltipPropTypes'\) was not found/,
-    },
-    {
-      message: /Can't resolve.*superset_text/,
     },
   ],
   performance: {
@@ -506,7 +514,7 @@ const config = {
     'react/lib/ReactContext': true,
   },
   plugins,
-  devtool: isDevMode ? 'eval-cheap-module-source-map' : false,
+  devtool: 'source-map',
 };
 
 // find all the symlinked plugins and use their source code for imports
@@ -521,24 +529,27 @@ Object.entries(packageConfig.dependencies).forEach(([pkg, relativeDir]) => {
 });
 console.log(''); // pure cosmetic new line
 
+let proxyConfig = getProxyConfig();
+
 if (isDevMode) {
-  let proxyConfig = getProxyConfig();
-  // Set up a plugin to handle manifest updates
-  config.plugins = config.plugins || [];
-  config.plugins.push({
-    apply: compiler => {
-      const { afterEmit } = getCompilerHooks(compiler);
+  config.devtool = 'eval-cheap-module-source-map';
+  config.devServer = {
+    onBeforeSetupMiddleware(devServer) {
+      // load proxy config when manifest updates
+      const { afterEmit } = getCompilerHooks(devServer.compiler);
       afterEmit.tap('ManifestPlugin', manifest => {
         proxyConfig = getProxyConfig(manifest);
       });
     },
-  });
-
-  config.devServer = {
     historyApiFallback: true,
     hot: true,
     port: devserverPort,
-    proxy: [() => proxyConfig],
+    // Only serves bundled files from webpack-dev-server
+    // and proxy everything else to Superset backend
+    proxy: [
+      // functions are called for every request
+      () => proxyConfig,
+    ],
     client: {
       overlay: {
         errors: true,
@@ -547,25 +558,15 @@ if (isDevMode) {
       },
       logging: 'error',
     },
-    static: {
-      directory: path.join(process.cwd(), '../static/assets'),
-    },
+    static: path.join(process.cwd(), '../static/assets'),
   };
 }
 
-// To
-// e.g. npm run package-stats
-if (process.env.BUNDLE_ANALYZER) {
-  config.plugins.push(new BundleAnalyzerPlugin({ analyzerMode: 'static' }));
-  config.plugins.push(
-    // this creates an HTML page with a sunburst diagram of dependencies.
-    // you'll find it at superset/static/stats/statistics.html
-    // note that the file is >100MB so it's in .gitignore
-    new Visualizer({
-      filename: path.join('..', 'stats', 'statistics.html'),
-      throwOnError: true,
-    }),
-  );
+// Bundle analyzer is disabled by default
+// Pass flag --analyzeBundle=true to enable
+// e.g. npm run build -- --analyzeBundle=true
+if (analyzeBundle) {
+  config.plugins.push(new BundleAnalyzerPlugin({ analyzerPort }));
 }
 
 // Speed measurement is disabled by default

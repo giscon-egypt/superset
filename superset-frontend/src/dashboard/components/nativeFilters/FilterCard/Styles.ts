@@ -33,7 +33,7 @@ export const Row = styled.div`
       margin-bottom: 0;
     }
 
-    & .antd5-tooltip-open {
+    & .ant-tooltip-open {
       display: inline-flex;
     }
   `};
@@ -44,6 +44,7 @@ export const RowLabel = styled.span`
     color: ${theme.colors.grayscale.base};
     padding-right: ${theme.gridUnit * 4}px;
     margin-right: auto;
+    text-transform: uppercase;
     white-space: nowrap;
   `};
 `;

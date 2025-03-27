@@ -140,7 +140,6 @@ def diagnose(spec: type[BaseEngineSpec]) -> dict[str, Any]:
             "user_impersonation": (
                 has_custom_method(spec, "update_impersonation_config")
                 or has_custom_method(spec, "get_url_for_impersonation")
-                or has_custom_method(spec, "impersonate_user")
             ),
             "file_upload": spec.supports_file_upload,
             "get_extra_table_metadata": has_custom_method(
@@ -223,7 +222,7 @@ def generate_table() -> list[list[Any]]:
 
     rows = []  # pylint: disable=redefined-outer-name
     rows.append(["Feature"] + list(info))  # header row
-    rows.append(["Module"] + list(db_info["module"] for db_info in info.values()))  # noqa: C400
+    rows.append(["Module"] + list(db_info["module"] for db_info in info.values()))
 
     # descriptive
     keys = [
@@ -244,14 +243,14 @@ def generate_table() -> list[list[Any]]:
     ]
     for key in keys:
         rows.append(
-            [DATABASE_DETAILS[key]] + list(db_info[key] for db_info in info.values())  # noqa: C400
+            [DATABASE_DETAILS[key]] + list(db_info[key] for db_info in info.values())
         )
 
     # basic
     for time_grain in TimeGrain:
         rows.append(
             [f"Has time grain {time_grain.name}"]
-            + list(db_info["time_grains"][time_grain.name] for db_info in info.values())  # noqa: C400
+            + list(db_info["time_grains"][time_grain.name] for db_info in info.values())
         )
     keys = [
         "masked_encrypted_extra",
@@ -260,7 +259,7 @@ def generate_table() -> list[list[Any]]:
     ]
     for key in keys:
         rows.append(
-            [BASIC_FEATURES[key]] + list(db_info[key] for db_info in info.values())  # noqa: C400
+            [BASIC_FEATURES[key]] + list(db_info[key] for db_info in info.values())
         )
 
     # nice to have
@@ -281,7 +280,7 @@ def generate_table() -> list[list[Any]]:
     for key in keys:
         rows.append(
             [NICE_TO_HAVE_FEATURES[key]]
-            + list(db_info[key] for db_info in info.values())  # noqa: C400
+            + list(db_info[key] for db_info in info.values())
         )
 
     # advanced
@@ -292,10 +291,10 @@ def generate_table() -> list[list[Any]]:
     ]
     for key in keys:
         rows.append(
-            [ADVANCED_FEATURES[key]] + list(db_info[key] for db_info in info.values())  # noqa: C400
+            [ADVANCED_FEATURES[key]] + list(db_info[key] for db_info in info.values())
         )
 
-    rows.append(["Score"] + list(db_info["score"] for db_info in info.values()))  # noqa: C400
+    rows.append(["Score"] + list(db_info["score"] for db_info in info.values()))
 
     return rows
 

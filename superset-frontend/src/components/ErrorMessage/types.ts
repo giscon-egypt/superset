@@ -25,7 +25,6 @@ export type ErrorMessageComponentProps<ExtraType = Record<string, any> | null> =
     error: SupersetError<ExtraType>;
     source?: ErrorSource;
     subtitle?: ReactNode;
-    compact?: boolean;
   };
 
 export type ErrorMessageComponent = ComponentType<ErrorMessageComponentProps>;

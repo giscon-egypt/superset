@@ -17,12 +17,10 @@
  * under the License.
  */
 import { PureComponent, Fragment } from 'react';
-import { withTheme } from '@emotion/react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { addAlpha, css, styled, t } from '@superset-ui/core';
-import { EmptyState } from 'src/components/EmptyState';
-import Icons from 'src/components/Icons';
+import { EmptyStateBig } from 'src/components/EmptyState';
 import { componentShape } from '../util/propShapes';
 import DashboardComponent from '../containers/DashboardComponent';
 import { Droppable } from './dnd/DragDroppable';
@@ -58,6 +56,7 @@ const GridContent = styled.div`
   ${({ theme, editMode }) => css`
     display: flex;
     flex-direction: column;
+
     /* gutters between rows */
     & > div:not(:last-child):not(.empty-droptarget) {
       ${!editMode && `margin-bottom: ${theme.gridUnit * 4}px`};
@@ -125,7 +124,7 @@ class DashboardGrid extends PureComponent {
     this.state = {
       isResizing: false,
     };
-    this.theme = this;
+
     this.handleResizeStart = this.handleResizeStart.bind(this);
     this.handleResizeStop = this.handleResizeStop.bind(this);
     this.handleTopDropTargetDrop = this.handleTopDropTargetDrop.bind(this);
@@ -155,12 +154,8 @@ class DashboardGrid extends PureComponent {
     }));
   }
 
-  handleResizeStop(_event, _direction, _elementRef, delta, id) {
-    this.props.resizeComponent({
-      id,
-      width: delta.width,
-      height: delta.height,
-    });
+  handleResizeStop({ id, widthMultiple: width, heightMultiple: height }) {
+    this.props.resizeComponent({ id, width, height });
 
     this.setState(() => ({
       isResizing: false,
@@ -195,7 +190,6 @@ class DashboardGrid extends PureComponent {
       canEdit,
       setEditMode,
       dashboardId,
-      theme,
     } = this.props;
     const columnPlusGutterWidth =
       (width + GRID_GUTTER_SIZE) / GRID_COLUMN_COUNT;
@@ -208,18 +202,14 @@ class DashboardGrid extends PureComponent {
       shouldDisplayEmptyState && gridComponent.type === TAB_TYPE;
 
     const dashboardEmptyState = editMode && (
-      <EmptyState
+      <EmptyStateBig
         title={t('Drag and drop components and charts to the dashboard')}
         description={t(
           'You can create a new chart or use existing ones from the panel on the right',
         )}
-        size="large"
         buttonText={
           <>
-            <Icons.PlusOutlined
-              iconSize="m"
-              iconColor={theme.colors.primary.light5}
-            />
+            <i className="fa fa-plus" />
             {t('Create a new chart')}
           </>
         }
@@ -235,18 +225,14 @@ class DashboardGrid extends PureComponent {
     );
 
     const topLevelTabEmptyState = editMode ? (
-      <EmptyState
+      <EmptyStateBig
         title={t('Drag and drop components to this tab')}
-        size="large"
         description={t(
           `You can create a new chart or use existing ones from the panel on the right`,
         )}
         buttonText={
           <>
-            <Icons.PlusOutlined
-              iconSize="m"
-              iconColor={theme.colors.primary.light5}
-            />
+            <i className="fa fa-plus" />
             {t('Create a new chart')}
           </>
         }
@@ -260,9 +246,8 @@ class DashboardGrid extends PureComponent {
         image="chart.svg"
       />
     ) : (
-      <EmptyState
+      <EmptyStateBig
         title={t('There are no components added to this tab')}
-        size="large"
         description={
           canEdit && t('You can add the components in the edit mode.')
         }
@@ -367,4 +352,4 @@ class DashboardGrid extends PureComponent {
 DashboardGrid.propTypes = propTypes;
 DashboardGrid.defaultProps = defaultProps;
 
-export default withTheme(DashboardGrid);
+export default DashboardGrid;

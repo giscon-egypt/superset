@@ -34,11 +34,11 @@ function getStatusColor(
     case AlertState.Success:
       return isReportEnabled
         ? theme.colors.success.base
-        : theme.colors.warning.base;
+        : theme.colors.alert.base;
     case AlertState.Noop:
       return theme.colors.success.base;
     case AlertState.Grace:
-      return theme.colors.warning.base;
+      return theme.colors.alert.base;
     default:
       return theme.colors.grayscale.base;
   }
@@ -53,15 +53,15 @@ export default function AlertStatusIcon({
 }) {
   const theme = useTheme();
   const lastStateConfig = {
-    icon: Icons.CheckOutlined,
+    icon: Icons.Check,
     label: '',
     status: '',
   };
   switch (state) {
     case AlertState.Success:
       lastStateConfig.icon = isReportEnabled
-        ? Icons.CheckOutlined
-        : Icons.WarningOutlined;
+        ? Icons.Check
+        : Icons.AlertSolidSmall;
       lastStateConfig.label = isReportEnabled
         ? t('Report sent')
         : t('Alert triggered, notification sent');
@@ -75,24 +75,24 @@ export default function AlertStatusIcon({
       lastStateConfig.status = AlertState.Working;
       break;
     case AlertState.Error:
-      lastStateConfig.icon = Icons.CloseOutlined;
+      lastStateConfig.icon = Icons.XSmall;
       lastStateConfig.label = isReportEnabled
         ? t('Report failed')
         : t('Alert failed');
       lastStateConfig.status = AlertState.Error;
       break;
     case AlertState.Noop:
-      lastStateConfig.icon = Icons.CheckOutlined;
+      lastStateConfig.icon = Icons.Check;
       lastStateConfig.label = t('Nothing triggered');
       lastStateConfig.status = AlertState.Noop;
       break;
     case AlertState.Grace:
-      lastStateConfig.icon = Icons.WarningOutlined;
+      lastStateConfig.icon = Icons.AlertSolidSmall;
       lastStateConfig.label = t('Alert Triggered, In Grace Period');
       lastStateConfig.status = AlertState.Grace;
       break;
     default:
-      lastStateConfig.icon = Icons.CheckOutlined;
+      lastStateConfig.icon = Icons.Check;
       lastStateConfig.label = t('Nothing triggered');
       lastStateConfig.status = AlertState.Noop;
   }
@@ -100,7 +100,6 @@ export default function AlertStatusIcon({
   return (
     <Tooltip title={lastStateConfig.label} placement="bottomLeft">
       <Icon
-        iconSize="m"
         iconColor={getStatusColor(
           lastStateConfig.status,
           isReportEnabled,

@@ -78,7 +78,6 @@ import {
   extractForecastValuesFromTooltipParams,
   formatForecastTooltipSeries,
   rebaseForecastDatum,
-  reorderForecastSeries,
 } from '../utils/forecast';
 import { convertInteger } from '../utils/convertInteger';
 import { defaultGrid, defaultYAxis } from '../defaults';
@@ -153,7 +152,6 @@ export default function transformProps(
     areaB,
     annotationLayers,
     colorScheme,
-    timeShiftColor,
     contributionMode,
     legendOrientation,
     legendType,
@@ -409,7 +407,6 @@ export default function transformProps(
         showValueIndexes: showValueIndexesA,
         totalStackedValues,
         thresholdValues,
-        timeShiftColor,
       },
     );
     if (transformedSeries) series.push(transformedSeries);
@@ -459,7 +456,6 @@ export default function transformProps(
         showValueIndexes: showValueIndexesB,
         totalStackedValues: totalStackedValuesB,
         thresholdValues: thresholdValuesB,
-        timeShiftColor,
       },
     );
     if (transformedSeries) series.push(transformedSeries);
@@ -518,9 +514,7 @@ export default function transformProps(
       minorTick: { show: minorTicks },
       minInterval:
         xAxisType === AxisType.Time && timeGrainSqla
-          ? TIMEGRAIN_TO_TIMESTAMP[
-              timeGrainSqla as keyof typeof TIMEGRAIN_TO_TIMESTAMP
-            ]
+          ? TIMEGRAIN_TO_TIMESTAMP[timeGrainSqla]
           : 0,
       ...getMinAndMaxFromBounds(
         xAxisType,
@@ -664,7 +658,7 @@ export default function transformProps(
         .map(entry => entry.name || '')
         .concat(extractAnnotationLabels(annotationLayers, annotationData)),
     },
-    series: dedupSeries(reorderForecastSeries(series) as SeriesOption[]),
+    series: dedupSeries(series),
     toolbox: {
       show: zoomable,
       top: TIMESERIES_CONSTANTS.toolboxTop,

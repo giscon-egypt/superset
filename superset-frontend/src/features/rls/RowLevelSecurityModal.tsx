@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { css, styled, SupersetClient, useTheme, t } from '@superset-ui/core';
+import {
+  css,
+  styled,
+  SupersetClient,
+  SupersetTheme,
+  t,
+} from '@superset-ui/core';
 import Modal from 'src/components/Modal';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Icons from 'src/components/Icons';
@@ -34,7 +40,7 @@ import { FilterType, RLSObject, RoleObject, TableObject } from './types';
 const noMargins = css`
   margin: 0;
 
-  .antd5-input {
+  .ant-input {
     margin: 0;
   }
 `;
@@ -43,58 +49,60 @@ const StyledModal = styled(Modal)`
   max-width: 1200px;
   min-width: min-content;
   width: 100%;
-  .antd5-modal-footer {
+  .ant-modal-footer {
     white-space: nowrap;
   }
 `;
 
-const StyledSectionContainer = styled.div`
-  ${({ theme }) => css`
-    display: flex;
-    flex-direction: column;
-    padding: ${theme.gridUnit * 3}px ${theme.gridUnit * 4}px
-      ${theme.gridUnit * 2}px;
-
-    label,
-    .control-label {
-      display: flex;
-      font-size: ${theme.typography.sizes.s}px;
-      color: ${theme.colors.grayscale.base};
-      align-items: center;
-    }
-
-    .info-solid-small {
-      vertical-align: middle;
-      padding-bottom: ${theme.gridUnit / 2}px;
-    }
-  `}
+const StyledIcon = (theme: SupersetTheme) => css`
+  margin: auto ${theme.gridUnit * 2}px auto 0;
+  color: ${theme.colors.grayscale.base};
 `;
+
+const StyledSectionContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: ${({ theme }) =>
+    `${theme.gridUnit * 3}px ${theme.gridUnit * 4}px ${theme.gridUnit * 2}px`};
+
+  label,
+  .control-label {
+    display: inline-block;
+    font-size: ${({ theme }) => theme.typography.sizes.s}px;
+    color: ${({ theme }) => theme.colors.grayscale.base};
+    vertical-align: middle;
+  }
+
+  .info-solid-small {
+    vertical-align: middle;
+    padding-bottom: ${({ theme }) => theme.gridUnit / 2}px;
+  }
+`;
+
 const StyledInputContainer = styled.div`
-  ${({ theme }) => css`
+  display: flex;
+  flex-direction: column;
+  margin: ${({ theme }) => theme.gridUnit}px;
+  margin-bottom: ${({ theme }) => theme.gridUnit * 4}px;
+
+  .input-container {
     display: flex;
-    flex-direction: column;
-    margin: ${theme.gridUnit}px;
-    margin-bottom: ${theme.gridUnit * 4}px;
+    align-items: center;
 
-    .input-container {
-      display: flex;
-      align-items: center;
-
-      > div {
-        width: 100%;
-      }
+    > div {
+      width: 100%;
     }
+  }
 
-    input,
-    textarea {
-      flex: 1 1 auto;
-    }
+  input,
+  textarea {
+    flex: 1 1 auto;
+  }
 
-    .required {
-      margin-left: ${theme.gridUnit / 2}px;
-      color: ${theme.colors.error.base};
-    }
-  `}
+  .required {
+    margin-left: ${({ theme }) => theme.gridUnit / 2}px;
+    color: ${({ theme }) => theme.colors.error.base};
+  }
 `;
 
 const StyledTextArea = styled(TextArea)`
@@ -111,7 +119,7 @@ export interface RowLevelSecurityModalProps {
   show: boolean;
 }
 
-const DEFAULT_RULE = {
+const DEAFULT_RULE = {
   name: '',
   filter_type: FilterType.Regular,
   tables: [],
@@ -122,11 +130,10 @@ const DEFAULT_RULE = {
 };
 
 function RowLevelSecurityModal(props: RowLevelSecurityModalProps) {
-  const theme = useTheme();
   const { rule, addDangerToast, addSuccessToast, onHide, show } = props;
 
   const [currentRule, setCurrentRule] = useState<RLSObject>({
-    ...DEFAULT_RULE,
+    ...DEAFULT_RULE,
   });
   const [disableSave, setDisableSave] = useState<boolean>(true);
 
@@ -197,7 +204,7 @@ function RowLevelSecurityModal(props: RowLevelSecurityModalProps) {
   // initialize
   useEffect(() => {
     if (!isEditMode) {
-      setCurrentRule({ ...DEFAULT_RULE });
+      setCurrentRule({ ...DEAFULT_RULE });
     } else if (rule?.id !== null && !loading && !fetchError) {
       fetchResource(rule.id as number);
     }
@@ -242,7 +249,7 @@ function RowLevelSecurityModal(props: RowLevelSecurityModalProps) {
 
   const hide = () => {
     clearError();
-    setCurrentRule({ ...DEFAULT_RULE });
+    setCurrentRule({ ...DEAFULT_RULE });
     onHide();
   };
 
@@ -335,18 +342,9 @@ function RowLevelSecurityModal(props: RowLevelSecurityModalProps) {
       title={
         <h4 data-test="rls-modal-title">
           {isEditMode ? (
-            <Icons.EditOutlined
-              css={css`
-                margin: auto ${theme.gridUnit * 2}px auto 0;
-              `}
-            />
+            <Icons.EditAlt css={StyledIcon} />
           ) : (
-            <Icons.PlusOutlined
-              iconSize="l"
-              css={css`
-                margin: auto ${theme.gridUnit * 2}px auto 0;
-              `}
-            />
+            <Icons.PlusLarge css={StyledIcon} />
           )}
           {isEditMode ? t('Edit Rule') : t('Add Rule')}
         </h4>

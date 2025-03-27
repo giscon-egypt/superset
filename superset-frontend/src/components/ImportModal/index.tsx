@@ -18,8 +18,7 @@
  */
 import { FunctionComponent, useEffect, useState, ChangeEvent } from 'react';
 
-// eslint-disable-next-line no-restricted-imports
-import { UploadChangeParam, UploadFile } from 'antd/lib/upload/interface'; // TODO: Remove antd
+import { UploadChangeParam, UploadFile } from 'antd/lib/upload/interface';
 import { styled, t } from '@superset-ui/core';
 
 import Button from 'src/components/Button';

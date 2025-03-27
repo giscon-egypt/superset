@@ -16,10 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import ReactMarkdown from 'react-markdown';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
-import { mergeWith } from 'lodash';
+import { mergeWith, isArray } from 'lodash';
 import { FeatureFlag, isFeatureEnabled } from '../utils';
 
 interface SafeMarkdownProps {
@@ -33,7 +35,7 @@ export function getOverrideHtmlSchema(
   htmlSchemaOverrides: SafeMarkdownProps['htmlSchemaOverrides'],
 ) {
   return mergeWith(originalSchema, htmlSchemaOverrides, (objValue, srcValue) =>
-    Array.isArray(objValue) ? objValue.concat(srcValue) : undefined,
+    isArray(objValue) ? objValue.concat(srcValue) : undefined,
   );
 }
 
@@ -43,21 +45,11 @@ function SafeMarkdown({
   htmlSchemaOverrides = {},
 }: SafeMarkdownProps) {
   const escapeHtml = isFeatureEnabled(FeatureFlag.EscapeMarkdownHtml);
-  const [rehypeRawPlugin, setRehypeRawPlugin] = useState<any>(null);
-  const [ReactMarkdown, setReactMarkdown] = useState<any>(null);
-  useEffect(() => {
-    Promise.all([import('rehype-raw'), import('react-markdown')]).then(
-      ([rehypeRaw, ReactMarkdown]) => {
-        setRehypeRawPlugin(() => rehypeRaw.default);
-        setReactMarkdown(() => ReactMarkdown.default);
-      },
-    );
-  }, []);
 
   const rehypePlugins = useMemo(() => {
     const rehypePlugins: any = [];
-    if (!escapeHtml && rehypeRawPlugin) {
-      rehypePlugins.push(rehypeRawPlugin);
+    if (!escapeHtml) {
+      rehypePlugins.push(rehypeRaw);
       if (htmlSanitization) {
         const schema = getOverrideHtmlSchema(
           defaultSchema,
@@ -67,11 +59,7 @@ function SafeMarkdown({
       }
     }
     return rehypePlugins;
-  }, [escapeHtml, htmlSanitization, htmlSchemaOverrides, rehypeRawPlugin]);
-
-  if (!ReactMarkdown || !rehypeRawPlugin) {
-    return null;
-  }
+  }, [escapeHtml, htmlSanitization, htmlSchemaOverrides]);
 
   // React Markdown escapes HTML by default
   return (

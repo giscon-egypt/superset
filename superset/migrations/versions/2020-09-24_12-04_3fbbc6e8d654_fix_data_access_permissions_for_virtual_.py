@@ -142,7 +142,7 @@ class SqlaTable(Base):
         return f"[{self.database}].[{self.table_name}](id:{self.id})"
 
 
-def upgrade():  # noqa: C901
+def upgrade():
     """
     Previous sqla_viz behaviour when creating a virtual dataset was faulty
     by creating an associated data access permission with [None] on the database name.

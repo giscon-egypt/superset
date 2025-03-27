@@ -17,8 +17,7 @@
  * under the License.
  */
 import { css, styled } from '@superset-ui/core';
-// eslint-disable-next-line no-restricted-imports
-import AntdTabs, { TabsProps as AntdTabsProps } from 'antd/lib/tabs'; // TODO: Remove antd
+import AntdTabs, { TabsProps as AntdTabsProps } from 'antd/lib/tabs';
 import Icons from 'src/components/Icons';
 
 export interface TabsProps extends AntdTabsProps {
@@ -75,6 +74,7 @@ const StyledTabs = ({
         justify-content: center;
         font-size: ${theme.typography.sizes.s}px;
         text-align: center;
+        text-transform: uppercase;
         user-select: none;
         .required {
           margin-left: ${theme.gridUnit / 2}px;
@@ -122,7 +122,7 @@ const StyledEditableTabs = styled(StyledTabs)`
   `}
 `;
 
-const StyledCloseOutlined = styled(Icons.CloseOutlined)`
+const StyledCancelXIcon = styled(Icons.CancelX)`
   color: ${({ theme }) => theme.colors.grayscale.base};
 `;
 export const EditableTabs = Object.assign(StyledEditableTabs, {
@@ -136,7 +136,7 @@ EditableTabs.defaultProps = {
 };
 
 EditableTabs.TabPane.defaultProps = {
-  closeIcon: <StyledCloseOutlined iconSize="s" role="button" tabIndex={0} />,
+  closeIcon: <StyledCancelXIcon role="button" tabIndex={0} />,
 };
 
 export const StyledLineEditableTabs = styled(EditableTabs)`

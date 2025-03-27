@@ -18,12 +18,8 @@
  */
 
 import fetchMock from 'fetch-mock';
-import {
-  render,
-  screen,
-  userEvent,
-  waitFor,
-} from 'spec/helpers/testing-library';
+import userEvent from '@testing-library/user-event';
+import { render, screen, waitFor } from 'spec/helpers/testing-library';
 import { ChartListChart, getMockChart } from 'spec/fixtures/mockCharts';
 import ToastContainer from 'src/components/MessageToasts/ToastContainer';
 import DatasetUsage from '.';
@@ -106,9 +102,7 @@ test('shows loading state', async () => {
     name: /loading/i,
   });
 
-  await waitFor(() => {
-    expect(loadingIndicator).toBeVisible();
-  });
+  expect(loadingIndicator).toBeVisible();
 });
 
 test('shows error state', async () => {

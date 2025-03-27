@@ -20,7 +20,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { shallowEqual, useSelector } from 'react-redux';
 import { useInView } from 'react-intersection-observer';
 import { omit } from 'lodash';
-import { EmptyState } from 'src/components/EmptyState';
+import { EmptyStateMedium } from 'src/components/EmptyState';
 import {
   t,
   styled,
@@ -42,7 +42,7 @@ interface QueryHistoryProps {
 
 const StyledEmptyStateWrapper = styled.div`
   height: 100%;
-  .antd5-empty-image img {
+  .ant-empty-image img {
     margin-right: 28px;
   }
 
@@ -143,9 +143,8 @@ const QueryHistory = ({
     </>
   ) : (
     <StyledEmptyStateWrapper>
-      <EmptyState
+      <EmptyStateMedium
         title={t('Run a query to display query history')}
-        size="medium"
         image="document.svg"
       />
     </StyledEmptyStateWrapper>

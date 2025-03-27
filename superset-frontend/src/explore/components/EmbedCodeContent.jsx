@@ -93,8 +93,6 @@ const EmbedCodeContent = ({ formData, addDangerToast }) => {
           text={html}
           copyNode={
             <CopyButtonEmbedCode buttonSize="xsmall">
-              {/* TODO: Remove fa-icon */}
-              {/* eslint-disable-next-line icons/no-fa-icons-usage */}
               <i className="fa fa-clipboard" />
             </CopyButtonEmbedCode>
           }

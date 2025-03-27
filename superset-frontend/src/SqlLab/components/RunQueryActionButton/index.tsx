@@ -18,7 +18,7 @@
  */
 import { useMemo, FC, ReactElement } from 'react';
 
-import { t, styled, useTheme, SupersetTheme } from '@superset-ui/core';
+import { t, styled, useTheme } from '@superset-ui/core';
 
 import Button from 'src/components/Button';
 import Icons from 'src/components/Icons';
@@ -44,13 +44,11 @@ export interface RunQueryActionButtonProps {
 const buildText = (
   shouldShowStopButton: boolean,
   selectedText: string | undefined,
-  theme: SupersetTheme,
 ): string | JSX.Element => {
   if (shouldShowStopButton) {
     return (
       <>
-        <Icons.Square iconSize="xs" iconColor={theme.colors.primary.light5} />
-        {t('Stop')}
+        <i className="fa fa-stop" /> {t('Stop')}
       </>
     );
   }
@@ -150,12 +148,13 @@ const RunQueryActionButton = ({
           ? {
               overlay: overlayCreateAsMenu,
               icon: (
-                <Icons.DownOutlined
+                <Icons.CaretDown
                   iconColor={
                     isDisabled
                       ? theme.colors.grayscale.base
                       : theme.colors.grayscale.light5
                   }
+                  name="caret-down"
                 />
               ),
               trigger: 'click',
@@ -164,7 +163,7 @@ const RunQueryActionButton = ({
               buttonStyle: shouldShowStopBtn ? 'warning' : 'primary',
             })}
       >
-        {buildText(shouldShowStopBtn, selectedText, theme)}
+        {buildText(shouldShowStopBtn, selectedText)}
       </ButtonComponent>
     </StyledButton>
   );

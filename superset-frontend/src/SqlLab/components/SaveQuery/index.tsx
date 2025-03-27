@@ -57,7 +57,7 @@ export type QueryPayload = {
 } & Pick<QueryEditor, 'dbId' | 'catalog' | 'schema' | 'sql'>;
 
 const Styles = styled.span`
-  span[role='img']:not([aria-label='down']) {
+  span[role='img'] {
     display: flex;
     margin: 0;
     color: ${({ theme }) => theme.colors.grayscale.base};

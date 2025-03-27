@@ -14,8 +14,6 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import logging
-
 import pandas as pd
 from sqlalchemy import DateTime, inspect, String
 
@@ -31,8 +29,6 @@ from .helpers import (
     get_table_connector_registry,
     merge_slice,
 )
-
-logger = logging.getLogger(__name__)
 
 
 def load_random_time_series_data(
@@ -63,10 +59,10 @@ def load_random_time_series_data(
                 dtype={"ds": DateTime if database.backend != "presto" else String(255)},
                 index=False,
             )
-        logger.debug("Done loading table!")
-        logger.debug("-" * 80)
+        print("Done loading table!")
+        print("-" * 80)
 
-    logger.debug(f"Creating table [{tbl_name}] reference")
+    print(f"Creating table [{tbl_name}] reference")
     table = get_table_connector_registry()
     obj = db.session.query(table).filter_by(table_name=tbl_name).first()
     if not obj:
@@ -89,7 +85,7 @@ def load_random_time_series_data(
         "subdomain_granularity": "day",
     }
 
-    logger.debug("Creating a slice")
+    print("Creating a slice")
     slc = Slice(
         slice_name="Calendar Heatmap",
         viz_type="cal_heatmap",

@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Menu } from 'src/components/Menu';
-import { MenuDotsDropdown, MenuDotsDropdownProps } from '.';
+import { Dropdown, DropdownProps } from '.';
 
 export default {
   title: 'Dropdown',
@@ -50,8 +50,8 @@ const customOverlay = (
 export const InteractiveDropdown = ({
   overlayType,
   ...rest
-}: MenuDotsDropdownProps & { overlayType: string }) => (
-  <MenuDotsDropdown
+}: DropdownProps & { overlayType: string }) => (
+  <Dropdown
     {...rest}
     overlay={overlayType === 'custom' ? customOverlay : menu}
   />

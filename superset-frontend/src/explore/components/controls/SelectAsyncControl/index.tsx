@@ -21,8 +21,7 @@ import { t, SupersetClient, getClientErrorObject } from '@superset-ui/core';
 import ControlHeader from 'src/explore/components/ControlHeader';
 import { Select } from 'src/components';
 import { SelectOptionsType, SelectProps } from 'src/components/Select/types';
-// eslint-disable-next-line no-restricted-imports
-import { SelectValue, LabeledValue } from 'antd/lib/select'; // TODO: Remove antd
+import { SelectValue, LabeledValue } from 'antd/lib/select';
 import withToasts from 'src/components/MessageToasts/withToasts';
 
 type SelectAsyncProps = Omit<SelectProps, 'options' | 'ariaLabel' | 'onChange'>;
@@ -32,10 +31,7 @@ interface SelectAsyncControlProps extends SelectAsyncProps {
   ariaLabel?: string;
   dataEndpoint: string;
   default?: SelectValue;
-  mutator?: (
-    response: Record<string, any>,
-    value: SelectValue | undefined,
-  ) => SelectOptionsType;
+  mutator?: (response: Record<string, any>) => SelectOptionsType;
   multi?: boolean;
   onChange: (val: SelectValue) => void;
   // ControlHeader related props
@@ -61,7 +57,6 @@ const SelectAsyncControl = ({
   ...props
 }: SelectAsyncControlProps) => {
   const [options, setOptions] = useState<SelectOptionsType>([]);
-  const [loaded, setLoaded] = useState<Boolean>(false);
 
   const handleOnChange = (val: SelectValue) => {
     let onChangeVal = val;
@@ -97,20 +92,12 @@ const SelectAsyncControl = ({
         endpoint: dataEndpoint,
       })
         .then(response => {
-          const data = mutator
-            ? mutator(response.json, value)
-            : response.json.result;
+          const data = mutator ? mutator(response.json) : response.json.result;
           setOptions(data);
         })
-        .catch(onError)
-        .finally(() => {
-          setLoaded(true);
-        });
-
-    if (!loaded) {
-      loadOptions();
-    }
-  }, [addDangerToast, dataEndpoint, mutator, value, loaded]);
+        .catch(onError);
+    loadOptions();
+  }, [addDangerToast, dataEndpoint, mutator]);
 
   return (
     <Select

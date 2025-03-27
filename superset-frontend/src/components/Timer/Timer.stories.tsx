@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { extendedDayjs } from 'src/utils/dates';
+import moment from 'moment';
 import Timer, { TimerProps } from './index';
 
 export default {
@@ -32,7 +32,7 @@ InteractiveTimer.args = {
 
 InteractiveTimer.argTypes = {
   startTime: {
-    defaultValue: extendedDayjs().utc().valueOf(),
+    defaultValue: moment().utc().valueOf(),
     table: {
       disable: true,
     },

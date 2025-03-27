@@ -25,7 +25,7 @@ import { styledMount as mount } from 'spec/helpers/theming';
 
 import { QueryObject } from 'src/views/CRUD/types';
 import SyntaxHighlighter from 'react-syntax-highlighter/dist/cjs/light';
-import { act } from 'spec/helpers/testing-library';
+import { act } from 'react-dom/test-utils';
 import { QueryState } from '@superset-ui/core';
 import QueryPreviewModal from './QueryPreviewModal';
 
@@ -82,8 +82,8 @@ describe('QueryPreviewModal', () => {
     await waitForComponentToPaint(wrapper);
   });
 
-  it('renders a SyntaxHighlighter', () => {
-    expect(wrapper.find(SyntaxHighlighter)).toBeTruthy();
+  it('renders a SynxHighlighter', () => {
+    expect(wrapper.find(SyntaxHighlighter)).toExist();
   });
 
   it('toggles between user sql and executed sql', () => {

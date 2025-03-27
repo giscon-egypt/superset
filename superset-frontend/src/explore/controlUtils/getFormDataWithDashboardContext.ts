@@ -84,14 +84,13 @@ const mergeFilterBoxToFormData = (
     __time_grain: 'time_grain_sqla',
     __granularity: 'granularity',
   };
-  const appliedTimeExtras: Record<string, any> = {};
+  const appliedTimeExtras = {};
 
   const filterBoxData: JsonObject = {};
   ensureIsArray(dashboardFormData.extra_filters).forEach(filter => {
-    if (dateColumns[filter.col as keyof typeof dateColumns]) {
+    if (dateColumns[filter.col]) {
       if (filter.val !== NO_TIME_RANGE) {
-        filterBoxData[dateColumns[filter.col as keyof typeof dateColumns]] =
-          filter.val;
+        filterBoxData[dateColumns[filter.col]] = filter.val;
         appliedTimeExtras[filter.col] = filter.val;
       }
     } else {
@@ -219,18 +218,11 @@ export const getFormDataWithDashboardContext = (
       {},
     );
 
-  const ownColorScheme = exploreFormData.color_scheme;
-  const dashboardColorScheme = dashboardContextFormData.color_scheme;
-  const appliedColorScheme = dashboardColorScheme || ownColorScheme;
-
   return {
     ...exploreFormData,
     ...dashboardContextFormData,
     ...filterBoxData,
     ...nativeFiltersData,
     ...adhocFilters,
-    own_color_scheme: ownColorScheme,
-    color_scheme: appliedColorScheme,
-    dashboard_color_scheme: dashboardColorScheme,
   };
 };

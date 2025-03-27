@@ -18,7 +18,8 @@
  */
 
 import { ErrorLevel, ErrorSource, ErrorTypeEnum } from '@superset-ui/core';
-import { render, screen, userEvent } from 'spec/helpers/testing-library';
+import { render, screen } from 'spec/helpers/testing-library';
+import userEvent from '@testing-library/user-event';
 import ErrorMessageWithStackTrace from './ErrorMessageWithStackTrace';
 import BasicErrorAlert from './BasicErrorAlert';
 
@@ -54,7 +55,7 @@ test('should render the link', () => {
   const button = screen.getByText('See more');
   userEvent.click(button);
   const link = screen.getByRole('link');
-  expect(link).toHaveTextContent('Request Access');
+  expect(link).toHaveTextContent('(Request Access)');
   expect(link).toHaveAttribute('href', mockedProps.link);
 });
 

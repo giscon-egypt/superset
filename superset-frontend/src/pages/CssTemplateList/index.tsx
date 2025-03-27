@@ -18,7 +18,7 @@
  */
 
 import { useMemo, useState } from 'react';
-import { t, SupersetClient, useTheme, css } from '@superset-ui/core';
+import { t, SupersetClient } from '@superset-ui/core';
 
 import rison from 'rison';
 import { useListViewResource } from 'src/views/CRUD/hooks';
@@ -37,7 +37,6 @@ import CssTemplateModal from 'src/features/cssTemplates/CssTemplateModal';
 import { TemplateObject } from 'src/features/cssTemplates/types';
 import { ModifiedInfo } from 'src/components/AuditInfo';
 import { QueryObjectColumns } from 'src/views/CRUD/types';
-import Icons from 'src/components/Icons';
 
 const PAGE_SIZE = 25;
 
@@ -56,7 +55,6 @@ function CssTemplatesList({
   addSuccessToast,
   user,
 }: CssTemplatesListProps) {
-  const theme = useTheme();
   const {
     state: {
       loading,
@@ -157,7 +155,7 @@ function CssTemplatesList({
                   label: 'edit-action',
                   tooltip: t('Edit template'),
                   placement: 'bottom',
-                  icon: 'EditOutlined',
+                  icon: 'Edit',
                   onClick: handleEdit,
                 }
               : null,
@@ -166,7 +164,7 @@ function CssTemplatesList({
                   label: 'delete-action',
                   tooltip: t('Delete template'),
                   placement: 'bottom',
-                  icon: 'DeleteOutlined',
+                  icon: 'Trash',
                   onClick: handleDelete,
                 }
               : null,
@@ -198,15 +196,7 @@ function CssTemplatesList({
     subMenuButtons.push({
       name: (
         <>
-          <Icons.PlusOutlined
-            iconColor={theme.colors.primary.light5}
-            iconSize="m"
-            css={css`
-              margin: 'auto ${theme.gridUnit * 2}px auto 0';
-              vertical-align: text-top;
-            `}
-          />
-          {t('CSS template')}
+          <i className="fa fa-plus" /> {t('CSS template')}
         </>
       ),
       buttonStyle: 'primary',

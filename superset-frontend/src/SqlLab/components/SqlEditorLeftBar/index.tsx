@@ -41,7 +41,7 @@ import { TableSelectorMultiple } from 'src/components/TableSelector';
 import { IconTooltip } from 'src/components/IconTooltip';
 import useQueryEditor from 'src/SqlLab/hooks/useQueryEditor';
 import type { DatabaseObject } from 'src/components/DatabaseSelector';
-import { EmptyState } from 'src/components/EmptyState';
+import { emptyStateComponent } from 'src/components/EmptyState';
 import {
   getItem,
   LocalStorageKeys,
@@ -101,7 +101,7 @@ const SqlEditorLeftBar = ({
   queryEditorId,
   height = 500,
 }: SqlEditorLeftBarProps) => {
-  const allSelectedTables = useSelector<SqlLabRootState, Table[]>(
+  const tables = useSelector<SqlLabRootState, Table[]>(
     ({ sqlLab }) =>
       sqlLab.tables.filter(table => table.queryEditorId === queryEditorId),
     shallowEqual,
@@ -113,18 +113,11 @@ const SqlEditorLeftBar = ({
     'schema',
   ]);
 
-  const [_emptyResultsWithSearch, setEmptyResultsWithSearch] = useState(false);
+  const [emptyResultsWithSearch, setEmptyResultsWithSearch] = useState(false);
   const [userSelectedDb, setUserSelected] = useState<DatabaseObject | null>(
     null,
   );
-  const { dbId, catalog, schema } = queryEditor;
-  const tables = useMemo(
-    () =>
-      allSelectedTables.filter(
-        table => table.dbId === dbId && table.schema === schema,
-      ),
-    [allSelectedTables, dbId, schema],
-  );
+  const { catalog, schema } = queryEditor;
 
   useEffect(() => {
     const bool = querystring.parse(window.location.search).db;
@@ -256,7 +249,7 @@ const SqlEditorLeftBar = ({
     <LeftBarStyles data-test="sql-editor-left-bar">
       <TableSelectorMultiple
         onEmptyResults={onEmptyResults}
-        emptyState={<EmptyState />}
+        emptyState={emptyStateComponent(emptyResultsWithSearch)}
         database={userSelectedDb}
         getDbList={handleDbList}
         handleError={handleError}
@@ -298,8 +291,6 @@ const SqlEditorLeftBar = ({
           buttonStyle="danger"
           onClick={handleResetState}
         >
-          {/* TODO: Remove fa-icon */}
-          {/* eslint-disable-next-line icons/no-fa-icons-usage */}
           <i className="fa fa-bomb" /> {t('Reset state')}
         </Button>
       )}

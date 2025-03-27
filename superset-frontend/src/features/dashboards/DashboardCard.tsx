@@ -22,18 +22,18 @@ import {
   isFeatureEnabled,
   FeatureFlag,
   t,
+  useTheme,
   SupersetClient,
 } from '@superset-ui/core';
 import { CardStyles } from 'src/views/CRUD/utils';
-import { Dropdown } from 'src/components/Dropdown';
+import { AntdDropdown } from 'src/components';
 import { Menu } from 'src/components/Menu';
 import ListViewCard from 'src/components/ListViewCard';
 import Icons from 'src/components/Icons';
-import { PublishedLabel } from 'src/components/Label';
+import Label from 'src/components/Label';
 import FacePile from 'src/components/FacePile';
 import FaveStar from 'src/components/FaveStar';
 import { Dashboard } from 'src/views/CRUD/types';
-import { Button } from 'src/components';
 
 interface DashboardCardProps {
   isChart?: boolean;
@@ -66,6 +66,9 @@ function DashboardCard({
   const canEdit = hasPerm('can_write');
   const canDelete = hasPerm('can_write');
   const canExport = hasPerm('can_export');
+
+  const theme = useTheme();
+
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [fetchingThumbnail, setFetchingThumbnail] = useState<boolean>(false);
 
@@ -88,7 +91,7 @@ function DashboardCard({
       SupersetClient.get({
         endpoint: `/api/v1/dashboard/${dashboard.id}`,
       }).then(({ json = {} }) => {
-        setThumbnailUrl(json.result?.thumbnail_url || '');
+        setThumbnailUrl(json.thumbnail_url || '');
         setFetchingThumbnail(false);
       });
     }
@@ -105,7 +108,7 @@ function DashboardCard({
             onClick={() => openDashboardEditModal?.(dashboard)}
             data-test="dashboard-card-option-edit-button"
           >
-            <Icons.EditOutlined iconSize="l" data-test="edit-alt" /> {t('Edit')}
+            <Icons.EditAlt iconSize="l" data-test="edit-alt" /> {t('Edit')}
           </div>
         </Menu.Item>
       )}
@@ -118,7 +121,7 @@ function DashboardCard({
             className="action-button"
             data-test="dashboard-card-option-export-button"
           >
-            <Icons.UploadOutlined iconSize="l" /> {t('Export')}
+            <Icons.Share iconSize="l" /> {t('Export')}
           </div>
         </Menu.Item>
       )}
@@ -131,7 +134,7 @@ function DashboardCard({
             onClick={() => onDelete(dashboard)}
             data-test="dashboard-card-option-delete-button"
           >
-            <Icons.DeleteOutlined iconSize="l" /> {t('Delete')}
+            <Icons.Trash iconSize="l" /> {t('Delete')}
           </div>
         </Menu.Item>
       )}
@@ -150,7 +153,9 @@ function DashboardCard({
         title={dashboard.dashboard_title}
         certifiedBy={dashboard.certified_by}
         certificationDetails={dashboard.certification_details}
-        titleRight={<PublishedLabel isPublished={dashboard.published} />}
+        titleRight={
+          <Label>{dashboard.published ? t('published') : t('draft')}</Label>
+        }
         cover={
           !isFeatureEnabled(FeatureFlag.Thumbnails) || !showThumbnails ? (
             <></>
@@ -176,11 +181,9 @@ function DashboardCard({
                 isStarred={favoriteStatus}
               />
             )}
-            <Dropdown dropdownRender={() => menu} trigger={['hover', 'click']}>
-              <Button buttonSize="xsmall" type="link">
-                <Icons.MoreOutlined iconSize="xl" />
-              </Button>
-            </Dropdown>
+            <AntdDropdown overlay={menu}>
+              <Icons.MoreVert iconColor={theme.colors.grayscale.base} />
+            </AntdDropdown>
           </ListViewCard.Actions>
         }
       />

@@ -21,22 +21,19 @@ import { ReactNode, CSSProperties } from 'react';
 import { css, truncationCSS, useCSSTextTruncation } from '@superset-ui/core';
 import { Menu } from 'src/components/Menu';
 import { Tooltip } from 'src/components/Tooltip';
-import { MenuItemProps } from 'antd-v5';
+import type { MenuProps } from 'antd/lib/menu';
 
 export type MenuItemWithTruncationProps = {
   tooltipText: ReactNode;
   children: ReactNode;
-  onClick?: MenuItemProps['onClick'];
+  onClick?: MenuProps['onClick'];
   style?: CSSProperties;
-  menuKey?: string;
 };
 
 export const MenuItemWithTruncation = ({
   tooltipText,
   children,
-  onClick,
-  style,
-  menuKey,
+  ...props
 }: MenuItemWithTruncationProps) => {
   const [itemRef, itemIsTruncated] = useCSSTextTruncation<HTMLDivElement>();
 
@@ -44,11 +41,8 @@ export const MenuItemWithTruncation = ({
     <Menu.Item
       css={css`
         display: flex;
-        line-height: 1.5em;
       `}
-      eventKey={menuKey}
-      onClick={onClick}
-      style={style}
+      {...props}
     >
       <Tooltip title={itemIsTruncated ? tooltipText : null}>
         <div

@@ -63,8 +63,6 @@ time_map = {
 
 
 def upgrade_comparison_params(slice_params: dict[str, Any]) -> dict[str, Any]:
-    if not slice_params or not isinstance(slice_params, dict):
-        return {}
     params = deepcopy(slice_params)
 
     # Update time_comparison to time_compare
@@ -85,7 +83,7 @@ def upgrade_comparison_params(slice_params: dict[str, Any]) -> dict[str, Any]:
     # Adjust adhoc_custom
     if "adhoc_custom" in params and params["adhoc_custom"]:
         adhoc = params["adhoc_custom"][0]  # As there's always only one element
-        if adhoc["comparator"] and adhoc["comparator"] != "No filter":
+        if adhoc["comparator"] != "No filter":
             # Set start_date_offset in params, not in adhoc
             start_date_offset, _ = get_since_until(adhoc["comparator"])
             params["start_date_offset"] = start_date_offset.strftime("%Y-%m-%d")
@@ -105,8 +103,6 @@ def upgrade():
         )
     ):
         try:
-            if not slc.params:  # Noop if there's no params on the slice
-                continue
             params = json.loads(slc.params)
             updated_slice_params = upgrade_comparison_params(params)
             slc.params = json.dumps(updated_slice_params)
@@ -123,8 +119,6 @@ def upgrade():
 
 
 def downgrade_comparison_params(slice_params: dict[str, Any]) -> dict[str, Any]:
-    if not slice_params or not isinstance(slice_params, dict):
-        return {}
     params = deepcopy(slice_params)
     params["enable_time_comparison"] = False
 
@@ -171,10 +165,10 @@ def downgrade_comparison_params(slice_params: dict[str, Any]) -> dict[str, Any]:
             since, until = get_since_until(temporal_range_filter["comparator"])
             delta_days = (until - since).days
             new_until_date = start_date_offset + timedelta(days=delta_days - 1)
-            comparator_str = f"{start_date_offset.strftime('%Y-%m-%d')} : {new_until_date.strftime('%Y-%m-%d')}"  # noqa: E501
+            comparator_str = f"{start_date_offset.strftime('%Y-%m-%d')} : {new_until_date.strftime('%Y-%m-%d')}"
 
             # Generate filterOptionName
-            random_string = md5(comparator_str.encode("utf-8")).hexdigest()  # noqa: S324
+            random_string = md5(comparator_str.encode("utf-8")).hexdigest()
             filter_option_name = f"filter_{random_string}"
 
             adhoc_custom[0] = {
@@ -205,8 +199,6 @@ def downgrade():
         )
     ):
         try:
-            if not slc.params:  # Noop if there's no params on the slice
-                continue
             params = json.loads(slc.params)
             updated_slice_params = downgrade_comparison_params(params)
             slc.params = json.dumps(updated_slice_params)

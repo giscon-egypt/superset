@@ -63,7 +63,6 @@ import CopyToClipboard from 'src/components/CopyToClipboard';
 import { addDangerToast } from 'src/components/MessageToasts/actions';
 import { prepareCopyToClipboardTabularData } from 'src/utils/common';
 import { getItem, LocalStorageKeys } from 'src/utils/localStorageHelpers';
-import Modal from 'src/components/Modal';
 import {
   addQueryEditor,
   clearQueryResults,
@@ -148,15 +147,6 @@ const ResultSetButtons = styled.div`
   display: grid;
   grid-auto-flow: column;
   padding-right: ${({ theme }) => 2 * theme.gridUnit}px;
-`;
-
-const copyButtonStyles = css`
-  &:hover {
-    text-decoration: unset;
-  }
-  span > :first-of-type {
-    margin: 0px;
-  }
 `;
 
 const ROWS_CHIP_WIDTH = 100;
@@ -305,9 +295,6 @@ const ResultSet = ({
 
   const renderControls = () => {
     if (search || visualize || csv) {
-      const { results, queryLimit, limitingFactor, rows } = query;
-      const limit = queryLimit || results.query.limit;
-      const rowsCount = Math.min(rows || 0, results?.data?.length || 0);
       let { data } = query.results;
       if (cache && query.cached) {
         data = cachedData;
@@ -351,31 +338,12 @@ const ResultSet = ({
             )}
             {csv && canExportData && (
               <Button
-                css={copyButtonStyles}
                 buttonSize="small"
                 href={getExportCsvUrl(query.id)}
                 data-test="export-csv-button"
-                onClick={() => {
-                  logAction(LOG_ACTIONS_SQLLAB_DOWNLOAD_CSV, {});
-                  if (
-                    limitingFactor === LimitingFactor.Dropdown &&
-                    limit === rowsCount
-                  ) {
-                    Modal.warning({
-                      title: t('Download is on the way'),
-                      content: t(
-                        'Downloading %(rows)s rows based on the LIMIT configuration. If you want the entire result set, you need to adjust the LIMIT.',
-                        { rows: rowsCount.toLocaleString() },
-                      ),
-                    });
-                  }
-                }}
+                onClick={() => logAction(LOG_ACTIONS_SQLLAB_DOWNLOAD_CSV, {})}
               >
-                <Icons.DownloadOutlined
-                  iconSize="m"
-                  iconColor={theme.colors.primary.dark2}
-                />{' '}
-                {t('Download to CSV')}
+                <i className="fa fa-file-text-o" /> {t('Download to CSV')}
               </Button>
             )}
 
@@ -385,15 +353,10 @@ const ResultSet = ({
                 wrapped={false}
                 copyNode={
                   <Button
-                    css={copyButtonStyles}
                     buttonSize="small"
                     data-test="copy-to-clipboard-button"
                   >
-                    <Icons.CopyOutlined
-                      iconSize="s"
-                      iconColor={theme.colors.primary.dark2}
-                    />{' '}
-                    {t('Copy to Clipboard')}
+                    <i className="fa fa-clipboard" /> {t('Copy to Clipboard')}
                   </Button>
                 }
                 hideTooltip
@@ -577,24 +540,18 @@ const ResultSet = ({
   }
 
   if (query.state === QueryState.Failed) {
-    const errors = [...(query.extra?.errors || []), ...(query.errors || [])];
-
     return (
       <ResultlessStyles>
-        {errors.map((error, index) => (
-          <ErrorMessageWithStackTrace
-            key={index}
-            title={t('Database error')}
-            error={error}
-            subtitle={<MonospaceDiv>{error.message}</MonospaceDiv>}
-            copyText={error.message || undefined}
-            link={query.link}
-            source="sqllab"
-          />
-        ))}
-        {errors.some(
-          error => error?.error_type === ErrorTypeEnum.FRONTEND_TIMEOUT_ERROR,
-        ) ? (
+        <ErrorMessageWithStackTrace
+          title={t('Database error')}
+          error={query?.extra?.errors?.[0] || query?.errors?.[0]}
+          subtitle={<MonospaceDiv>{query.errorMessage}</MonospaceDiv>}
+          copyText={query.errorMessage || undefined}
+          link={query.link}
+          source="sqllab"
+        />
+        {(query?.extra?.errors?.[0] || query?.errors?.[0])?.error_type ===
+        ErrorTypeEnum.FRONTEND_TIMEOUT_ERROR ? (
           <Button
             className="sql-result-track-job"
             buttonSize="small"

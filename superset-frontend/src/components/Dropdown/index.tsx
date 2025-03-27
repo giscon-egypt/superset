@@ -17,6 +17,7 @@
  * under the License.
  */
 import {
+  RefObject,
   ReactElement,
   ReactNode,
   FocusEvent,
@@ -24,10 +25,8 @@ import {
   cloneElement,
 } from 'react';
 
-import {
-  Dropdown as AntdDropdown,
-  DropdownProps as AntdDropdownProps,
-} from 'antd-v5';
+import { AntdDropdown } from 'src/components';
+import { DropDownProps } from 'antd/lib/dropdown';
 import { styled } from '@superset-ui/core';
 import Icons from 'src/components/Icons';
 
@@ -80,8 +79,7 @@ export enum IconOrientation {
   Vertical = 'vertical',
   Horizontal = 'horizontal',
 }
-
-export interface MenuDotsDropdownProps extends AntdDropdownProps {
+export interface DropdownProps extends DropDownProps {
   overlay: ReactElement;
   iconOrientation?: IconOrientation;
 }
@@ -91,26 +89,30 @@ const RenderIcon = (
 ) => {
   const component =
     iconOrientation === IconOrientation.Horizontal ? (
-      <Icons.EllipsisOutlined iconSize="xl" />
+      <Icons.MoreHoriz iconSize="xl" />
     ) : (
       <MenuDots />
     );
   return component;
 };
 
-export const MenuDotsDropdown = ({
+export const Dropdown = ({
   overlay,
   iconOrientation = IconOrientation.Vertical,
   ...rest
-}: MenuDotsDropdownProps) => (
-  <AntdDropdown dropdownRender={() => overlay} {...rest}>
+}: DropdownProps) => (
+  <AntdDropdown overlay={overlay} {...rest}>
     <MenuDotsWrapper data-test="dropdown-trigger">
       {RenderIcon(iconOrientation)}
     </MenuDotsWrapper>
   </AntdDropdown>
 );
 
-export interface NoAnimationDropdownProps extends AntdDropdownProps {
+interface ExtendedDropDownProps extends DropDownProps {
+  ref?: RefObject<HTMLDivElement>;
+}
+
+export interface NoAnimationDropdownProps extends ExtendedDropDownProps {
   children: ReactNode;
   onBlur?: (e: FocusEvent<HTMLDivElement>) => void;
   onKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void;
@@ -124,13 +126,8 @@ export const NoAnimationDropdown = (props: NoAnimationDropdownProps) => {
   });
 
   return (
-    <AntdDropdown autoFocus overlayStyle={props.overlayStyle} {...rest}>
+    <AntdDropdown overlayStyle={props.overlayStyle} {...rest}>
       {childrenWithProps}
     </AntdDropdown>
   );
 };
-
-export type DropdownProps = AntdDropdownProps;
-export const Dropdown = (props: DropdownProps) => (
-  <AntdDropdown autoFocus {...props} />
-);

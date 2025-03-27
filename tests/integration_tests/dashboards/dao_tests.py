@@ -87,12 +87,12 @@ class TestDashboardDAO(SupersetTestCase):
             "duplicate_slices": False,
         }
         dash = DashboardDAO.copy_dashboard(original_dash, dash_data)
-        assert dash.id != original_dash.id
-        assert len(dash.position) == len(original_dash.position)
-        assert dash.dashboard_title == "copied dash"
-        assert dash.css == "<css>"
-        assert dash.owners == [security_manager.find_user("admin")]
-        self.assertCountEqual(dash.slices, original_dash.slices)  # noqa: PT009
+        self.assertNotEqual(dash.id, original_dash.id)
+        self.assertEqual(len(dash.position), len(original_dash.position))
+        self.assertEqual(dash.dashboard_title, "copied dash")
+        self.assertEqual(dash.css, "<css>")
+        self.assertEqual(dash.owners, [security_manager.find_user("admin")])
+        self.assertCountEqual(dash.slices, original_dash.slices)
 
         db.session.delete(dash)
         db.session.commit()
@@ -118,7 +118,9 @@ class TestDashboardDAO(SupersetTestCase):
             "duplicate_slices": False,
         }
         dash = DashboardDAO.copy_dashboard(original_dash, dash_data)
-        assert dash.params_dict["native_filter_configuration"] == [{"mock": "filter"}]
+        self.assertEqual(
+            dash.params_dict["native_filter_configuration"], [{"mock": "filter"}]
+        )
 
         db.session.delete(dash)
         db.session.commit()
@@ -139,15 +141,15 @@ class TestDashboardDAO(SupersetTestCase):
             "duplicate_slices": True,
         }
         dash = DashboardDAO.copy_dashboard(original_dash, dash_data)
-        assert dash.id != original_dash.id
-        assert len(dash.position) == len(original_dash.position)
-        assert dash.dashboard_title == "copied dash"
-        assert dash.css == "<css>"
-        assert dash.owners == [security_manager.find_user("admin")]
-        assert len(dash.slices) == len(original_dash.slices)
+        self.assertNotEqual(dash.id, original_dash.id)
+        self.assertEqual(len(dash.position), len(original_dash.position))
+        self.assertEqual(dash.dashboard_title, "copied dash")
+        self.assertEqual(dash.css, "<css>")
+        self.assertEqual(dash.owners, [security_manager.find_user("admin")])
+        self.assertEqual(len(dash.slices), len(original_dash.slices))
         for original_slc in original_dash.slices:
             for slc in dash.slices:
-                assert slc.id != original_slc.id
+                self.assertNotEqual(slc.id, original_slc.id)
 
         for slc in dash.slices:
             db.session.delete(slc)

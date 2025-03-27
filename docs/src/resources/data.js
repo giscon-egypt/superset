@@ -132,14 +132,4 @@ export const Databases = [
     href: 'https://www.couchbase.com/',
     imgName: 'couchbase.svg',
   },
-  {
-    title: 'Denodo',
-    href: 'https://www.denodo.com/',
-    imgName: 'denodo.png',
-  },
-  {
-    title: 'TDengine',
-    href: 'https://www.tdengine.com/',
-    imgName: 'tdengine.png',
-  },
 ];

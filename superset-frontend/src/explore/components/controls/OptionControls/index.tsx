@@ -82,7 +82,7 @@ export const CaretContainer = styled.div`
 `;
 
 export const CloseContainer = styled.div`
-  height: auto;
+  height: 100%;
   width: ${({ theme }) => theme.gridUnit * 6}px;
   border-right: solid 1px ${({ theme }) => theme.colors.grayscale.dark2}0C;
   cursor: pointer;
@@ -373,25 +373,16 @@ export const OptionControlLabel = ({
       withCaret={withCaret}
       data-test="option-label"
       {...props}
-      css={css`
-        text-align: center;
-      `}
     >
       <CloseContainer
         role="button"
         data-test="remove-control-button"
         onClick={onRemove}
       >
-        <Icons.CloseOutlined
-          iconSize="m"
-          iconColor={theme.colors.grayscale.light1}
-          css={css`
-            vertical-align: sub;
-          `}
-        />
+        <Icons.XSmall iconColor={theme.colors.grayscale.light1} />
       </CloseContainer>
       <Label data-test="control-label">
-        {isFunction && <Icons.FunctionOutlined iconSize="m" />}
+        {isFunction && <Icons.FieldDerived />}
         {getLabelContent()}
       </Label>
       {(!!datasourceWarningMessage || isExtra) && (
@@ -410,13 +401,7 @@ export const OptionControlLabel = ({
       )}
       {withCaret && (
         <CaretContainer>
-          <Icons.RightOutlined
-            iconSize="m"
-            css={css`
-              margin-top: ${theme.gridUnit}px;
-            `}
-            iconColor={theme.colors.grayscale.light1}
-          />
+          <Icons.CaretRight iconColor={theme.colors.grayscale.light1} />
         </CaretContainer>
       )}
     </OptionControlContainer>

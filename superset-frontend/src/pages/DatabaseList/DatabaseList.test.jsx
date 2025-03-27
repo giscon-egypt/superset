@@ -14,7 +14,7 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.src/pages/DatabaseList/DatabaseList.test.jsx
+ * under the License.
  */
 import thunk from 'redux-thunk';
 import * as reactRedux from 'react-redux';
@@ -30,7 +30,7 @@ import SubMenu from 'src/features/home/SubMenu';
 import ListView from 'src/components/ListView';
 import Filters from 'src/components/ListView/Filters';
 import waitForComponentToPaint from 'spec/helpers/waitForComponentToPaint';
-import { act } from 'spec/helpers/testing-library';
+import { act } from 'react-dom/test-utils';
 
 // store needed for withToasts(DatabaseList)
 
@@ -131,11 +131,11 @@ describe('Admin DatabaseList', () => {
   });
 
   test('renders', () => {
-    expect(wrapper.find(DatabaseList)).toBeTruthy();
+    expect(wrapper.find(DatabaseList)).toExist();
   });
 
   test('renders a SubMenu', () => {
-    expect(wrapper.find(SubMenu)).toBeTruthy();
+    expect(wrapper.find(SubMenu)).toExist();
   });
 
   test('renders a SubMenu with no tabs', () => {
@@ -143,11 +143,11 @@ describe('Admin DatabaseList', () => {
   });
 
   test('renders a DatabaseModal', () => {
-    expect(wrapper.find(DatabaseModal)).toBeTruthy();
+    expect(wrapper.find(DatabaseModal)).toExist();
   });
 
   test('renders a ListView', () => {
-    expect(wrapper.find(ListView)).toBeTruthy();
+    expect(wrapper.find(ListView)).toExist();
   });
 
   test('fetches Databases', () => {
@@ -164,7 +164,14 @@ describe('Admin DatabaseList', () => {
     });
     await waitForComponentToPaint(wrapper);
 
-    expect(wrapper.find(DeleteModal).props().description).toMatchSnapshot();
+    expect(wrapper.find(DeleteModal).props().description)
+      .toMatchInlineSnapshot(`
+      <React.Fragment>
+        <p>
+          The database db 0 is linked to 0 charts that appear on 0 dashboards and users have 0 SQL Lab tabs using this database open. Are you sure you want to continue? Deleting the database will break those objects.
+        </p>
+      </React.Fragment>
+    `);
 
     act(() => {
       wrapper
@@ -175,11 +182,7 @@ describe('Admin DatabaseList', () => {
     });
     await waitForComponentToPaint(wrapper);
     act(() => {
-      wrapper
-        .find({ 'data-test': 'modal-confirm-button' })
-        .last()
-        .props()
-        .onClick();
+      wrapper.find('button').last().props().onClick();
     });
 
     await waitForComponentToPaint(wrapper);
@@ -243,6 +246,6 @@ describe('Admin DatabaseList', () => {
     );
     await waitForComponentToPaint(newWrapper);
 
-    expect(newWrapper.find('.dropdown-menu-links').length).toBe(0);
+    expect(newWrapper.find('.dropdown-menu-links')).not.toExist();
   });
 });

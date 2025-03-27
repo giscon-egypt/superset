@@ -19,7 +19,7 @@ import decimal
 import logging
 import uuid
 from datetime import date, datetime, time, timedelta
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -69,7 +69,7 @@ def format_timedelta(time_delta: timedelta) -> str:
     return str(time_delta)
 
 
-def base_json_conv(obj: Any) -> Any:  # noqa: C901
+def base_json_conv(obj: Any) -> Any:
     """
     Tries to convert additional types to JSON compatible forms.
 
@@ -95,9 +95,6 @@ def base_json_conv(obj: Any) -> Any:  # noqa: C901
         return str(obj)
     if isinstance(obj, timedelta):
         return format_timedelta(obj)
-    if isinstance(obj, pd.DateOffset):
-        offset_attrs = ", ".join(f"{k}={v}" for k, v in obj.kwds.items())
-        return f"DateOffset({offset_attrs})"
     if isinstance(obj, bytes):
         try:
             return obj.decode("utf-8")
@@ -193,7 +190,6 @@ def dumps(  # pylint: disable=too-many-arguments
     indent: Union[str, int, None] = None,
     separators: Union[tuple[str, str], None] = None,
     cls: Union[type[simplejson.JSONEncoder], None] = None,
-    encoding: Optional[str] = "utf-8",
 ) -> str:
     """
     Dumps object to compatible JSON format
@@ -210,21 +206,29 @@ def dumps(  # pylint: disable=too-many-arguments
     """
 
     results_string = ""
-    dumps_kwargs: Dict[str, Any] = {
-        "default": default,
-        "allow_nan": allow_nan,
-        "ignore_nan": ignore_nan,
-        "sort_keys": sort_keys,
-        "indent": indent,
-        "separators": separators,
-        "cls": cls,
-        "encoding": encoding,
-    }
     try:
-        results_string = simplejson.dumps(obj, **dumps_kwargs)
+        results_string = simplejson.dumps(
+            obj,
+            default=default,
+            allow_nan=allow_nan,
+            ignore_nan=ignore_nan,
+            sort_keys=sort_keys,
+            indent=indent,
+            separators=separators,
+            cls=cls,
+        )
     except UnicodeDecodeError:
-        dumps_kwargs["encoding"] = None
-        results_string = simplejson.dumps(obj, **dumps_kwargs)
+        results_string = simplejson.dumps(
+            obj,
+            default=default,
+            allow_nan=allow_nan,
+            ignore_nan=ignore_nan,
+            sort_keys=sort_keys,
+            indent=indent,
+            separators=separators,
+            cls=cls,
+            encoding=None,
+        )
     return results_string
 
 

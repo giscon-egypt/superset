@@ -17,10 +17,7 @@
  * under the License.
  */
 import { memo, useCallback, useMemo, useRef } from 'react';
-import { GeoJsonLayer } from '@deck.gl/layers';
-// ignoring the eslint error below since typescript prefers 'geojson' to '@types/geojson'
-// eslint-disable-next-line import/no-unresolved
-import { Feature, Geometry, GeoJsonProperties } from 'geojson';
+import { GeoJsonLayer } from 'deck.gl/typed';
 import geojsonExtent from '@mapbox/geojson-extent';
 import {
   HandlerFunction,
@@ -40,11 +37,6 @@ import TooltipRow from '../../TooltipRow';
 import fitViewport, { Viewport } from '../../utils/fitViewport';
 import { TooltipProps } from '../../components/Tooltip';
 
-type ProcessedFeature = Feature<Geometry, GeoJsonProperties> & {
-  properties: JsonObject;
-  extraProps?: JsonObject;
-};
-
 const propertyMap = {
   fillColor: 'fillColor',
   color: 'fillColor',
@@ -59,7 +51,7 @@ const alterProps = (props: JsonObject, propOverrides: JsonObject) => {
   const newProps: JsonObject = {};
   Object.keys(props).forEach(k => {
     if (k in propertyMap) {
-      newProps[propertyMap[k as keyof typeof propertyMap]] = props[k];
+      newProps[propertyMap[k]] = props[k];
     } else {
       newProps[k] = props[k];
     }
@@ -76,7 +68,7 @@ const alterProps = (props: JsonObject, propOverrides: JsonObject) => {
     ...propOverrides,
   };
 };
-let features: ProcessedFeature[] = [];
+let features: JsonObject[];
 const recurseGeoJson = (
   node: JsonObject,
   propOverrides: JsonObject,
@@ -91,7 +83,7 @@ const recurseGeoJson = (
     const newNode = {
       ...node,
       properties: alterProps(node.properties, propOverrides),
-    } as ProcessedFeature;
+    } as JsonObject;
     if (!newNode.extraProps) {
       newNode.extraProps = extraProps;
     }
@@ -140,16 +132,16 @@ export function getLayer(
   features = [];
   recurseGeoJson(payload.data, propOverrides);
 
-  let processedFeatures = features;
+  let jsFnMutator;
   if (fd.js_data_mutator) {
     // Applying user defined data mutator if defined
-    const jsFnMutator = sandboxedEval(fd.js_data_mutator);
-    processedFeatures = jsFnMutator(features) as ProcessedFeature[];
+    jsFnMutator = sandboxedEval(fd.js_data_mutator);
+    features = jsFnMutator(features);
   }
 
   return new GeoJsonLayer({
     id: `geojson-layer-${fd.slice_id}` as const,
-    data: processedFeatures,
+    data: features,
     extruded: fd.extruded,
     filled: fd.filled,
     stroked: fd.stroked,

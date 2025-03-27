@@ -46,7 +46,7 @@ export default {
   argTypes: { onClick: { action: 'clicked' } },
 } as Meta<typeof Table>;
 
-interface BasicData {
+export interface BasicData {
   name: string;
   category: string;
   price: number;
@@ -54,7 +54,7 @@ interface BasicData {
   key: number;
 }
 
-interface RendererData {
+export interface RendererData {
   key: number;
   buttonCell: string;
   textCell: string;
@@ -62,7 +62,7 @@ interface RendererData {
   dollarCell: number;
 }
 
-interface ExampleData {
+export interface ExampleData {
   title: string;
   name: string;
   age: number;
@@ -71,8 +71,8 @@ interface ExampleData {
   key: number;
 }
 
-function generateValues(amount: number, row = 0): Record<string, number> {
-  const cells: Record<string, number> = {};
+function generateValues(amount: number, row = 0): object {
+  const cells = {};
   for (let i = 0; i < amount; i += 1) {
     cells[`col-${i}`] = i * row * 0.75;
   }
@@ -94,12 +94,7 @@ function generateColumns(amount: number): ColumnsType<ExampleData>[] {
           locale={LocaleCode.en_US}
         />
       ),
-      sorter: (a: BasicData, b: BasicData) =>
-        numericalSort(
-          `col-${i}`,
-          a as Record<PropertyKey, any>,
-          b as Record<PropertyKey, any>,
-        ),
+      sorter: (a: BasicData, b: BasicData) => numericalSort(`col-${i}`, a, b),
     });
   }
   return newCols as ColumnsType<ExampleData>[];
@@ -126,14 +121,14 @@ const basicData: BasicData[] = [
   {
     key: 3,
     name: '128 GB SSD',
-    category: 'Harddrive',
+    category: 'Hardrive',
     price: 49.99,
     description: 'Reliable and fast data storage',
   },
   {
     key: 4,
     name: '128 GB SSD',
-    category: 'Harddrive',
+    category: 'Hardrive',
     price: 49.99,
     description: 'Reliable and fast data storage',
   },
@@ -154,14 +149,14 @@ const basicData: BasicData[] = [
   {
     key: 7,
     name: '256 GB SSD',
-    category: 'Harddrive',
+    category: 'Hardrive',
     price: 175,
     description: 'Reliable and fast data storage',
   },
   {
     key: 8,
     name: '1 TB SSD',
-    category: 'Harddrive',
+    category: 'Hardrive',
     price: 349.99,
     description: 'Reliable and fast data storage',
   },
@@ -173,34 +168,19 @@ const basicColumns: ColumnsType<BasicData> = [
     dataIndex: 'name',
     key: 'name',
     width: 100,
-    sorter: (a: BasicData, b: BasicData) =>
-      alphabeticalSort(
-        'name',
-        a as Record<PropertyKey, any>,
-        b as Record<PropertyKey, any>,
-      ),
+    sorter: (a: BasicData, b: BasicData) => alphabeticalSort('name', a, b),
   },
   {
     title: 'Category',
     dataIndex: 'category',
     key: 'category',
-    sorter: (a: BasicData, b: BasicData) =>
-      alphabeticalSort(
-        'category',
-        a as Record<PropertyKey, any>,
-        b as Record<PropertyKey, any>,
-      ),
+    sorter: (a: BasicData, b: BasicData) => alphabeticalSort('category', a, b),
   },
   {
     title: 'Price',
     dataIndex: 'price',
     key: 'price',
-    sorter: (a: BasicData, b: BasicData) =>
-      numericalSort(
-        'price',
-        a as Record<PropertyKey, any>,
-        b as Record<PropertyKey, any>,
-      ),
+    sorter: (a: BasicData, b: BasicData) => numericalSort('price', a, b),
     width: 100,
   },
   {
@@ -221,12 +201,7 @@ const bigColumns: ColumnsType<ExampleData> = [
     title: 'Age',
     dataIndex: 'age',
     key: 'age',
-    sorter: (a: ExampleData, b: ExampleData) =>
-      numericalSort(
-        'age',
-        a as Record<PropertyKey, any>,
-        b as Record<PropertyKey, any>,
-      ),
+    sorter: (a: ExampleData, b: ExampleData) => numericalSort('age', a, b),
     width: 75,
   },
   {
@@ -406,12 +381,7 @@ const paginationColumns: ColumnsType<BasicData> = [
         locale={LocaleCode.en_US}
       />
     ),
-    sorter: (a: BasicData, b: BasicData) =>
-      numericalSort(
-        'price',
-        a as Record<PropertyKey, any>,
-        b as Record<PropertyKey, any>,
-      ),
+    sorter: (a: BasicData, b: BasicData) => numericalSort('price', a, b),
   },
   {
     title: 'Description',

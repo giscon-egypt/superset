@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { render, screen, userEvent } from 'spec/helpers/testing-library';
+import { render, screen } from 'spec/helpers/testing-library';
+import userEvent from '@testing-library/user-event';
 import { MainNav as Menu } from 'src/components/Menu';
 import LanguagePicker from './LanguagePicker';
 
@@ -42,7 +43,7 @@ test('should render', async () => {
       <LanguagePicker {...mockedProps} />
     </Menu>,
   );
-  expect(await screen.findByRole('menu')).toBeInTheDocument();
+  expect(await screen.findByRole('button')).toBeInTheDocument();
   expect(container).toBeInTheDocument();
 });
 
@@ -61,7 +62,7 @@ test('should render the items', async () => {
       <LanguagePicker {...mockedProps} />
     </Menu>,
   );
-  userEvent.hover(screen.getByRole('menuitem'));
+  userEvent.hover(screen.getByRole('button'));
   expect(await screen.findByText('English')).toBeInTheDocument();
   expect(await screen.findByText('Italian')).toBeInTheDocument();
 });

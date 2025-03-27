@@ -43,7 +43,7 @@ def test_convert_dttm(
     expected_result: Optional[str],
     dttm: datetime,  # noqa: F811
 ) -> None:
-    from superset.db_engine_specs.athena import AthenaEngineSpec as spec  # noqa: N813
+    from superset.db_engine_specs.athena import AthenaEngineSpec as spec
 
     assert_convert_dttm(spec, target_type, expected_result, dttm)
 
@@ -55,11 +55,11 @@ def test_extract_errors() -> None:
 
     from superset.db_engine_specs.athena import AthenaEngineSpec
 
-    msg = ": mismatched input 'from_'. Expecting: "
+    msg = ": mismatched input 'fromm'. Expecting: "
     result = AthenaEngineSpec.extract_errors(Exception(msg))
     assert result == [
         SupersetError(
-            message='Please check your query for syntax errors at or near "from_". Then, try running your query again.',  # noqa: E501
+            message='Please check your query for syntax errors at or near "fromm". Then, try running your query again.',
             error_type=SupersetErrorType.SYNTAX_ERROR,
             level=ErrorLevel.ERROR,
             extra={

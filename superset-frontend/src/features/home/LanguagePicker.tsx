@@ -17,10 +17,11 @@
  * under the License.
  */
 import { MainNav as Menu } from 'src/components/Menu';
-import { styled, css, useTheme } from '@superset-ui/core';
+import { styled } from '@superset-ui/core';
 import Icons from 'src/components/Icons';
 
 const { SubMenu } = Menu;
+
 export interface Languages {
   [key: string]: {
     flag: string;
@@ -56,23 +57,15 @@ const StyledFlag = styled.i`
 
 export default function LanguagePicker(props: LanguagePickerProps) {
   const { locale, languages, ...rest } = props;
-  const theme = useTheme();
   return (
     <SubMenu
-      css={css`
-        [data-icon='caret-down'] {
-          color: ${theme.colors.grayscale.base};
-          font-size: ${theme.typography.sizes.xxs}px;
-          margin-left: ${theme.gridUnit}px;
-        }
-      `}
       aria-label="Languages"
       title={
         <div className="f16">
           <StyledFlag className={`flag ${languages[locale].flag}`} />
         </div>
       }
-      icon={<Icons.CaretDownOutlined iconSize="xs" />}
+      icon={<Icons.TriangleDown />}
       {...rest}
     >
       {Object.keys(languages).map(langKey => (

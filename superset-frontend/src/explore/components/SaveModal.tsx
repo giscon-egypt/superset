@@ -27,7 +27,6 @@ import {
   css,
   DatasourceType,
   isDefined,
-  logging,
   styled,
   SupersetClient,
   t,
@@ -73,7 +72,7 @@ type SaveModalState = {
 };
 
 export const StyledModal = styled(Modal)`
-  .antd5-modal-body {
+  .ant-modal-body {
     overflow: visible;
   }
   i {
@@ -133,8 +132,7 @@ class SaveModal extends Component<SaveModalProps, SaveModalState> {
           });
         }
       } catch (error) {
-        logging.warn(error);
-        this.props.addDangerToast(
+        this.props.actions.addDangerToast(
           t('An error occurred while loading dashboard information.'),
         );
       }

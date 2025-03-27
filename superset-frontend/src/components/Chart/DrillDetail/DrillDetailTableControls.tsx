@@ -18,7 +18,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { Tag } from 'src/components/Tags';
+import { Tag } from 'antd';
 import {
   BinaryQueryObjectFilterClause,
   css,
@@ -29,21 +29,19 @@ import {
 import RowCountLabel from 'src/explore/components/RowCountLabel';
 import Icons from 'src/components/Icons';
 
-export type TableControlsProps = {
-  filters: BinaryQueryObjectFilterClause[];
-  setFilters: (filters: BinaryQueryObjectFilterClause[]) => void;
-  totalCount?: number;
-  loading: boolean;
-  onReload: () => void;
-};
-
 export default function TableControls({
   filters,
   setFilters,
   totalCount,
   loading,
   onReload,
-}: TableControlsProps) {
+}: {
+  filters: BinaryQueryObjectFilterClause[];
+  setFilters: (filters: BinaryQueryObjectFilterClause[]) => void;
+  totalCount?: number;
+  loading: boolean;
+  onReload: () => void;
+}) {
   const theme = useTheme();
   const filterMap: Record<string, BinaryQueryObjectFilterClause> = useMemo(
     () =>
@@ -91,16 +89,23 @@ export default function TableControls({
         css={css`
           display: flex;
           flex-wrap: wrap;
+          margin-bottom: -${theme.gridUnit * 4}px;
         `}
       >
-        {filterTags.map(({ colName, val }, index) => (
+        {filterTags.map(({ colName, val }) => (
           <Tag
-            editable
-            onDelete={removeFilter.bind(null, colName)}
-            index={index}
-            id={index}
+            closable
+            onClose={removeFilter.bind(null, colName)}
             key={colName}
-            name={`${colName}=${val}`}
+            css={css`
+              height: ${theme.gridUnit * 6}px;
+              display: flex;
+              align-items: center;
+              padding: ${theme.gridUnit / 2}px ${theme.gridUnit * 2}px;
+              margin-right: ${theme.gridUnit * 4}px;
+              margin-bottom: ${theme.gridUnit * 4}px;
+              line-height: 1.2;
+            `}
             data-test="filter-col"
           >
             <span

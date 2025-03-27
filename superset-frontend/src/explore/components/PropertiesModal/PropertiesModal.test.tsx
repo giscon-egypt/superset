@@ -17,14 +17,9 @@
  * under the License.
  */
 
-import { VizType } from '@superset-ui/core';
-import {
-  render,
-  screen,
-  userEvent,
-  waitFor,
-} from 'spec/helpers/testing-library';
+import { render, screen, waitFor } from 'spec/helpers/testing-library';
 import fetchMock from 'fetch-mock';
+import userEvent from '@testing-library/user-event';
 import PropertiesModal, { PropertiesModalProps } from '.';
 
 const createProps = () =>
@@ -83,7 +78,7 @@ fetchMock.get('glob:*/api/v1/chart/318', {
       params:
         '{"adhoc_filters": [], "all_columns_x": ["age"], "color_scheme": "supersetColors", "datasource": "42__table", "granularity_sqla": "time_start", "groupby": null, "label_colors": {}, "link_length": "25", "queryFields": {"groupby": "groupby"}, "row_limit": 10000, "slice_id": 1380, "time_range": "No filter", "url_params": {}, "viz_type": "histogram", "x_axis_label": "age", "y_axis_label": "count"}',
       slice_name: 'Age distribution of respondents',
-      viz_type: VizType.Histogram,
+      viz_type: 'histogram',
     },
     show_columns: [
       'cache_timeout',
@@ -149,25 +144,15 @@ test('Should render null when show:false', async () => {
   });
 });
 
-// Add cleanup after each test
-afterEach(async () => {
-  // Wait for any pending effects to complete
-  await new Promise(resolve => setTimeout(resolve, 0));
-});
-
 test('Should render when show:true', async () => {
   const props = createProps();
   renderModal(props);
 
-  await waitFor(
-    () => {
-      const modal = screen.getByRole('dialog');
-      expect(modal).toBeInTheDocument();
-      expect(modal).toHaveTextContent('Edit Chart Properties');
-      expect(modal).not.toHaveClass('ant-zoom-appear');
-    },
-    { timeout: 3000 },
-  );
+  await waitFor(() => {
+    expect(
+      screen.getByRole('dialog', { name: 'Edit Chart Properties' }),
+    ).toBeVisible();
+  });
 });
 
 test('Should have modal header', async () => {
@@ -186,49 +171,43 @@ test('"Close" button should call "onHide"', async () => {
   renderModal(props);
 
   await waitFor(() => {
-    expect(props.onHide).toHaveBeenCalledTimes(0);
+    expect(props.onHide).toBeCalledTimes(0);
   });
 
   userEvent.click(screen.getByRole('button', { name: 'Close' }));
 
   await waitFor(() => {
-    expect(props.onHide).toHaveBeenCalledTimes(1);
-    expect(props.onSave).toHaveBeenCalledTimes(0);
+    expect(props.onHide).toBeCalledTimes(1);
+    expect(props.onSave).toBeCalledTimes(0);
   });
 });
 
 test('Should render all elements inside modal', async () => {
   const props = createProps();
   renderModal(props);
+  await waitFor(() => {
+    expect(screen.getAllByRole('textbox')).toHaveLength(5);
+    expect(screen.getByRole('combobox')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Basic information' }),
+    ).toBeVisible();
+    expect(screen.getByText('Name')).toBeVisible();
+    expect(screen.getByText('Description')).toBeVisible();
 
-  await waitFor(
-    () => {
-      expect(screen.getAllByRole('textbox')).toHaveLength(5);
-      expect(screen.getByRole('combobox')).toBeInTheDocument();
-      expect(
-        screen.getByRole('heading', { name: 'Basic information' }),
-      ).toBeInTheDocument();
-      expect(screen.getByText('Name')).toBeInTheDocument();
-      expect(screen.getByText('Description')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Configuration' }),
+    ).toBeVisible();
+    expect(screen.getByText('Cache timeout')).toBeVisible();
 
-      expect(
-        screen.getByRole('heading', { name: 'Configuration' }),
-      ).toBeInTheDocument();
-      expect(screen.getByText('Cache timeout')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Access' })).toBeVisible();
+    expect(screen.getByText('Owners')).toBeVisible();
 
-      expect(
-        screen.getByRole('heading', { name: 'Access' }),
-      ).toBeInTheDocument();
-      expect(screen.getByText('Owners')).toBeInTheDocument();
-
-      expect(
-        screen.getByRole('heading', { name: 'Configuration' }),
-      ).toBeInTheDocument();
-      expect(screen.getByText('Certified by')).toBeInTheDocument();
-      expect(screen.getByText('Certification details')).toBeInTheDocument();
-    },
-    { timeout: 10000 },
-  );
+    expect(
+      screen.getByRole('heading', { name: 'Configuration' }),
+    ).toBeVisible();
+    expect(screen.getByText('Certified by')).toBeVisible();
+    expect(screen.getByText('Certification details')).toBeVisible();
+  });
 });
 
 test('Should have modal footer', async () => {
@@ -250,14 +229,14 @@ test('"Cancel" button should call "onHide"', async () => {
   renderModal(props);
 
   await waitFor(() => {
-    expect(props.onHide).toHaveBeenCalledTimes(0);
+    expect(props.onHide).toBeCalledTimes(0);
   });
 
   userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
   await waitFor(() => {
-    expect(props.onHide).toHaveBeenCalledTimes(1);
-    expect(props.onSave).toHaveBeenCalledTimes(0);
+    expect(props.onHide).toBeCalledTimes(1);
+    expect(props.onSave).toBeCalledTimes(0);
   });
 });
 
@@ -265,16 +244,16 @@ test('"Save" button should call only "onSave"', async () => {
   const props = createProps();
   renderModal(props);
   await waitFor(() => {
-    expect(props.onSave).toHaveBeenCalledTimes(0);
-    expect(props.onHide).toHaveBeenCalledTimes(0);
+    expect(props.onSave).toBeCalledTimes(0);
+    expect(props.onHide).toBeCalledTimes(0);
 
     expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
   });
   userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
   await waitFor(() => {
-    expect(props.onSave).toHaveBeenCalledTimes(1);
-    expect(props.onHide).toHaveBeenCalledTimes(1);
+    expect(props.onSave).toBeCalledTimes(1);
+    expect(props.onHide).toBeCalledTimes(1);
   });
 });
 
@@ -310,7 +289,7 @@ test('"Name" should not be empty', async () => {
   userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
   await waitFor(() => {
-    expect(props.onSave).toHaveBeenCalledTimes(0);
+    expect(props.onSave).toBeCalledTimes(0);
   });
 });
 
@@ -328,8 +307,8 @@ test('"Name" should not be empty when saved', async () => {
   userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
   await waitFor(() => {
-    expect(props.onSave).toHaveBeenCalledTimes(1);
-    expect(props.onSave).toHaveBeenCalledWith(
+    expect(props.onSave).toBeCalledTimes(1);
+    expect(props.onSave).toBeCalledWith(
       expect.objectContaining({ slice_name: 'Test chart new name' }),
     );
   });
@@ -349,8 +328,8 @@ test('"Cache timeout" should not be empty when saved', async () => {
   userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
   await waitFor(() => {
-    expect(props.onSave).toHaveBeenCalledTimes(1);
-    expect(props.onSave).toHaveBeenCalledWith(
+    expect(props.onSave).toBeCalledTimes(1);
+    expect(props.onSave).toBeCalledWith(
       expect.objectContaining({ cache_timeout: '1000' }),
     );
   });
@@ -370,8 +349,8 @@ test('"Description" should not be empty when saved', async () => {
   userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
   await waitFor(() => {
-    expect(props.onSave).toHaveBeenCalledTimes(1);
-    expect(props.onSave).toHaveBeenCalledWith(
+    expect(props.onSave).toBeCalledTimes(1);
+    expect(props.onSave).toBeCalledWith(
       expect.objectContaining({ description: 'Test description' }),
     );
   });
@@ -391,8 +370,8 @@ test('"Certified by" should not be empty when saved', async () => {
   userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
   await waitFor(() => {
-    expect(props.onSave).toHaveBeenCalledTimes(1);
-    expect(props.onSave).toHaveBeenCalledWith(
+    expect(props.onSave).toBeCalledTimes(1);
+    expect(props.onSave).toBeCalledWith(
       expect.objectContaining({ certified_by: 'Test certified by' }),
     );
   });
@@ -414,8 +393,8 @@ test('"Certification details" should not be empty when saved', async () => {
   userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
   await waitFor(() => {
-    expect(props.onSave).toHaveBeenCalledTimes(1);
-    expect(props.onSave).toHaveBeenCalledWith(
+    expect(props.onSave).toBeCalledTimes(1);
+    expect(props.onSave).toBeCalledWith(
       expect.objectContaining({
         certification_details: 'Test certification details',
       }),

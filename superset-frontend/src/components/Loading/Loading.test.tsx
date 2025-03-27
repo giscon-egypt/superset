@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { render, screen } from 'spec/helpers/testing-library';
+import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
 import Loading from './index';
 
 test('Rerendering correctly with default props', () => {

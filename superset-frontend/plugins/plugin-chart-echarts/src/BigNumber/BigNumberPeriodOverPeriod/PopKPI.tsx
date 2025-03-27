@@ -26,7 +26,7 @@ import {
   t,
   useTheme,
 } from '@superset-ui/core';
-import { DEFAULT_DATE_PATTERN, Tooltip } from '@superset-ui/chart-controls';
+import { Tooltip } from '@superset-ui/chart-controls';
 import { isEmpty } from 'lodash';
 import {
   ColorSchemeEnum,
@@ -90,33 +90,27 @@ export default function PopKPI(props: PopKPIProps) {
     if (!currentTimeRangeFilter || (!shift && !startDateOffset)) {
       setComparisonRange('');
     } else if (!isEmpty(shift) || startDateOffset) {
+      const newShift = getTimeOffset({
+        timeRangeFilter: {
+          ...currentTimeRangeFilter,
+          comparator:
+            dashboardTimeRange ?? (currentTimeRangeFilter as any).comparator,
+        },
+        shifts: ensureIsArray(shift),
+        startDate: startDateOffset || '',
+      });
       const promise: any = fetchTimeRange(
         dashboardTimeRange ?? (currentTimeRangeFilter as any).comparator,
         currentTimeRangeFilter.subject,
+        newShift || [],
       );
       Promise.resolve(promise).then((res: any) => {
-        const dates = res?.value?.match(DEFAULT_DATE_PATTERN);
-        const [parsedStartDate, parsedEndDate] = dates ?? [];
-        const newShift = getTimeOffset({
-          timeRangeFilter: {
-            ...currentTimeRangeFilter,
-            comparator: `${parsedStartDate} : ${parsedEndDate}`,
-          },
-          shifts: ensureIsArray(shift),
-          startDate: startDateOffset || '',
-        });
-        fetchTimeRange(
-          dashboardTimeRange ?? (currentTimeRangeFilter as any).comparator,
-          currentTimeRangeFilter.subject,
-          ensureIsArray(newShift),
-        ).then(res => {
-          const response: string[] = ensureIsArray(res.value);
-          const firstRange: string = response.flat()[0];
-          const rangeText = firstRange.split('vs\n');
-          setComparisonRange(
-            rangeText.length > 1 ? rangeText[1].trim() : rangeText[0],
-          );
-        });
+        const response: string[] = ensureIsArray(res.value);
+        const firstRange: string = response.flat()[0];
+        const rangeText = firstRange.split('vs\n');
+        setComparisonRange(
+          rangeText.length > 1 ? rangeText[1].trim() : rangeText[0],
+        );
       });
     }
   }, [currentTimeRangeFilter, shift, startDateOffset, dashboardTimeRange]);

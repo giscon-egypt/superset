@@ -51,7 +51,6 @@ const Styles = styled.div<PivotTableStylesProps>`
       width: ${
         typeof width === 'string' ? parseInt(width, 10) : width - margin * 2
       }px;
-      white-space: nowrap;
  `}
 `;
 
@@ -155,7 +154,6 @@ export default function PivotTableChart(props: PivotTableProps) {
     dateFormatters,
     onContextMenu,
     timeGrainSqla,
-    allowRenderHtml,
   } = props;
 
   const theme = useTheme();
@@ -557,7 +555,6 @@ export default function PivotTableChart(props: PivotTableProps) {
           subtotalOptions={subtotalOptions}
           namesMapping={verboseMap}
           onContextMenu={handleContextMenu}
-          allowRenderHtml={allowRenderHtml}
         />
       </PivotTableWrapper>
     </Styles>

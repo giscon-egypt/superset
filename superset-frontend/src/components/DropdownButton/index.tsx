@@ -16,75 +16,92 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { type ComponentProps } from 'react';
+import { ReactNode, ReactElement } from 'react';
 
-import { Dropdown } from 'antd-v5';
-import { Tooltip, TooltipPlacement } from 'src/components/Tooltip';
+import { AntdDropdown, AntdTooltip } from 'src/components';
+import { styled } from '@superset-ui/core';
 import { kebabCase } from 'lodash';
-import { css, useTheme } from '@superset-ui/core';
 
-export type DropdownButtonProps = ComponentProps<typeof Dropdown.Button> & {
+const StyledDropdownButton = styled.div`
+  .ant-btn-group {
+    button.ant-btn {
+      background-color: ${({ theme }) => theme.colors.primary.dark1};
+      border-color: transparent;
+      color: ${({ theme }) => theme.colors.grayscale.light5};
+      font-size: 12px;
+      line-height: 13px;
+      outline: none;
+      text-transform: uppercase;
+      &:first-of-type {
+        border-radius: ${({ theme }) =>
+          `${theme.gridUnit}px 0 0 ${theme.gridUnit}px`};
+        margin: 0;
+        width: 120px;
+      }
+
+      &:disabled {
+        background-color: ${({ theme }) => theme.colors.grayscale.light2};
+        color: ${({ theme }) => theme.colors.grayscale.base};
+      }
+      &:nth-of-type(2) {
+        margin: 0;
+        border-radius: ${({ theme }) =>
+          `0 ${theme.gridUnit}px ${theme.gridUnit}px 0`};
+        width: ${({ theme }) => theme.gridUnit * 9}px;
+        &:before,
+        &:hover:before {
+          border-left: 1px solid ${({ theme }) => theme.colors.grayscale.light5};
+          content: '';
+          display: block;
+          height: ${({ theme }) => theme.gridUnit * 8}px;
+          margin: 0;
+          position: absolute;
+          width: ${({ theme }) => theme.gridUnit * 0.25}px;
+        }
+
+        &:disabled:before {
+          border-left: 1px solid ${({ theme }) => theme.colors.grayscale.base};
+        }
+      }
+    }
+  }
+`;
+
+export interface DropdownButtonProps {
+  overlay: ReactElement;
   tooltip?: string;
-  tooltipPlacement?: TooltipPlacement;
-};
+  placement?: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
+  buttonsRender?: ((buttons: ReactNode[]) => ReactNode[]) | undefined;
+}
 
 export const DropdownButton = ({
-  dropdownRender,
+  overlay,
   tooltip,
-  tooltipPlacement,
-  children,
+  placement,
   ...rest
 }: DropdownButtonProps) => {
-  const theme = useTheme();
-  const { type: buttonType } = rest;
-  // divider implementation for default (non-primary) buttons
-  const defaultBtnCss = css`
-    ${(!buttonType || buttonType === 'default') &&
-    `.antd5-dropdown-trigger {
-      position: relative;
-      &:before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 1px;
-        height: 100%;
-        background-color: ${theme.colors.grayscale.light2};
-      }
-      .anticon {
-        vertical-align: middle;
-      }
-    }`}
-  `;
-  const button = (
-    <Dropdown.Button
-      dropdownRender={dropdownRender}
-      {...rest}
-      css={[
-        defaultBtnCss,
-        css`
-          .antd5-btn {
-            height: 30px;
-            box-shadow: none;
-            font-size: ${theme.typography.sizes.s}px;
-            font-weight: ${theme.typography.weights.bold};
-          }
-        `,
-      ]}
-    >
-      {children}
-    </Dropdown.Button>
+  const buildButton = (
+    props: {
+      buttonsRender?: DropdownButtonProps['buttonsRender'];
+    } = {},
+  ) => (
+    <StyledDropdownButton>
+      <AntdDropdown.Button overlay={overlay} {...rest} {...props} />
+    </StyledDropdownButton>
   );
   if (tooltip) {
-    return (
-      <Tooltip
-        placement={tooltipPlacement}
-        id={`${kebabCase(tooltip)}-tooltip`}
-        title={tooltip}
-      >
-        {button}
-      </Tooltip>
-    );
+    return buildButton({
+      buttonsRender: ([leftButton, rightButton]) => [
+        <AntdTooltip
+          placement={placement}
+          id={`${kebabCase(tooltip)}-tooltip`}
+          title={tooltip}
+        >
+          {leftButton}
+        </AntdTooltip>,
+        rightButton,
+      ],
+    });
   }
-  return button;
+  return buildButton();
 };

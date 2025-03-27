@@ -34,7 +34,7 @@ import { FilterControlProps } from './types';
 import { FilterCardPlacement } from '../../FilterCard/types';
 import { useIsFilterInScope } from '../../state';
 
-const FilterStyledIcon = styled.div`
+const StyledIcon = styled.div`
   position: absolute;
   right: 0;
 `;
@@ -207,9 +207,8 @@ const DescriptionToolTip = ({ description }: { description: string }) => (
         textOverflow: 'ellipsis',
         whiteSpace: 'normal',
       }}
+      getPopupContainer={trigger => trigger.parentElement as HTMLElement}
     >
-      {/* TODO: Remove fa-icon */}
-      {/* eslint-disable-next-line icons/no-fa-icons-usage */}
       <i
         className="fa fa-info-circle text-muted"
         css={(theme: SupersetTheme) => ({
@@ -254,17 +253,14 @@ const FilterControl = ({
   const label = useMemo(
     () => (
       <FilterControlTitleBox>
-        <FilterControlTitle
-          id={`filter-name-${filter.id}`}
-          data-test="filter-control-name"
-        >
+        <FilterControlTitle data-test="filter-control-name">
           {name}
         </FilterControlTitle>
         {isRequired && <RequiredFieldIndicator />}
         {filter.description?.trim() && (
           <DescriptionToolTip description={filter.description} />
         )}
-        <FilterStyledIcon data-test="filter-icon">{icon}</FilterStyledIcon>
+        <StyledIcon data-test="filter-icon">{icon}</StyledIcon>
       </FilterControlTitleBox>
     ),
     [
@@ -319,7 +315,7 @@ const FilterControl = ({
           <div>
             <FormItem
               label={label}
-              htmlFor={filter.id}
+              aria-label={name}
               required={filter?.controlValues?.enableEmptyFilter}
               validateStatus={validateStatus}
             >

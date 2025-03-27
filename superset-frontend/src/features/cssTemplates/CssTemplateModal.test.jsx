@@ -62,11 +62,11 @@ describe('CssTemplateModal', () => {
   });
 
   it('renders', () => {
-    expect(wrapper.find(CssTemplateModal)).toBeTruthy();
+    expect(wrapper.find(CssTemplateModal)).toExist();
   });
 
   it('renders a Modal', () => {
-    expect(wrapper.find(Modal)).toBeTruthy();
+    expect(wrapper.find(Modal)).toExist();
   });
 
   it('renders add header when no css template is included', async () => {
@@ -83,10 +83,10 @@ describe('CssTemplateModal', () => {
   });
 
   it('renders input elements for template name', () => {
-    expect(wrapper.find('input[name="template_name"]')).toBeTruthy();
+    expect(wrapper.find('input[name="template_name"]')).toExist();
   });
 
   it('renders css editor for css', () => {
-    expect(wrapper.find(CssEditor)).toBeTruthy();
+    expect(wrapper.find(CssEditor)).toExist();
   });
 });

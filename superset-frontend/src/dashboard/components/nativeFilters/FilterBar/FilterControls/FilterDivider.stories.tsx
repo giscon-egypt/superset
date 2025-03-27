@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { css } from '@superset-ui/core';
+import { css } from '@emotion/react';
 import { FilterBarOrientation } from 'src/dashboard/types';
 import FilterDivider from './FilterDivider';
 import { FilterDividerProps } from './types';

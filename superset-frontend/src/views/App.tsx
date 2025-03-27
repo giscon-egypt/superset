@@ -25,17 +25,14 @@ import {
   useLocation,
 } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
-import { css } from '@superset-ui/core';
 import { GlobalStyles } from 'src/GlobalStyles';
 import ErrorBoundary from 'src/components/ErrorBoundary';
 import Loading from 'src/components/Loading';
-import { Layout } from 'src/components';
 import Menu from 'src/features/home/Menu';
 import getBootstrapData from 'src/utils/getBootstrapData';
 import ToastContainer from 'src/components/MessageToasts/ToastContainer';
 import setupApp from 'src/setup/setupApp';
 import setupPlugins from 'src/setup/setupPlugins';
-import { setupAGGridModules } from 'src/setup/setupAGGridModules';
 import { routes, isFrontendRoute } from 'src/views/routes';
 import { Logger, LOG_ACTIONS_SPA_NAVIGATION } from 'src/logger/LogUtils';
 import setupExtensions from 'src/setup/setupExtensions';
@@ -47,7 +44,6 @@ import { ScrollToTop } from './ScrollToTop';
 setupApp();
 setupPlugins();
 setupExtensions();
-setupAGGridModules();
 
 const bootstrapData = getBootstrapData();
 
@@ -86,20 +82,9 @@ const App = () => (
         {routes.map(({ path, Component, props = {}, Fallback = Loading }) => (
           <Route path={path} key={path}>
             <Suspense fallback={<Fallback />}>
-              <Layout.Content
-                css={css`
-                  display: flex;
-                  flex-direction: column;
-                `}
-              >
-                <ErrorBoundary
-                  css={css`
-                    margin: 16px;
-                  `}
-                >
-                  <Component user={bootstrapData.user} {...props} />
-                </ErrorBoundary>
-              </Layout.Content>
+              <ErrorBoundary>
+                <Component user={bootstrapData.user} {...props} />
+              </ErrorBoundary>
             </Suspense>
           </Route>
         ))}

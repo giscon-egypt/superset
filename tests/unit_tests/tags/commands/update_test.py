@@ -73,7 +73,7 @@ def session_with_data(session: Session):
     session.add(dashboard_obj)
     session.add(tag)
     session.commit()
-    return session
+    yield session
 
 
 def test_update_command_success(session_with_data: Session, mocker: MockerFixture):

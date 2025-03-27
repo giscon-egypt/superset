@@ -39,7 +39,7 @@ export type ControlHeaderProps = {
   tooltipOnClick?: () => void;
 };
 
-export function ControlHeader({
+export default function ControlHeader({
   name,
   description,
   label,
@@ -105,8 +105,6 @@ export function ControlHeader({
           {warning && (
             <span>
               <Tooltip id="error-tooltip" placement="top" title={warning}>
-                {/* TODO: Remove fa-icon */}
-                {/* eslint-disable-next-line icons/no-fa-icons-usage */}
                 <i className="fa fa-exclamation-circle text-warning" />
               </Tooltip>{' '}
             </span>
@@ -114,8 +112,6 @@ export function ControlHeader({
           {danger && (
             <span>
               <Tooltip id="error-tooltip" placement="top" title={danger}>
-                {/* TODO: Remove fa-icon */}
-                {/* eslint-disable-next-line icons/no-fa-icons-usage */}
                 <i className="fa fa-exclamation-circle text-danger" />
               </Tooltip>{' '}
             </span>
@@ -127,8 +123,6 @@ export function ControlHeader({
                 placement="top"
                 title={validationErrors.join(' ')}
               >
-                {/* TODO: Remove fa-icon */}
-                {/* eslint-disable-next-line icons/no-fa-icons-usage */}
                 <i className="fa fa-exclamation-circle text-danger" />
               </Tooltip>{' '}
             </span>

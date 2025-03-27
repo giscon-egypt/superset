@@ -64,7 +64,7 @@ function Footer({
   const createLogAction = (dataset: Partial<DatasetObject>) => {
     let totalCount = 0;
     const value = Object.keys(dataset).reduce((total, key) => {
-      if (INPUT_FIELDS.includes(key) && dataset[key as keyof DatasetObject]) {
+      if (INPUT_FIELDS.includes(key) && dataset[key]) {
         totalCount += 1;
       }
       return totalCount;

@@ -17,7 +17,6 @@
 
 from __future__ import annotations
 
-import copy
 import enum
 import logging
 import re
@@ -32,11 +31,9 @@ from deprecation import deprecated
 from sqlglot import exp
 from sqlglot.dialects.dialect import Dialect, Dialects
 from sqlglot.errors import ParseError
-from sqlglot.optimizer.pushdown_predicates import pushdown_predicates
 from sqlglot.optimizer.scope import Scope, ScopeType, traverse_scope
 
 from superset.exceptions import SupersetParseError
-from superset.sql.dialects.firebolt import Firebolt
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +60,7 @@ SQLGLOT_DIALECTS = {
     # "elasticsearch": ???
     # "exa": ???
     # "firebird": ???
-    "firebolt": Firebolt,
+    # "firebolt": ???
     "gsheets": Dialects.SQLITE,
     "hana": Dialects.POSTGRES,
     "hive": Dialects.HIVE,
@@ -82,7 +79,7 @@ SQLGLOT_DIALECTS = {
     "presto": Dialects.PRESTO,
     "pydoris": Dialects.DORIS,
     "redshift": Dialects.REDSHIFT,
-    "risingwave": Dialects.RISINGWAVE,
+    # "risingwave": ???
     # "rockset": ???
     "shillelagh": Dialects.SQLITE,
     "snowflake": Dialects.SNOWFLAKE,
@@ -94,7 +91,6 @@ SQLGLOT_DIALECTS = {
     "teradatasql": Dialects.TERADATA,
     "trino": Dialects.TRINO,
     "vertica": Dialects.POSTGRES,
-    "yql": Dialects.CLICKHOUSE,
 }
 
 
@@ -227,12 +223,6 @@ class BaseSQLStatement(Generic[InternalRepresentation]):
         Check if the statement mutates data (DDL/DML).
 
         :return: True if the statement mutates data.
-        """
-        raise NotImplementedError()
-
-    def optimize(self) -> BaseSQLStatement[InternalRepresentation]:
-        """
-        Return optimized statement.
         """
         raise NotImplementedError()
 
@@ -410,7 +400,7 @@ class SQLStatement(BaseSQLStatement[exp.Expression]):
 
         return self._fallback_formatting()
 
-    @deprecated(deprecated_in="4.0")
+    @deprecated(deprecated_in="4.0", removed_in="5.0")
     def _fallback_formatting(self) -> str:
         """
         Format SQL without a specific dialect.
@@ -439,19 +429,6 @@ class SQLStatement(BaseSQLStatement[exp.Expression]):
             for set_item in self._parsed.find_all(exp.SetItem)
             for eq in set_item.find_all(exp.EQ)
         }
-
-    def optimize(self) -> SQLStatement:
-        """
-        Return optimized statement.
-        """
-        # only optimize statements that have a custom dialect
-        if not self._dialect:
-            return SQLStatement(self._sql, self.engine, self._parsed.copy())
-
-        optimized = pushdown_predicates(self._parsed, dialect=self._dialect)
-        sql = optimized.sql(dialect=self._dialect)
-
-        return SQLStatement(sql, self.engine, optimized)
 
 
 class KQLSplitState(enum.Enum):
@@ -575,7 +552,7 @@ class KustoKQLStatement(BaseSQLStatement[str]):
             | join (PopulationData) on State
             | project State, Population, TotalInjuries = InjuriesDirect + InjuriesIndirect
 
-        """  # noqa: E501
+        """
         logger.warning(
             "Kusto KQL doesn't support table extraction. This means that data access "
             "roles will not be enforced by Superset in the database."
@@ -610,14 +587,6 @@ class KustoKQLStatement(BaseSQLStatement[str]):
         :return: True if the statement mutates data.
         """
         return self._parsed.startswith(".") and not self._parsed.startswith(".show")
-
-    def optimize(self) -> KustoKQLStatement:
-        """
-        Return optimized statement.
-
-        Kusto KQL doesn't support optimization, so this method is a no-op.
-        """
-        return KustoKQLStatement(self._sql, self.engine, self._parsed)
 
 
 class SQLScript:
@@ -672,17 +641,6 @@ class SQLScript:
         :return: True if the script contains mutating statements
         """
         return any(statement.is_mutating() for statement in self.statements)
-
-    def optimize(self) -> SQLScript:
-        """
-        Return optimized script.
-        """
-        script = copy.deepcopy(self)
-        script.statements = [  # type: ignore
-            statement.optimize() for statement in self.statements
-        ]
-
-        return script
 
 
 def extract_tables_from_statement(

@@ -304,21 +304,6 @@ class ChartCacheScreenshotResponseSchema(Schema):
     image_url = fields.String(
         metadata={"description": "The url to fetch the screenshot"}
     )
-    task_status = fields.String(
-        metadata={"description": "The status of the async screenshot"}
-    )
-    task_updated_at = fields.String(
-        metadata={"description": "The timestamp of the last change in status"}
-    )
-
-
-class ChartGetCachedScreenshotResponseSchema(Schema):
-    task_status = fields.String(
-        metadata={"description": "The status of the async screenshot"}
-    )
-    task_updated_at = fields.String(
-        metadata={"description": "The timestamp of the last change in status"}
-    )
 
 
 class ChartDataColumnSchema(Schema):
@@ -335,7 +320,7 @@ class ChartDataAdhocMetricSchema(Schema):
     Ad-hoc metrics are used to define metrics outside the datasource.
     """
 
-    expressionType = fields.String(  # noqa: N815
+    expressionType = fields.String(
         metadata={"description": "Simple or SQL metric", "example": "SQL"},
         required=True,
         validate=validate.OneOf(choices=("SIMPLE", "SQL")),
@@ -350,7 +335,7 @@ class ChartDataAdhocMetricSchema(Schema):
         ),
     )
     column = fields.Nested(ChartDataColumnSchema)
-    sqlExpression = fields.String(  # noqa: N815
+    sqlExpression = fields.String(
         metadata={
             "description": "The metric as defined by a SQL aggregate expression. "
             "Only required for SQL expression type.",
@@ -364,14 +349,14 @@ class ChartDataAdhocMetricSchema(Schema):
             "example": "Weighted observations",
         },
     )
-    hasCustomLabel = fields.Boolean(  # noqa: N815
+    hasCustomLabel = fields.Boolean(
         metadata={
-            "description": "When false, the label will be automatically generated based "  # noqa: E501
-            "on the aggregate expression. When true, a custom label has to be specified.",  # noqa: E501
+            "description": "When false, the label will be automatically generated based "
+            "on the aggregate expression. When true, a custom label has to be specified.",
             "example": True,
         },
     )
-    optionName = fields.String(  # noqa: N815
+    optionName = fields.String(
         metadata={
             "description": "Unique identifier. Can be any string value, as long as all "
             "metrics have a unique identifier. If undefined, a random name"
@@ -379,15 +364,15 @@ class ChartDataAdhocMetricSchema(Schema):
             "example": "metric_aec60732-fac0-4b17-b736-93f1a5c93e30",
         },
     )
-    timeGrain = fields.String(  # noqa: N815
+    timeGrain = fields.String(
         metadata={
             "description": "Optional time grain for temporal filters",
             "example": "PT1M",
         },
     )
-    isExtra = fields.Boolean(  # noqa: N815
+    isExtra = fields.Boolean(
         metadata={
-            "description": "Indicates if the filter has been added by a filter component "  # noqa: E501
+            "description": "Indicates if the filter has been added by a filter component "
             "as opposed to being a part of the original query."
         }
     )
@@ -452,8 +437,8 @@ class ChartDataRollingOptionsSchema(ChartDataPostProcessingOperationOptionsSchem
             metadata={
                 "description": "columns on which to perform rolling, mapping source "
                 "column to target column. For instance, `{'y': 'y'}` will replace the "
-                "column `y` with the rolling value in `y`, while `{'y': 'y2'}` will add "  # noqa: E501
-                "a column `y2` based on rolling values calculated from `y`, leaving the "  # noqa: E501
+                "column `y` with the rolling value in `y`, while `{'y': 'y2'}` will add "
+                "a column `y2` based on rolling values calculated from `y`, leaving the "
                 "original column `y` unchanged.",
                 "example": {"weekly_rolling_sales": "sales"},
             },
@@ -556,7 +541,7 @@ class ChartDataSelectOptionsSchema(ChartDataPostProcessingOperationOptionsSchema
     columns = fields.List(
         fields.String(),
         metadata={
-            "description": "Columns which to select from the input data, in the desired "  # noqa: E501
+            "description": "Columns which to select from the input data, in the desired "
             "order. If columns are renamed, the original column name should be "
             "referenced here.",
             "example": ["country", "gender", "age"],
@@ -706,8 +691,8 @@ class ChartDataBoxplotOptionsSchema(ChartDataPostProcessingOperationOptionsSchem
             "references to datasource metrics (strings), or ad-hoc metrics"
             "which are defined only within the query object. See "
             "`ChartDataAdhocMetricSchema` for the structure of ad-hoc metrics. "
-            "When metrics is undefined or null, the query is executed without a groupby. "  # noqa: E501
-            "However, when metrics is an array (length >= 0), a groupby clause is added "  # noqa: E501
+            "When metrics is undefined or null, the query is executed without a groupby. "
+            "However, when metrics is an array (length >= 0), a groupby clause is added "
             "to the query."
         },
         allow_none=True,
@@ -801,7 +786,8 @@ class ChartDataPivotOptionsSchema(ChartDataPostProcessingOperationOptionsSchema)
     )
     marginal_distribution_name = fields.String(
         metadata={
-            "description": "Name of marginal distribution row/column. (default: `All`)"
+            "description": "Name of marginal distribution row/column. "
+            "(default: `All`)"
         },
     )
     aggregates = ChartDataAggregateConfigField()
@@ -921,7 +907,7 @@ class ChartDataPostProcessingOperationSchema(Schema):
 class ChartDataFilterSchema(Schema):
     col = fields.Raw(
         metadata={
-            "description": "The column to filter by. Can be either a string (physical or "  # noqa: E501
+            "description": "The column to filter by. Can be either a string (physical or "
             "saved expression) or an object (adhoc column)",
             "example": "country",
         },
@@ -948,7 +934,7 @@ class ChartDataFilterSchema(Schema):
             "example": "PT1M",
         },
     )
-    isExtra = fields.Boolean(  # noqa: N815
+    isExtra = fields.Boolean(
         metadata={
             "description": "Indicates if the filter has been added by a filter "
             "component as opposed to being a part of the original query."
@@ -1009,7 +995,7 @@ class ChartDataExtrasSchema(Schema):
 
 
 class AnnotationLayerSchema(Schema):
-    annotationType = fields.String(  # noqa: N815
+    annotationType = fields.String(
         metadata={"description": "Type of annotation layer"},
         validate=validate.OneOf(choices=[ann.value for ann in AnnotationType]),
     )
@@ -1017,20 +1003,20 @@ class AnnotationLayerSchema(Schema):
         metadata={"description": "Layer color"},
         allow_none=True,
     )
-    descriptionColumns = fields.List(  # noqa: N815
+    descriptionColumns = fields.List(
         fields.String(),
         metadata={
             "description": "Columns to use as the description. If none are provided, "
             "all will be shown."
         },
     )
-    hideLine = fields.Boolean(  # noqa: N815
+    hideLine = fields.Boolean(
         metadata={
             "description": "Should line be hidden. Only applies to line annotations"
         },
         allow_none=True,
     )
-    intervalEndColumn = fields.String(  # noqa: N815
+    intervalEndColumn = fields.String(
         metadata={
             "description": "Column containing end of interval. "
             "Only applies to interval layers"
@@ -1060,17 +1046,17 @@ class AnnotationLayerSchema(Schema):
     show = fields.Boolean(
         metadata={"description": "Should the layer be shown"}, required=True
     )
-    showLabel = fields.Boolean(  # noqa: N815
+    showLabel = fields.Boolean(
         metadata={"description": "Should the label always be shown"},
         allow_none=True,
     )
-    showMarkers = fields.Boolean(  # noqa: N815
+    showMarkers = fields.Boolean(
         metadata={
             "description": "Should markers be shown. Only applies to line annotations."
         },
         required=True,
     )
-    sourceType = fields.String(  # noqa: N815
+    sourceType = fields.String(
         metadata={"description": "Type of source for annotation data"},
         validate=validate.OneOf(
             choices=(
@@ -1092,11 +1078,11 @@ class AnnotationLayerSchema(Schema):
             )
         ),
     )
-    timeColumn = fields.String(  # noqa: N815
+    timeColumn = fields.String(
         metadata={"description": "Column with event date or interval start date"},
         allow_none=True,
     )
-    titleColumn = fields.String(  # noqa: N815
+    titleColumn = fields.String(
         metadata={"description": "Column with title"},
         allow_none=True,
     )
@@ -1194,7 +1180,7 @@ class ChartDataQueryObjectSchema(Schema):
         fields.Nested(ChartDataPostProcessingOperationSchema, allow_none=True),
         allow_none=True,
         metadata={
-            "description": "Post processing operations to be applied to the result set. "  # noqa: E501
+            "description": "Post processing operations to be applied to the result set. "
             "Operations are applied to the result set in sequential order."
         },
     )
@@ -1434,7 +1420,7 @@ class ChartDataResponseResult(Schema):
     )
     cache_timeout = fields.Integer(
         metadata={
-            "description": "Cache timeout in following order: custom timeout, datasource "  # noqa: E501
+            "description": "Cache timeout in following order: custom timeout, datasource "
             "timeout, cache default timeout, config default cache timeout."
         },
         required=True,
@@ -1545,7 +1531,7 @@ class GetFavStarIdsSchema(Schema):
     result = fields.List(
         fields.Nested(ChartFavStarResponseResult),
         metadata={
-            "description": "A list of results for each corresponding chart in the request"  # noqa: E501
+            "description": "A list of results for each corresponding chart in the request"
         },
     )
 
@@ -1573,7 +1559,7 @@ class ChartCacheWarmUpRequestSchema(Schema):
     )
     dashboard_id = fields.Integer(
         metadata={
-            "description": "The ID of the dashboard to get filters for when warming cache"  # noqa: E501
+            "description": "The ID of the dashboard to get filters for when warming cache"
         }
     )
     extra_filters = fields.String(

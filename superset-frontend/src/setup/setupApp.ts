@@ -95,6 +95,6 @@ export default function setupApp() {
   window.jQuery = $;
   require('bootstrap');
 
-  // set up app wide custom error messages
+  // setup appwide custom error messages
   setupErrorMessages();
 }

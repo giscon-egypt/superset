@@ -17,7 +17,7 @@
  * under the License.
  */
 import { action } from '@storybook/addon-actions';
-import { Dropdown } from 'src/components/Dropdown';
+import { AntdDropdown } from 'src/components';
 import { Menu } from 'src/components/Menu';
 import Icons from 'src/components/Icons';
 import FaveStar from 'src/components/FaveStar';
@@ -70,20 +70,20 @@ export const SupersetListViewCard = ({
           saveFaveStar={action('saveFaveStar')}
           isStarred={isStarred}
         />
-        <Dropdown
-          dropdownRender={() => (
+        <AntdDropdown
+          overlay={
             <Menu>
               <Menu.Item role="button" tabIndex={0} onClick={action('Delete')}>
-                <Icons.DeleteOutlined /> Delete
+                <Icons.Trash /> Delete
               </Menu.Item>
               <Menu.Item role="button" tabIndex={0} onClick={action('Edit')}>
-                <Icons.EditOutlined /> Edit
+                <Icons.EditAlt /> Edit
               </Menu.Item>
             </Menu>
-          )}
+          }
         >
-          <Icons.EllipsisOutlined />
-        </Dropdown>
+          <Icons.MoreHoriz />
+        </AntdDropdown>
       </ListViewCard.Actions>
     }
   />

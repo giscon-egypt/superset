@@ -17,12 +17,12 @@
  * under the License.
  */
 
+import userEvent from '@testing-library/user-event';
 import {
   fireEvent,
   render,
   screen,
   waitFor,
-  userEvent,
 } from 'spec/helpers/testing-library';
 import DashboardComponent from 'src/dashboard/containers/DashboardComponent';
 import EditableTitle from 'src/components/EditableTitle';
@@ -90,7 +90,6 @@ const createProps = () => ({
     type: 'TABS',
   },
   editMode: false,
-  embeddedMode: false,
   undoLength: 0,
   redoLength: 0,
   filters: {},
@@ -117,7 +116,7 @@ test('Render tab (no content)', () => {
     useDnd: true,
   });
   expect(screen.getByText('🚀 Aspiring Developers')).toBeInTheDocument();
-  expect(EditableTitle).toHaveBeenCalledTimes(1);
+  expect(EditableTitle).toBeCalledTimes(1);
   expect(getByTestId('dragdroppable-object')).toBeInTheDocument();
 });
 
@@ -130,7 +129,7 @@ test('Render tab (no content) editMode:true', () => {
     useDnd: true,
   });
   expect(screen.getByText('🚀 Aspiring Developers')).toBeInTheDocument();
-  expect(EditableTitle).toHaveBeenCalledTimes(1);
+  expect(EditableTitle).toBeCalledTimes(1);
   expect(getByTestId('dragdroppable-object')).toBeInTheDocument();
 });
 
@@ -197,10 +196,6 @@ test('Drop on a tab', async () => {
   );
 
   fireEvent.dragStart(screen.getByText('Dashboard Component'));
-  fireEvent.dragOver(screen.getByText('Next Tab'));
-  await waitFor(() =>
-    expect(screen.getByTestId('title-drop-indicator')).toBeVisible(),
-  );
   fireEvent.drop(screen.getByText('Next Tab'));
   await waitFor(() => expect(mockOnDropOnTab).toHaveBeenCalledTimes(2));
   expect(mockOnDropOnTab).toHaveBeenLastCalledWith(
@@ -223,12 +218,12 @@ test('Edit table title', () => {
     useDnd: true,
   });
 
-  expect(EditableTitle).toHaveBeenCalledTimes(1);
+  expect(EditableTitle).toBeCalledTimes(1);
   expect(getByTestId('dragdroppable-object')).toBeInTheDocument();
 
-  expect(props.updateComponents).not.toHaveBeenCalled();
+  expect(props.updateComponents).not.toBeCalled();
   userEvent.click(screen.getByText('🚀 Aspiring Developers'));
-  expect(props.updateComponents).toHaveBeenCalled();
+  expect(props.updateComponents).toBeCalled();
 });
 
 test('Render tab (with content)', () => {
@@ -238,7 +233,7 @@ test('Render tab (with content)', () => {
     useRedux: true,
     useDnd: true,
   });
-  expect(DashboardComponent).toHaveBeenCalledTimes(2);
+  expect(DashboardComponent).toBeCalledTimes(2);
   expect(DashboardComponent).toHaveBeenNthCalledWith(
     1,
     expect.objectContaining({
@@ -288,7 +283,7 @@ test('Render tab content with no children', () => {
   expect(
     screen.getByText('There are no components added to this tab'),
   ).toBeVisible();
-  expect(screen.getByRole('img', { name: 'empty' })).toBeVisible();
+  expect(screen.getByAltText('empty')).toBeVisible();
   expect(screen.queryByText('edit mode')).not.toBeInTheDocument();
 });
 
@@ -317,7 +312,7 @@ test('Render tab (with content) editMode:true', () => {
     useRedux: true,
     useDnd: true,
   });
-  expect(DashboardComponent).toHaveBeenCalledTimes(2);
+  expect(DashboardComponent).toBeCalledTimes(2);
   expect(DashboardComponent).toHaveBeenNthCalledWith(
     1,
     expect.objectContaining({
@@ -370,14 +365,14 @@ test('Should call "handleDrop" and "handleTopDropTargetDrop"', () => {
     },
   );
 
-  expect(props.handleComponentDrop).not.toHaveBeenCalled();
+  expect(props.handleComponentDrop).not.toBeCalled();
   userEvent.click(getAllByTestId('MockDroppable')[0]);
-  expect(props.handleComponentDrop).toHaveBeenCalledTimes(1);
-  expect(props.onDropOnTab).not.toHaveBeenCalled();
+  expect(props.handleComponentDrop).toBeCalledTimes(1);
+  expect(props.onDropOnTab).not.toBeCalled();
   rerender(<Tab {...props} />);
   userEvent.click(getAllByTestId('MockDroppable')[1]);
-  expect(props.onDropOnTab).toHaveBeenCalledTimes(1);
-  expect(props.handleComponentDrop).toHaveBeenCalledTimes(2);
+  expect(props.onDropOnTab).toBeCalledTimes(1);
+  expect(props.handleComponentDrop).toBeCalledTimes(2);
 });
 
 test('Render tab content with no children, editMode: true, canEdit: true', () => {
@@ -397,49 +392,11 @@ test('Render tab content with no children, editMode: true, canEdit: true', () =>
   expect(
     screen.getByText('Drag and drop components to this tab'),
   ).toBeVisible();
-  expect(screen.getByRole('img', { name: 'empty' })).toBeVisible();
+  expect(screen.getByAltText('empty')).toBeVisible();
   expect(
     screen.getByRole('link', { name: 'create a new chart' }),
   ).toBeVisible();
   expect(
     screen.getByRole('link', { name: 'create a new chart' }),
   ).toHaveAttribute('href', '/chart/add?dashboard_id=23');
-});
-
-test('AnchorLink renders in view mode', () => {
-  const props = createProps();
-  props.renderType = 'RENDER_TAB';
-
-  render(<Tab {...props} />, {
-    useRedux: true,
-    useDnd: true,
-  });
-
-  expect(screen.queryByTestId('anchor-link')).toBeInTheDocument();
-});
-
-test('AnchorLink does not render in edit mode', () => {
-  const props = createProps();
-  props.editMode = true;
-  props.renderType = 'RENDER_TAB';
-
-  render(<Tab {...props} />, {
-    useRedux: true,
-    useDnd: true,
-  });
-
-  expect(screen.queryByTestId('anchor-link')).not.toBeInTheDocument();
-});
-
-test('AnchorLink does not render in embedded mode', () => {
-  const props = createProps();
-  props.embeddedMode = true;
-  props.renderType = 'RENDER_TAB';
-
-  render(<Tab {...props} />, {
-    useRedux: true,
-    useDnd: true,
-  });
-
-  expect(screen.queryByTestId('anchor-link')).not.toBeInTheDocument();
 });

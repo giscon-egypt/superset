@@ -18,18 +18,18 @@ from marshmallow import fields, Schema
 
 
 class DashboardPermalinkStateSchema(Schema):
-    dataMask = fields.Dict(  # noqa: N815
+    dataMask = fields.Dict(
         required=False,
         allow_none=True,
         metadata={"description": "Data mask used for native filter state"},
     )
-    activeTabs = fields.List(  # noqa: N815
+    activeTabs = fields.List(
         fields.String(),
         required=False,
         allow_none=True,
         metadata={"description": "Current active dashboard tabs"},
     )
-    urlParams = fields.List(  # noqa: N815
+    urlParams = fields.List(
         fields.Tuple(
             (
                 fields.String(
@@ -55,7 +55,7 @@ class DashboardPermalinkStateSchema(Schema):
 
 
 class DashboardPermalinkSchema(Schema):
-    dashboardId = fields.String(  # noqa: N815
+    dashboardId = fields.String(
         required=True,
         allow_none=False,
         metadata={"description": "The id or slug of the dashboard"},

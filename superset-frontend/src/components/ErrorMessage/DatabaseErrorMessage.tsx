@@ -34,16 +34,12 @@ interface DatabaseErrorExtra {
 
 function DatabaseErrorMessage({
   error,
-  source,
+  source = 'dashboard',
   subtitle,
 }: ErrorMessageComponentProps<DatabaseErrorExtra | null>) {
   const { extra, level, message } = error;
 
-  const isVisualization = ['dashboard', 'explore'].includes(source || '');
-  const [firstLine, ...remainingLines] = message.split('\n');
-  const alertMessage = firstLine;
-  const alertDescription =
-    remainingLines.length > 0 ? remainingLines.join('\n') : null;
+  const isVisualization = ['dashboard', 'explore'].includes(source);
 
   const body = extra && (
     <>
@@ -79,13 +75,23 @@ function DatabaseErrorMessage({
     </>
   );
 
+  const copyText = extra?.issue_codes
+    ? t('%(message)s\nThis may be triggered by: \n%(issues)s', {
+        message,
+        issues: extra.issue_codes
+          .map(issueCode => issueCode.message)
+          .join('\n'),
+      })
+    : message;
+
   return (
     <ErrorAlert
-      errorType={t('%s Error', extra?.engine_name || t('DB engine'))}
-      message={alertMessage}
-      description={alertDescription}
-      type={level}
-      descriptionDetails={body}
+      title={t('%s Error', extra?.engine_name || t('DB engine'))}
+      subtitle={subtitle}
+      level={level}
+      source={source}
+      copyText={copyText}
+      body={body}
     />
   );
 }

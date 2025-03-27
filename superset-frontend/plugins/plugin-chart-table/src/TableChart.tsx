@@ -61,7 +61,7 @@ import {
   PlusCircleOutlined,
   TableOutlined,
 } from '@ant-design/icons';
-import { isEmpty } from 'lodash';
+import { isEmpty, isNumber } from 'lodash';
 import {
   ColorSchemeEnum,
   DataColumnMeta,
@@ -197,36 +197,33 @@ function SelectPageSize({
   onChange,
 }: SelectPageSizeRendererProps) {
   return (
-    <span
-      className="dt-select-page-size form-inline"
-      role="group"
-      aria-label={t('Select page size')}
-    >
-      <label htmlFor="pageSizeSelect" className="sr-only">
-        {t('Select page size')}
-      </label>
-      {t('Show')}{' '}
+    <span className="dt-select-page-size form-inline">
+      {t('page_size.show')}{' '}
       <select
-        id="pageSizeSelect"
         className="form-control input-sm"
         value={current}
+        onBlur={() => {}}
         onChange={e => {
           onChange(Number((e.target as HTMLSelectElement).value));
         }}
-        aria-label={t('Show entries per page')}
       >
         {options.map(option => {
           const [size, text] = Array.isArray(option)
             ? option
             : [option, option];
+          const sizeLabel = size === 0 ? t('all') : size;
           return (
-            <option key={size} value={size}>
+            <option
+              aria-label={t('Show %s entries', sizeLabel)}
+              key={size}
+              value={size}
+            >
               {text}
             </option>
           );
         })}
       </select>{' '}
-      {t('entries per page')}
+      {t('page_size.entries')}
     </span>
   );
 }
@@ -605,8 +602,6 @@ export default function TableChart<D extends DataRecord = DataRecord>(
       // Calculate the number of placeholder columns needed before the current header
       const startPosition = value[0];
       const colSpan = value.length;
-      // Retrieve the originalLabel from the first column in this group
-      const originalLabel = columnsMeta[value[0]]?.originalLabel || key;
 
       // Add placeholder <th> for columns before this header
       for (let i = currentColumnIndex; i < startPosition; i += 1) {
@@ -622,7 +617,7 @@ export default function TableChart<D extends DataRecord = DataRecord>(
       // Add the current header <th>
       headers.push(
         <th key={`header-${key}`} colSpan={colSpan} style={{ borderBottom: 0 }}>
-          {originalLabel}
+          {key}
           <span
             css={css`
               float: right;
@@ -901,9 +896,7 @@ export default function TableChart<D extends DataRecord = DataRecord>(
                   /* The following classes are added to support custom CSS styling */
                   className={cx(
                     'cell-bar',
-                    typeof value === 'number' && value < 0
-                      ? 'negative'
-                      : 'positive',
+                    isNumber(value) && value < 0 ? 'negative' : 'positive',
                   )}
                   css={cellBarStyles}
                   role="presentation"
@@ -977,7 +970,7 @@ export default function TableChart<D extends DataRecord = DataRecord>(
         ),
         Footer: totals ? (
           i === 0 ? (
-            <th key={`footer-summary-${i}`}>
+            <th>
               <div
                 css={css`
                   display: flex;
@@ -999,7 +992,7 @@ export default function TableChart<D extends DataRecord = DataRecord>(
               </div>
             </th>
           ) : (
-            <td key={`footer-total-${i}`} style={sharedStyle}>
+            <td style={sharedStyle}>
               <strong>{formatColumnValue(column, totals[key])[1]}</strong>
             </td>
           )
@@ -1045,7 +1038,7 @@ export default function TableChart<D extends DataRecord = DataRecord>(
 
   useLayoutEffect(() => {
     // After initial load the table should resize only when the new sizes
-    // Are not only scrollbar updates, otherwise, the table would twitch
+    // Are not only scrollbar updates, otherwise, the table would twicth
     const scrollBarSize = getScrollBarSize();
     const { width: tableWidth, height: tableHeight } = tableSize;
     // Table is increasing its original size

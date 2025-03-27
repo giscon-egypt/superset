@@ -17,7 +17,12 @@
  * under the License.
  */
 import { useMemo, useState } from 'react';
-import { useTheme, t, GenericDataType } from '@superset-ui/core';
+import {
+  ChartDataResponseResult,
+  useTheme,
+  t,
+  GenericDataType,
+} from '@superset-ui/core';
 
 import {
   COLUMN_NAME_ALIASES,
@@ -34,7 +39,7 @@ import ControlHeader from '../../ControlHeader';
 
 export type ColumnConfigControlProps<T extends ColumnConfig> =
   ControlComponentProps<Record<string, T>> & {
-    columnsPropsObject?: { colnames: string[]; coltypes: GenericDataType[] };
+    queryResponse?: ChartDataResponseResult;
     configFormLayout?: ColumnConfigFormLayout;
     appliedColumnNames?: string[];
     width?: number | string;
@@ -50,7 +55,7 @@ const MAX_NUM_COLS = 10;
  * Add per-column config to queried results.
  */
 export default function ColumnConfigControl<T extends ColumnConfig>({
-  columnsPropsObject,
+  queryResponse,
   appliedColumnNames = [],
   value,
   onChange,
@@ -59,7 +64,7 @@ export default function ColumnConfigControl<T extends ColumnConfig>({
   height,
   ...props
 }: ColumnConfigControlProps<T>) {
-  const { colnames: _colnames, coltypes: _coltypes } = columnsPropsObject || {};
+  const { colnames: _colnames, coltypes: _coltypes } = queryResponse || {};
   let colnames: string[] = [];
   let coltypes: GenericDataType[] = [];
   if (appliedColumnNames.length === 0) {
@@ -140,6 +145,7 @@ export default function ColumnConfigControl<T extends ColumnConfig>({
               padding: theme.gridUnit * 2,
               textAlign: 'center',
               cursor: 'pointer',
+              textTransform: 'uppercase',
               fontSize: theme.typography.sizes.xs,
               color: theme.colors.text.label,
               ':hover': {
@@ -150,14 +156,10 @@ export default function ColumnConfigControl<T extends ColumnConfig>({
           >
             {showAllColumns ? (
               <>
-                {/* TODO: Remove fa-icon */}
-                {/* eslint-disable-next-line icons/no-fa-icons-usage */}
                 <i className="fa fa-angle-up" /> &nbsp; {t('Show less columns')}
               </>
             ) : (
               <>
-                {/* TODO: Remove fa-icon */}
-                {/* eslint-disable-next-line icons/no-fa-icons-usage */}
                 <i className="fa fa-angle-down" /> &nbsp;
                 {t('Show all columns')}
               </>

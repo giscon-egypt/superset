@@ -43,7 +43,6 @@ const propTypes = {
   showBubbles: PropTypes.bool,
   linearColorScheme: PropTypes.string,
   color: PropTypes.string,
-  colorScheme: PropTypes.string,
   setDataMask: PropTypes.func,
   onContextMenu: PropTypes.func,
   emitCrossFilters: PropTypes.bool,
@@ -86,24 +85,24 @@ function WorldMap(element, props) {
     .range([1, maxBubbleSize]);
 
   let processedData;
-  let colorFn;
+  let colorScale;
   if (colorBy === ColorBy.Country) {
-    colorFn = CategoricalColorNamespace.getScale(colorScheme);
+    colorScale = CategoricalColorNamespace.getScale(colorScheme);
 
     processedData = filteredData.map(d => ({
       ...d,
       radius: radiusScale(Math.sqrt(d.m2)),
-      fillColor: colorFn(d.name, sliceId),
+      fillColor: colorScale(d.name, sliceId),
     }));
   } else {
-    colorFn = getSequentialSchemeRegistry()
+    colorScale = getSequentialSchemeRegistry()
       .get(linearColorScheme)
       .createLinearScale(d3Extent(filteredData, d => d.m1));
 
     processedData = filteredData.map(d => ({
       ...d,
       radius: radiusScale(Math.sqrt(d.m2)),
-      fillColor: colorFn(d.m1),
+      fillColor: colorScale(d.m1),
     }));
   }
 

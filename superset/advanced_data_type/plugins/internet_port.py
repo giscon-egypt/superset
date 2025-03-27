@@ -94,7 +94,7 @@ def port_translation_func(req: AdvancedDataTypeRequest) -> AdvancedDataTypeRespo
             break
         else:
             resp["display_value"] = ", ".join(
-                map(  # noqa: C417
+                map(
                     lambda x: f"{x['start']} - {x['end']}"
                     if isinstance(x, dict)
                     else str(x),
@@ -104,7 +104,7 @@ def port_translation_func(req: AdvancedDataTypeRequest) -> AdvancedDataTypeRespo
     return resp
 
 
-def port_translate_filter_func(  # noqa: C901
+def port_translate_filter_func(
     col: Column, operator: FilterOperator, values: list[Any]
 ) -> Any:
     """

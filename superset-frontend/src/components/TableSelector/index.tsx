@@ -23,8 +23,7 @@ import {
   useMemo,
   useEffect,
 } from 'react';
-// eslint-disable-next-line no-restricted-imports
-import { SelectValue } from 'antd/lib/select'; // TODO: Remove antd
+import { SelectValue } from 'antd/lib/select';
 
 import {
   styled,
@@ -126,9 +125,9 @@ export const TableOption = ({ table }: { table: Table }) => {
   return (
     <TableLabel title={value}>
       {type === 'view' ? (
-        <Icons.EyeOutlined iconSize="m" />
+        <Icons.Eye iconSize="m" />
       ) : (
-        <Icons.InsertRowAboveOutlined iconSize="m" />
+        <Icons.Table iconSize="m" />
       )}
       {extra?.certification && (
         <CertifiedBadge

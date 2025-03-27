@@ -61,11 +61,11 @@ describe('AnnotationLayerModal', () => {
   });
 
   it('renders', () => {
-    expect(wrapper.find(AnnotationLayerModal)).toBeTruthy();
+    expect(wrapper.find(AnnotationLayerModal)).toExist();
   });
 
   it('renders a Modal', () => {
-    expect(wrapper.find(Modal)).toBeTruthy();
+    expect(wrapper.find(Modal)).toExist();
   });
 
   it('renders add header when no layer is included', async () => {
@@ -82,10 +82,10 @@ describe('AnnotationLayerModal', () => {
   });
 
   it('renders input element for name', () => {
-    expect(wrapper.find('input[name="name"]')).toBeTruthy();
+    expect(wrapper.find('input[name="name"]')).toExist();
   });
 
   it('renders textarea element for description', () => {
-    expect(wrapper.find('textarea[name="descr"]')).toBeTruthy();
+    expect(wrapper.find('textarea[name="descr"]')).toExist();
   });
 });

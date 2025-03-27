@@ -107,7 +107,7 @@ const basicData: = [
   {
     key: 3,
     name: '128 GB SSD',
-    category: 'Harddrive',
+    category: 'Hardrive',
     price: '49.99'
     description: 'Reliable and fast data storage',
   },

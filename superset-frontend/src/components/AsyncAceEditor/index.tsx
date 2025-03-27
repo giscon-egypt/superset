@@ -18,23 +18,26 @@
  */
 import { forwardRef, useEffect, ComponentType } from 'react';
 
-import type {
+import {
   Editor as OrigEditor,
   IEditSession,
   Position,
   TextMode as OrigTextMode,
 } from 'brace';
-import type AceEditor from 'react-ace';
-import type { IAceEditorProps } from 'react-ace';
-
+import AceEditor, { IAceEditorProps } from 'react-ace';
+import { config } from 'ace-builds';
+import { acequire } from 'ace-builds/src-noconflict/ace';
 import AsyncEsmComponent, {
   PlaceholderProps,
 } from 'src/components/AsyncEsmComponent';
 import useEffectEvent from 'src/hooks/useEffectEvent';
+import cssWorkerUrl from 'ace-builds/src-noconflict/worker-css';
 import { useTheme, css } from '@superset-ui/core';
 import { Global } from '@emotion/react';
 
 export { getTooltipHTML } from './Tooltip';
+
+config.setModuleUrl('ace/mode/css_worker', cssWorkerUrl);
 
 export interface AceCompleterKeywordData {
   name: string;
@@ -113,26 +116,7 @@ export default function AsyncAceEditor(
   }: AsyncAceEditorOptions = {},
 ) {
   return AsyncEsmComponent(async () => {
-    const reactAcePromise = import('react-ace');
-    const aceBuildsConfigPromise = import('ace-builds');
-    const cssWorkerUrlPromise = import(
-      'ace-builds/src-min-noconflict/worker-css'
-    );
-    const acequirePromise = import('ace-builds/src-min-noconflict/ace');
-
-    const [
-      { default: ReactAceEditor },
-      { config },
-      { default: cssWorkerUrl },
-      { require: acequire },
-    ] = await Promise.all([
-      reactAcePromise,
-      aceBuildsConfigPromise,
-      cssWorkerUrlPromise,
-      acequirePromise,
-    ]);
-
-    config.setModuleUrl('ace/mode/css_worker', cssWorkerUrl);
+    const { default: ReactAceEditor } = await import('react-ace');
 
     await Promise.all(aceModules.map(x => aceModuleLoaders[x]()));
 

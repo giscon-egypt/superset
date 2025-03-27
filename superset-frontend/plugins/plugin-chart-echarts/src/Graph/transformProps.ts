@@ -297,15 +297,14 @@ export default function transformProps(
   });
 
   const categoryList = [...categories];
+
   const series: GraphSeriesOption[] = [
     {
       zoom: DEFAULT_GRAPH_SERIES_OPTION.zoom,
       type: 'graph',
       categories: categoryList.map(c => ({
         name: c,
-        itemStyle: {
-          color: colorFn(c, sliceId),
-        },
+        itemStyle: { color: colorFn(c, sliceId, colorScheme) },
       })),
       layout,
       force: {

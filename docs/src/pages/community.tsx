@@ -86,7 +86,7 @@ const communityLinks = [
 ];
 
 const StyledJoinCommunity = styled('section')`
-  background-color: var(--ifm-background-color);
+  background-color: var(--ifm-off-section-background);
   border-bottom: 1px solid var(--ifm-border-color);
   .list {
     max-width: 540px;
@@ -118,7 +118,7 @@ const StyledJoinCommunity = styled('section')`
   .description {
     font-size: 14px;
     line-height: 20px;
-    color: var(--ifm-font-base-color);
+    color: var(--ifm-secondary-text);
     margin-top: -8px;
     margin-bottom: 23px;
     ${mq[1]} {
@@ -140,6 +140,22 @@ const StyledCalendarIframe = styled('iframe')`
   border: 0;
   ${mq[1]} {
     width: calc(100% - 40px);
+  }
+`;
+
+const StyledNewsletterIframe = styled('iframe')`
+  display: block;
+  max-width: 1080px;
+  width: calc(100% - 40px);
+  height: 285px;
+  margin: 30px auto 20px;
+  border: 0;
+  @media (max-width: 1200px) {
+    height: 380px;
+  }
+  @media (max-width: 679px) {
+    height: 680px;
+    margin-top: 15px;
   }
 `;
 
@@ -166,9 +182,10 @@ const StyledLink = styled('a')`
 const FinePrint = styled('div')`
   font-size: 14px;
   color: var(--ifm-secondary-text);
-`;
+`
 
 const Community = () => {
+
   const [showCalendar, setShowCalendar] = useState(false); // State to control calendar visibility
 
   const toggleCalendar = () => {
@@ -201,17 +218,14 @@ const Community = () => {
                       className="title"
                       href={url}
                       target="_blank"
-                      rel="noreferrer"
                       aria-label={ariaLabel}
                     >
                       <img className="icon" src={`/img/community/${image}`} />
                     </a>
                   }
                   title={
-                    <a href={url} target="_blank" rel="noreferrer">
-                      <p className="title" style={{ marginBottom: 0 }}>
-                        {title}
-                      </p>
+                    <a className="title" href={url} target="_blank">
+                      {title}
                     </a>
                   }
                   description={<p className="description">{description}</p>}
@@ -232,22 +246,16 @@ const Community = () => {
                 <StyledLink
                   href="https://calendar.google.com/calendar/u/0/r?cid=superset.committers@gmail.com"
                   target="_blank"
-                  rel="noreferrer"
                 >
                   <img src="/img/calendar-icon.svg" alt="calendar-icon" />
                   Subscribe to the Superset Community Calendar
                 </StyledLink>
                 <br />
                 <StyledLink onClick={toggleCalendar}>
-                  <img src="/img/calendar-icon.svg" alt="calendar-icon" />
+                <img src="/img/calendar-icon.svg" alt="calendar-icon" />
                   {showCalendar ? 'Hide Calendar' : 'Display Calendar*'}
                 </StyledLink>
-                {!showCalendar && (
-                  <FinePrint>
-                    <sup>*</sup>Clicking on this link will load and send data
-                    from and to Google.
-                  </FinePrint>
-                )}
+                {!showCalendar  && <FinePrint><sup>*</sup>Clicking on this link will load and send data from and to Google.</FinePrint>}
               </>
             }
           />

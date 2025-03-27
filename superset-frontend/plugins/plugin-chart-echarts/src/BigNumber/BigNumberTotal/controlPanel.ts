@@ -105,22 +105,19 @@ export default {
                   'verbose_map',
                 )
                   ? (explore?.datasource as Dataset)?.verbose_map
-                  : (explore?.datasource?.columns ?? {});
+                  : explore?.datasource?.columns ?? {};
                 const { colnames, coltypes } =
                   chart?.queriesResponse?.[0] ?? {};
                 const numericColumns =
                   Array.isArray(colnames) && Array.isArray(coltypes)
                     ? colnames
                         .filter(
-                          (_: string, index: number) =>
+                          (colname: string, index: number) =>
                             coltypes[index] === GenericDataType.Numeric,
                         )
-                        .map((colname: string | number) => ({
+                        .map(colname => ({
                           value: colname,
-                          label:
-                            (Array.isArray(verboseMap)
-                              ? verboseMap[colname as number]
-                              : verboseMap[colname as string]) ?? colname,
+                          label: verboseMap[colname] ?? colname,
                         }))
                     : [];
                 return {

@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t, useTheme } from '@superset-ui/core';
-import Icons from 'src/components/Icons';
+import { t } from '@superset-ui/core';
+import { CheckCircleOutlined } from '@ant-design/icons';
 
 const ValidatedPanelHeader = ({
   title,
@@ -30,13 +30,8 @@ const ValidatedPanelHeader = ({
   validateCheckStatus: boolean;
   testId?: string;
 }): JSX.Element => {
-  const theme = useTheme();
-  const checkmark = (
-    <Icons.CheckCircleOutlined
-      iconSize="m"
-      iconColor={theme.colors.success.base}
-    />
-  );
+  const checkmark = <CheckCircleOutlined />;
+
   return (
     <div className="collapse-panel-header">
       <div className="collapse-panel-title" data-test={testId}>

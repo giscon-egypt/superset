@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { styled, useTheme, css } from '@superset-ui/core';
+import { styled, useTheme } from '@superset-ui/core';
 import { Tooltip } from 'src/components/Tooltip';
 import Icons from 'src/components/Icons';
-import { ActionType } from 'src/types/Action';
 
 export interface InfoTooltipProps {
   iconStyle?: React.CSSProperties;
@@ -39,7 +38,7 @@ export interface InfoTooltipProps {
     | 'rightTop'
     | 'rightBottom'
     | undefined;
-  trigger?: ActionType | ActionType[];
+  trigger?: string | Array<string>;
   overlayStyle?: any;
   bgColor?: string;
   viewBox?: string;
@@ -61,15 +60,7 @@ const defaultOverlayStyle = {
   fontSize: '12px',
   lineHeight: '16px',
 };
-const InfoIconContainer = styled.div`
-  ${({ theme }) => css`
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    margin-left: ${theme.gridUnit}px;
-  `}
-`;
+
 const defaultColor = 'rgba(0,0,0,0.9)';
 
 export default function InfoTooltip({
@@ -94,15 +85,7 @@ export default function InfoTooltip({
       overlayStyle={overlayStyle}
       color={bgColor}
     >
-      <InfoIconContainer>
-        <Icons.InfoCircleFilled
-          aria-label="info-tooltip"
-          data-test="info-tooltip-icon"
-          iconSize="m"
-          style={alteredIconStyle}
-          viewBox={viewBox}
-        />
-      </InfoIconContainer>
+      <Icons.InfoSolidSmall style={alteredIconStyle} viewBox={viewBox} />
     </StyledTooltip>
   );
 }

@@ -53,41 +53,21 @@ class TaggedObjectEntityResponseSchema(Schema):
     changed_on = fields.DateTime()
     created_by = fields.Nested(UserSchema(exclude=["username"]))
     creator = fields.String()
-    tags = fields.List(fields.Nested(TagGetResponseSchema()))
-    owners = fields.List(fields.Nested(UserSchema()))
-
-
-objects_to_tag_field = fields.List(
-    fields.Tuple(
-        (
-            fields.String(metadata={"description": "type of resource"}),
-            fields.Int(validate=Range(min=1), metadata={"description": "resource id"}),
-        ),
-    ),
-    metadata={
-        "description": "Objects to tag",
-    },
-    required=False,
-)
+    tags = fields.List(fields.Nested(TagGetResponseSchema))
+    owners = fields.List(fields.Nested(UserSchema))
 
 
 class TagObjectSchema(Schema):
     name = fields.String(validate=Length(min=1))
     description = fields.String(required=False, allow_none=True)
-    objects_to_tag = objects_to_tag_field
+    objects_to_tag = fields.List(
+        fields.Tuple((fields.String(), fields.Int(validate=Range(min=1)))),
+        required=False,
+    )
 
 
 class TagPostBulkSchema(Schema):
-    tags = fields.List(fields.Nested(TagObjectSchema()))
-
-
-class TagPostBulkResponseObjectSchema(Schema):
-    objects_tagged = objects_to_tag_field
-    objects_skipped = objects_to_tag_field
-
-
-class TagPostBulkResponseSchema(Schema):
-    result = fields.Nested(TagPostBulkResponseObjectSchema())
+    tags = fields.List(fields.Nested(TagObjectSchema))
 
 
 class TagPostSchema(TagObjectSchema):

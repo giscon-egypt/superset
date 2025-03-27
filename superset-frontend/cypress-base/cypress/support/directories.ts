@@ -25,16 +25,16 @@ export function dataTestChartName(chartName: string): string {
 
 export const pageHeader = {
   logo: '.navbar-brand > img',
-  headerNavigationItem: '.antd5-menu-submenu-title',
+  headerNavigationItem: '.ant-menu-submenu-title',
   headerNavigationDropdown: "[aria-label='triangle-down']",
-  headerNavigationItemMenu: '.antd5-menu-item-group-list',
-  plusIcon: ':nth-child(2) > .antd5-menu-submenu-title',
+  headerNavigationItemMenu: '.ant-menu-item-group-list',
+  plusIcon: ':nth-child(2) > .ant-menu-submenu-title',
   plusIconMenuOptions: {
     sqlQueryOption: dataTestLocator('menu-item-SQL query'),
     chartOption: dataTestLocator('menu-item-Chart'),
     dashboardOption: dataTestLocator('menu-item-Dashboard'),
   },
-  plusMenu: '.antd5-menu-submenu-popup',
+  plusMenu: '.ant-menu-submenu-popup',
   barButtons: '[role="presentation"]',
   sqlLabMenu: '[id="item_3$Menu"]',
   dataMenu: '[id="item_4$Menu"]',
@@ -53,7 +53,7 @@ export const securityAccess = {
 export const homePage = {
   homeSection: {
     sectionArea: '.ant-collapse-content-box',
-    sectionElement: '.antd5-card-meta-title',
+    sectionElement: '.ant-card-meta-title',
   },
   sections: {
     expandedSection: '.ant-collapse-item-active',
@@ -94,19 +94,19 @@ export const databasesPage = {
     dbDropdown: '[class="ant-select-selection-search-input"]',
     dbDropdownMenu: '.rc-virtual-list-holder-inner',
     dbDropdownMenuItem: '[class="ant-select-item-option-content"]',
-    infoAlert: '.antd5-alert',
+    infoAlert: '.ant-alert',
     serviceAccountInput: '[name="credentials_info"]',
     connectionStep: {
-      modal: '.antd5-modal-content',
-      modalBody: '.antd5-modal-body',
+      modal: '.ant-modal-content',
+      modalBody: '.ant-modal-body',
       stepTitle: '.css-7x6kk > h4',
       helperBottom: '.helper-bottom',
       postgresDatabase: '[name="database"]',
       dbInput: '[name="database_name"]',
-      alertMessage: '.antd5-alert-message',
+      alertMessage: '.ant-alert-message',
       errorField: '[role="alert"]',
       uploadJson: '[title="Upload JSON file"]',
-      chooseFile: '[class="antd5-btn input-upload-btn"]',
+      chooseFile: '[class="ant-btn input-upload-btn"]',
       additionalParameters: '[name="query_input"]',
       sqlAlchemyUriInput: dataTestLocator('sqlalchemy-uri-input'),
       advancedTab: '#rc-tabs-0-tab-2',
@@ -140,7 +140,7 @@ export const sqlLabView = {
   tabsNavList: "[class='ant-tabs-nav-list']",
   tab: "[class='ant-tabs-tab-btn']",
   addTabButton: dataTestLocator('add-tab-icon'),
-  tooltip: '.antd5-tooltip-content',
+  tooltip: '.ant-tooltip-content',
   tabName: '.css-1suejie',
   schemaInput: '[data-test=DatabaseSelector] > :nth-child(2)',
   loadingIndicator: '.Select__loading-indicator',
@@ -148,9 +148,9 @@ export const sqlLabView = {
   examplesMenuItem: '[title="examples"]',
   tableInput: ':nth-child(4) > .select > :nth-child(1)',
   sqlEditor: '#brace-editor textarea',
-  saveAsButton: '.SaveQuery > .antd5-btn',
+  saveAsButton: '.SaveQuery > .ant-btn',
   saveAsModal: {
-    footer: '.antd5-modal-footer',
+    footer: '.ant-modal-footer',
     queryNameInput: 'input[class^="ant-input"]',
   },
   sqlToolbar: {
@@ -158,20 +158,20 @@ export const sqlLabView = {
     runButton: '.css-d3dxop',
   },
   rowsLimit: {
-    dropdown: '.antd5-dropdown-menu',
-    limitButton: '.antd5-dropdown-menu-item',
+    dropdown: '.ant-dropdown-menu',
+    limitButton: '.ant-dropdown-menu-item',
     limitButtonText: '.css-151uxnz',
-    limitTextWithValue: '[class="antd5-dropdown-trigger"]',
+    limitTextWithValue: '[class="ant-dropdown-trigger"]',
   },
   renderedTableHeader: '.ReactVirtualized__Table__headerRow',
   renderedTableRow: '.ReactVirtualized__Table__row',
   errorBody: '.error-body',
-  alertMessage: '.antd5-alert-message',
+  alertMessage: '.ant-alert-message',
   historyTable: {
     header: '[role=columnheader]',
     table: '.QueryTable',
     row: dataTestLocator('table-row'),
-    failureMarkIcon: '[aria-label=close]',
+    failureMarkIcon: '[aria-label=x-small]',
     successMarkIcon: '[aria-label=check]',
   },
 };
@@ -195,16 +195,16 @@ export const savedQuery = {
 export const annotationLayersView = {
   emptyDescription: {
     description: '.ant-empty-description',
-    addAnnotationLayerButton: '.ant-empty-footer > .antd5-btn',
+    addAnnotationLayerButton: '.ant-empty-footer > .ant-btn',
   },
   modal: {
     content: {
-      content: '.antd5-modal-body',
-      title: '.antd5-modal-body > :nth-child(2) > input',
+      content: '.ant-modal-body',
+      title: '.ant-modal-body > :nth-child(2) > input',
       description: "[name='descr']",
     },
     footer: {
-      footer: '.antd5-modal-footer',
+      footer: '.ant-modal-footer',
       addButton: dataTestLocator('modal-confirm-button'),
       cancelButton: dataTestLocator('modal-cancel-button'),
     },
@@ -216,7 +216,7 @@ export const datasetsList = {
   newDatasetModal: {
     inputField: '[class="section"]',
     addButton: dataTestLocator('modal-confirm-button'),
-    body: '.antd5-modal-body',
+    body: '.ant-modal-body',
   },
   table: {
     tableRow: {
@@ -252,7 +252,7 @@ export const datasetsList = {
     aceTextInput: '.ace_text-input',
     sourceSQLInput: '.ace_content',
     sourceVirtualSQLRadio: ':nth-child(2) > .ant-radio > .ant-radio-inner',
-    sourcePadlock: '[aria-label=lock]',
+    sourcePadlock: '[aria-label=lock-locked]',
     legacy: {
       panel: '.panel-body',
       sqlInput: '#sql',
@@ -261,7 +261,7 @@ export const datasetsList = {
     },
   },
   deleteDatasetModal: {
-    modal: '.antd5-modal-content',
+    modal: '.ant-modal-content',
     deleteInput: dataTestLocator('delete-modal-input'),
     deleteButton: dataTestLocator('modal-confirm-button'),
     text: '.css-kxmt87',
@@ -275,8 +275,8 @@ export const chartListView = {
     bulkSelect: dataTestLocator('bulk-select'),
   },
   header: {
-    cardView: '[aria-label="appstore"]',
-    listView: '[aria-label="unordered-list"]',
+    cardView: '[aria-label="card-view"]',
+    listView: '[aria-label="list-view"]',
     sort: '[class="ant-select-selection-search-input"][aria-label="Sort"]',
     sortRecentlyModifiedMenuOption: '[label="Recently modified"]',
     sortAlphabeticalMenuOption: '[label="Alphabetical"]',
@@ -284,8 +284,10 @@ export const chartListView = {
   },
   card: {
     card: dataTestLocator('styled-card'),
-    cardCover: '[class="antd5-card-cover"]',
+    cardCover: '[class="ant-card-cover"]',
     cardImage: '[class="gradient-container"]',
+    selectedStarIcon: "[aria-label='favorite-selected']",
+    unselectedStarIcon: "[aria-label='favorite-unselected']",
     starIcon: dataTestLocator('fave-unfave-icon'),
   },
   deleteModal: {
@@ -316,24 +318,26 @@ export const chartListView = {
 };
 export const nativeFilters = {
   modal: {
-    container: '.antd5-modal',
-    footer: '.antd5-modal-footer',
+    container: '.ant-modal',
+    footer: '.ant-modal-footer',
     saveButton: dataTestLocator('native-filter-modal-save-button'),
     cancelButton: dataTestLocator('native-filter-modal-cancel-button'),
     confirmCancelButton: dataTestLocator(
       'native-filter-modal-confirm-cancel-button',
     ),
-    alertXUnsavedFilters: '.antd5-alert-message',
+    alertXUnsavedFilters: '.ant-alert-message',
     tabsList: {
       filterItemsContainer: dataTestLocator('filter-title-container'),
       tabsContainer: '[class="ant-tabs-nav-list"]',
       tab: '.ant-tabs-tab',
-      removeTab: '[aria-label="delete"]',
+      removeTab: '[aria-label="trash"]',
     },
     addFilter: dataTestLocator('add-filter-button'),
     defaultValueCheck: '.ant-checkbox-checked',
-    addNewFilterButton: dataTestLocator('add-new-filter-button'),
-    addNewDividerButton: dataTestLocator('add-new-divider-button'),
+  },
+  addFilterButton: {
+    button: `.ant-modal-content [data-test="new-dropdown-icon"]`,
+    dropdownItem: '.ant-dropdown-menu-item',
   },
   filtersPanel: {
     filterName: dataTestLocator('filters-config-modal__name-input'),
@@ -344,7 +348,6 @@ export const nativeFilters = {
     filterTypeInput: dataTestLocator('filters-config-modal__filter-type'),
     fieldInput: dataTestLocator('field-input'),
     filterTypeItem: '.ant-select-selection-item',
-    filterGear: dataTestLocator('filterbar-orientation-icon'),
   },
   filterFromDashboardView: {
     filterValueInput: '[class="ant-select-selection-search-input"]',
@@ -373,7 +376,7 @@ export const nativeFilters = {
     listItemNotActive: '[class="ant-tabs-tab ant-tabs-tab-with-remove"]',
     listItemActive:
       '[class="ant-tabs-tab ant-tabs-tab-with-remove ant-tabs-tab-active"]',
-    removeIcon: '[aria-label="delete"]',
+    removeIcon: '[aria-label="trash"]',
   },
   filterItem: dataTestLocator('form-item-value'),
   filterItemDropdown: '.ant-select-selection-search',
@@ -398,10 +401,10 @@ export const dashboardListView = {
   },
   card: {
     card: dataTestLocator('styled-card'),
-    cardCover: '[class="antd5-card-cover"]',
+    cardCover: '[class="ant-card-cover"]',
     cardImage: '[class="gradient-container"]',
-    selectedStarIcon: "[aria-label='star']",
-    unselectedStarIcon: "[aria-label='star']",
+    selectedStarIcon: "[aria-label='favorite-selected']",
+    unselectedStarIcon: "[aria-label='favorite-unselected']",
     starIcon: dataTestLocator('fave-unfave-icon'),
   },
   deleteModal: {
@@ -410,8 +413,8 @@ export const dashboardListView = {
   },
   table: {
     starIcon: dataTestLocator('fave-unfave-icon'),
-    selectedStarIcon: "[aria-label='star']",
-    unselectedStarIcon: "[aria-label='star']",
+    selectedStarIcon: "[aria-label='favorite-selected']",
+    unselectedStarIcon: "[aria-label='favorite-unselected']",
     bulkSelect: {
       checkboxOff: '[aria-label="checkbox-off"]',
       checkboxOn: '[aria-label="checkbox-on"]',
@@ -432,12 +435,12 @@ export const dashboardListView = {
     newDashboardButton: '.css-yff34v',
   },
   importModal: {
-    selectFileButton: '.ant-upload > .antd5-btn > span',
+    selectFileButton: '.ant-upload > .ant-btn > span',
     importButton: dataTestLocator('modal-confirm-button'),
   },
   header: {
-    cardView: '[aria-label="appstore"]',
-    listView: '[aria-label="unordered-list"]',
+    cardView: '[aria-label="card-view"]',
+    listView: '[aria-label="list-view"]',
     sort: dataTestLocator('sort-header'),
     sortDropdown: '.Select__menu',
     statusFilterInput: `${dataTestLocator(
@@ -474,15 +477,15 @@ export const exploreView = {
   },
   chartAreaItem: '.nv-legend-text',
   viewQueryModal: {
-    container: '.antd5-modal-content',
-    closeButton: 'button.antd5-modal-close',
+    container: '.ant-modal-content',
+    closeButton: 'button.ant-modal-close',
   },
   embedCodeModal: {
     container: dataTestLocator('embed-code-popover'),
     textfield: dataTestLocator('embed-code-textarea'),
   },
   saveModal: {
-    modal: '.antd5-modal-content',
+    modal: '.ant-modal-content',
     chartNameInput: dataTestLocator('new-chart-name'),
     dashboardNameInput: '.ant-select-selection-search-input',
     addToDashboardInput: dataTestLocator(
@@ -501,7 +504,7 @@ export const exploreView = {
     optionField: dataTestLocator('option-label'),
     fieldInput: '.Select__control input',
     removeFieldValue: dataTestLocator('remove-control-button'),
-    addFieldValue: '[aria-label="plus"]',
+    addFieldValue: '[aria-label="plus-small"]',
     vizType: dataTestLocator('visualization-type'),
     runButton: dataTestLocator('run-query-button'),
     saveQuery: dataTestLocator('query-save-button'),
@@ -553,7 +556,7 @@ export const exploreView = {
     timeSection: {
       timeRangeFilter: dataTestLocator('time-range-trigger'),
       timeRangeFilterModal: {
-        container: '.antd5-popover-content',
+        container: '.ant-popover-content',
         footer: '.footer',
         cancelButton: dataTestLocator('cancel-button'),
         configureLastTimeRange: {
@@ -578,7 +581,7 @@ export const exploreView = {
     },
   },
   editDatasetModal: {
-    container: '.antd5-modal-content',
+    container: '.ant-modal-content',
     datasetTabsContainer: dataTestLocator('edit-dataset-tabs'),
     saveButton: dataTestLocator('datasource-modal-save'),
     metricsTab: {
@@ -586,7 +589,7 @@ export const exploreView = {
       rowsContainer: dataTestLocator('table-content-rows'),
     },
     confirmModal: {
-      okButton: '.antd5-modal-confirm-btns .antd5-btn-primary',
+      okButton: '.ant-modal-confirm-btns .ant-btn-primary',
     },
   },
   visualizationTypeModal: {
@@ -617,12 +620,12 @@ export const dashboardView = {
     closeButton: dataTestLocator('close-button'),
   },
   saveModal: {
-    modal: '.antd5-modal-content',
+    modal: '.ant-modal-content',
     dashboardNameInput: '.ant-input',
     saveButton: dataTestLocator('modal-save-dashboard-button'),
   },
   dashboardProperties: {
-    modal: '.antd5-modal-content',
+    modal: '.ant-modal-content',
     dashboardTitleInput: dataTestLocator('dashboard-title-input'),
     modalButton: '[type="button"]',
   },
@@ -631,7 +634,7 @@ export const dashboardView = {
     refreshChart: dataTestLocator('refresh-chart-menu-item'),
   },
   threeDotsMenuIcon:
-    '.header-with-actions .right-button-panel .antd5-dropdown-trigger',
+    '.header-with-actions .right-button-panel .ant-dropdown-trigger',
   threeDotsMenuDropdown: dataTestLocator('header-actions-menu'),
   refreshDashboard: dataTestLocator('refresh-dashboard-menu-item'),
   saveAsMenuOption: dataTestLocator('save-as-menu-item'),

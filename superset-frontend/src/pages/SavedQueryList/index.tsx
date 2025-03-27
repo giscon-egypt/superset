@@ -23,8 +23,6 @@ import {
   styled,
   SupersetClient,
   t,
-  css,
-  useTheme,
 } from '@superset-ui/core';
 import { useCallback, useMemo, useState, MouseEvent } from 'react';
 import { Link, useHistory } from 'react-router-dom';
@@ -53,6 +51,7 @@ import { TagsList } from 'src/components/Tags';
 import { Tooltip } from 'src/components/Tooltip';
 import { commonMenuData } from 'src/features/home/commonMenuData';
 import { QueryObjectColumns, SavedQueryObject } from 'src/views/CRUD/types';
+import copyTextToClipboard from 'src/utils/copy';
 import Tag from 'src/types/TagType';
 import ImportModelsModal from 'src/components/ImportModal/index';
 import { ModifiedInfo } from 'src/components/AuditInfo';
@@ -104,7 +103,6 @@ function SavedQueryList({
   addSuccessToast,
   user,
 }: SavedQueryListProps) {
-  const theme = useTheme();
   const {
     state: {
       loading,
@@ -198,24 +196,8 @@ function SavedQueryList({
 
   subMenuButtons.push({
     name: (
-      <Link
-        to="/sqllab?new=true"
-        css={css`
-          display: flex;
-          &:hover {
-            color: currentColor;
-            text-decoration: none;
-          }
-        `}
-      >
-        <Icons.PlusOutlined
-          iconColor={theme.colors.primary.light5}
-          iconSize="m"
-          css={css`
-            margin: auto ${theme.gridUnit * 2}px auto 0;
-          `}
-        />
-        {t('Query')}
+      <Link to="/sqllab?new=true">
+        <i className="fa fa-plus" /> {t('Query')}
       </Link>
     ),
     buttonStyle: 'primary',
@@ -230,7 +212,7 @@ function SavedQueryList({
           placement="bottomRight"
           data-test="import-tooltip-test"
         >
-          <Icons.DownloadOutlined data-test="import-icon" />
+          <Icons.Import data-test="import-icon" />
         </Tooltip>
       ),
       buttonStyle: 'link',
@@ -251,31 +233,16 @@ function SavedQueryList({
   };
 
   const copyQueryLink = useCallback(
-    async (savedQuery: SavedQueryObject) => {
-      try {
-        const payload = {
-          dbId: savedQuery.db_id,
-          name: savedQuery.label,
-          schema: savedQuery.schema,
-          catalog: savedQuery.catalog,
-          sql: savedQuery.sql,
-          autorun: false,
-          templateParams: null,
-        };
-
-        const response = await SupersetClient.post({
-          endpoint: '/api/v1/sqllab/permalink',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+    (id: number) => {
+      copyTextToClipboard(() =>
+        Promise.resolve(`${window.location.origin}/sqllab?savedQueryId=${id}`),
+      )
+        .then(() => {
+          addSuccessToast(t('Link Copied!'));
+        })
+        .catch(() => {
+          addDangerToast(t('Sorry, your browser does not support copying.'));
         });
-
-        const { url: permalink } = response.json;
-
-        await navigator.clipboard.writeText(permalink);
-        addSuccessToast(t('Link Copied!'));
-      } catch (error) {
-        addDangerToast(t('There was an error generating the permalink.'));
-      }
     },
     [addDangerToast, addSuccessToast],
   );
@@ -329,11 +296,6 @@ function SavedQueryList({
       {
         accessor: 'label',
         Header: t('Name'),
-        Cell: ({
-          row: {
-            original: { id, label },
-          },
-        }: any) => <Link to={`/sqllab?savedQueryId=${id}`}>{label}</Link>,
       },
       {
         accessor: 'description',
@@ -426,7 +388,7 @@ function SavedQueryList({
           };
           const handleEdit = ({ metaKey }: MouseEvent) =>
             openInSqlLab(original.id, Boolean(metaKey));
-          const handleCopy = () => copyQueryLink(original);
+          const handleCopy = () => copyQueryLink(original.id);
           const handleExport = () => handleBulkSavedQueryExport([original]);
           const handleDelete = () => setQueryCurrentlyDeleting(original);
 
@@ -442,28 +404,28 @@ function SavedQueryList({
               label: 'edit-action',
               tooltip: t('Edit query'),
               placement: 'bottom',
-              icon: 'EditOutlined',
+              icon: 'Edit',
               onClick: handleEdit,
             },
             {
               label: 'copy-action',
               tooltip: t('Copy query URL'),
               placement: 'bottom',
-              icon: 'CopyOutlined',
+              icon: 'Copy',
               onClick: handleCopy,
             },
             canExport && {
               label: 'export-action',
               tooltip: t('Export query'),
               placement: 'bottom',
-              icon: 'UploadOutlined',
+              icon: 'Share',
               onClick: handleExport,
             },
             canDelete && {
               label: 'delete-action',
               tooltip: t('Delete query'),
               placement: 'bottom',
-              icon: 'DeleteOutlined',
+              icon: 'Trash',
               onClick: handleDelete,
             },
           ].filter(item => !!item);

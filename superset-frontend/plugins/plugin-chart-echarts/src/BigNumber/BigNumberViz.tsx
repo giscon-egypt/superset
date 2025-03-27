@@ -98,7 +98,6 @@ class BigNumberVis extends PureComponent<BigNumberVizProps> {
       !formatTime ||
       !showTimestamp ||
       typeof timestamp === 'string' ||
-      typeof timestamp === 'bigint' ||
       typeof timestamp === 'boolean'
     )
       return null;
@@ -121,7 +120,7 @@ class BigNumberVis extends PureComponent<BigNumberVizProps> {
         className="kicker"
         style={{
           fontSize,
-          height: 'auto',
+          height: maxHeight,
         }}
       >
         {text}
@@ -157,7 +156,7 @@ class BigNumberVis extends PureComponent<BigNumberVizProps> {
     document.body.append(container);
     const fontSize = computeMaxFontSize({
       text,
-      maxWidth: width * 0.9, // reduced it's max width
+      maxWidth: width - 8, // Decrease 8px for more precise font size
       maxHeight,
       className: 'header-line',
       container,
@@ -175,10 +174,8 @@ class BigNumberVis extends PureComponent<BigNumberVizProps> {
       <div
         className="header-line"
         style={{
-          display: 'flex',
-          alignItems: 'center',
           fontSize,
-          height: 'auto',
+          height: maxHeight,
           color: numberColor,
         }}
         onContextMenu={onContextMenu}
@@ -207,7 +204,7 @@ class BigNumberVis extends PureComponent<BigNumberVizProps> {
       document.body.append(container);
       fontSize = computeMaxFontSize({
         text,
-        maxWidth: width * 0.9, // max width reduced
+        maxWidth: width,
         maxHeight,
         className: 'subheader-line',
         container,
@@ -359,7 +356,6 @@ export default styled(BigNumberVis)`
       position: relative;
       line-height: 1em;
       white-space: nowrap;
-      margin-bottom:${theme.gridUnit * 2}px;
       span {
         position: absolute;
         bottom: 0;

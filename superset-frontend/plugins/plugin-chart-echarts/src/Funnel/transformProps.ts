@@ -26,7 +26,6 @@ import {
   NumberFormats,
   tooltipHtml,
   ValueFormatter,
-  VizType,
 } from '@superset-ui/core';
 import type { CallbackDataParams } from 'echarts/types/src/util/types';
 import type { EChartsCoreOption } from 'echarts/core';
@@ -146,6 +145,7 @@ export default function transformProps(
   }, {});
 
   const { setDataMask = () => {}, onContextMenu } = hooks;
+
   const colorFn = CategoricalColorNamespace.getScale(colorScheme as string);
   const numberFormatter = getValueFormatter(
     metric,
@@ -175,7 +175,7 @@ export default function transformProps(
       value,
       name,
       itemStyle: {
-        color: colorFn(name, sliceId),
+        color: colorFn(name, sliceId, colorScheme),
         opacity: isFiltered
           ? OpacityEnum.SemiTransparent
           : OpacityEnum.NonTransparent,
@@ -232,7 +232,7 @@ export default function transformProps(
 
   const series: FunnelSeriesOption[] = [
     {
-      type: VizType.Funnel,
+      type: 'funnel',
       ...getChartPadding(showLegend, legendOrientation, legendMargin),
       animation: true,
       minSize: '0%',

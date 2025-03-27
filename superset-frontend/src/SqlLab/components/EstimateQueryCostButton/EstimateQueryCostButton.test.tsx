@@ -57,7 +57,7 @@ describe('EstimateQueryCostButton', () => {
   it('renders EstimateQueryCostButton', async () => {
     const { queryByText } = setup({}, mockStore(initialState));
 
-    expect(queryByText('Estimate cost')).toBeInTheDocument();
+    expect(queryByText('Estimate cost')).toBeTruthy();
   });
 
   it('renders label for selected query', async () => {
@@ -66,7 +66,7 @@ describe('EstimateQueryCostButton', () => {
       mockStore(initialState),
     );
 
-    expect(queryByText('Estimate selected query cost')).toBeInTheDocument();
+    expect(queryByText('Estimate selected query cost')).toBeTruthy();
   });
 
   it('renders label for selected query from unsaved', async () => {
@@ -84,7 +84,7 @@ describe('EstimateQueryCostButton', () => {
       }),
     );
 
-    expect(queryByText('Estimate selected query cost')).toBeInTheDocument();
+    expect(queryByText('Estimate selected query cost')).toBeTruthy();
   });
 
   it('renders estimation error result', async () => {
@@ -103,10 +103,10 @@ describe('EstimateQueryCostButton', () => {
       }),
     );
 
-    expect(queryByText('Estimate cost')).toBeInTheDocument();
+    expect(queryByText('Estimate cost')).toBeTruthy();
     fireEvent.click(getByText('Estimate cost'));
 
-    expect(queryByText('Estimate error')).toBeInTheDocument();
+    expect(queryByText('Estimate error')).toBeTruthy();
   });
 
   it('renders estimation success result', async () => {
@@ -126,9 +126,9 @@ describe('EstimateQueryCostButton', () => {
       }),
     );
 
-    expect(queryByText('Estimate cost')).toBeInTheDocument();
+    expect(queryByText('Estimate cost')).toBeTruthy();
     fireEvent.click(getByText('Estimate cost'));
 
-    expect(queryByText('Total cost')).toBeInTheDocument();
+    expect(queryByText('Total cost')).toBeTruthy();
   });
 });

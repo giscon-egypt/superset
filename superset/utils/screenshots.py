@@ -16,18 +16,14 @@
 # under the License.
 from __future__ import annotations
 
-import base64
 import logging
-from datetime import datetime
-from enum import Enum
 from io import BytesIO
-from typing import cast, TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING
 
 from flask import current_app
 
-from superset import app, feature_flag_manager, thumbnail_cache
+from superset import feature_flag_manager
 from superset.dashboards.permalink.types import DashboardPermalinkState
-from superset.extensions import event_logger
 from superset.utils.hashing import md5_sha_from_dict
 from superset.utils.urls import modify_url_query
 from superset.utils.webdriver import (
@@ -57,111 +53,17 @@ if TYPE_CHECKING:
     from flask_caching import Cache
 
 
-class StatusValues(Enum):
-    PENDING = "Pending"
-    COMPUTING = "Computing"
-    UPDATED = "Updated"
-    ERROR = "Error"
-
-
-class ScreenshotCachePayloadType(TypedDict):
-    image: str | None
-    timestamp: str
-    status: str
-
-
-class ScreenshotCachePayload:
-    def __init__(
-        self,
-        image: bytes | None = None,
-        status: StatusValues = StatusValues.PENDING,
-        timestamp: str = "",
-    ):
-        self._image = image
-        self._timestamp = timestamp or datetime.now().isoformat()
-        self.status = StatusValues.UPDATED if image else status
-
-    @classmethod
-    def from_dict(cls, payload: ScreenshotCachePayloadType) -> ScreenshotCachePayload:
-        return cls(
-            image=base64.b64decode(payload["image"]) if payload["image"] else None,
-            status=StatusValues(payload["status"]),
-            timestamp=payload["timestamp"],
-        )
-
-    def to_dict(self) -> ScreenshotCachePayloadType:
-        return {
-            "image": base64.b64encode(self._image).decode("utf-8")
-            if self._image
-            else None,
-            "timestamp": self._timestamp,
-            "status": self.status.value,
-        }
-
-    def update_timestamp(self) -> None:
-        self._timestamp = datetime.now().isoformat()
-
-    def pending(self) -> None:
-        self.update_timestamp()
-        self._image = None
-        self.status = StatusValues.PENDING
-
-    def computing(self) -> None:
-        self.update_timestamp()
-        self._image = None
-        self.status = StatusValues.COMPUTING
-
-    def update(self, image: bytes) -> None:
-        self.update_timestamp()
-        self.status = StatusValues.UPDATED
-        self._image = image
-
-    def error(
-        self,
-    ) -> None:
-        self.update_timestamp()
-        self.status = StatusValues.ERROR
-
-    def get_image(self) -> BytesIO | None:
-        if not self._image:
-            return None
-        return BytesIO(self._image)
-
-    def get_timestamp(self) -> str:
-        return self._timestamp
-
-    def get_status(self) -> str:
-        return self.status.value
-
-    def is_error_cache_ttl_expired(self) -> bool:
-        error_cache_ttl = app.config["THUMBNAIL_ERROR_CACHE_TTL"]
-        return (
-            datetime.now() - datetime.fromisoformat(self.get_timestamp())
-        ).total_seconds() > error_cache_ttl
-
-    def should_trigger_task(self, force: bool = False) -> bool:
-        return (
-            force
-            or self.status == StatusValues.PENDING
-            or (self.status == StatusValues.ERROR and self.is_error_cache_ttl_expired())
-        )
-
-
 class BaseScreenshot:
     driver_type = current_app.config["WEBDRIVER_TYPE"]
-    url: str
-    digest: str | None
-    screenshot: bytes | None
     thumbnail_type: str = ""
     element: str = ""
     window_size: WindowSize = DEFAULT_SCREENSHOT_WINDOW_SIZE
     thumb_size: WindowSize = DEFAULT_SCREENSHOT_THUMBNAIL_SIZE
-    cache: Cache = thumbnail_cache
 
-    def __init__(self, url: str, digest: str | None):
-        self.digest = digest
+    def __init__(self, url: str, digest: str):
+        self.digest: str = digest
         self.url = url
-        self.screenshot = None
+        self.screenshot: bytes | None = None
 
     def driver(self, window_size: WindowSize | None = None) -> WebDriver:
         window_size = window_size or self.window_size
@@ -169,14 +71,7 @@ class BaseScreenshot:
             return WebDriverPlaywright(self.driver_type, window_size)
         return WebDriverSelenium(self.driver_type, window_size)
 
-    def get_screenshot(
-        self, user: User, window_size: WindowSize | None = None
-    ) -> bytes | None:
-        driver = self.driver(window_size)
-        self.screenshot = driver.get_screenshot(self.url, self.element, user)
-        return self.screenshot
-
-    def get_cache_key(
+    def cache_key(
         self,
         window_size: bool | WindowSize | None = None,
         thumb_size: bool | WindowSize | None = None,
@@ -192,42 +87,68 @@ class BaseScreenshot:
         }
         return md5_sha_from_dict(args)
 
+    def get_screenshot(
+        self, user: User, window_size: WindowSize | None = None
+    ) -> bytes | None:
+        driver = self.driver(window_size)
+        self.screenshot = driver.get_screenshot(self.url, self.element, user)
+        return self.screenshot
+
+    def get(
+        self,
+        user: User = None,
+        cache: Cache = None,
+        thumb_size: WindowSize | None = None,
+    ) -> BytesIO | None:
+        """
+            Get thumbnail screenshot has BytesIO from cache or fetch
+
+        :param user: None to use current user or User Model to login and fetch
+        :param cache: The cache to use
+        :param thumb_size: Override thumbnail site
+        """
+        payload: bytes | None = None
+        cache_key = self.cache_key(self.window_size, thumb_size)
+        if cache:
+            payload = cache.get(cache_key)
+        if not payload:
+            payload = self.compute_and_cache(
+                user=user, thumb_size=thumb_size, cache=cache
+            )
+        else:
+            logger.info("Loaded thumbnail from cache: %s", cache_key)
+        if payload:
+            return BytesIO(payload)
+        return None
+
     def get_from_cache(
         self,
+        cache: Cache,
         window_size: WindowSize | None = None,
         thumb_size: WindowSize | None = None,
-    ) -> ScreenshotCachePayload | None:
-        cache_key = self.get_cache_key(window_size, thumb_size)
-        return self.get_from_cache_key(cache_key)
+    ) -> BytesIO | None:
+        cache_key = self.cache_key(window_size, thumb_size)
+        return self.get_from_cache_key(cache, cache_key)
 
-    @classmethod
-    def get_from_cache_key(cls, cache_key: str) -> ScreenshotCachePayload | None:
+    @staticmethod
+    def get_from_cache_key(cache: Cache, cache_key: str) -> BytesIO | None:
         logger.info("Attempting to get from cache: %s", cache_key)
-        if payload := cls.cache.get(cache_key):
-            # Initially, only bytes were stored. This was changed to store an instance
-            # of ScreenshotCachePayload, but since it can't be serialized in all
-            # backends it was further changed to a dict of attributes.
-            if isinstance(payload, bytes):
-                payload = ScreenshotCachePayload(payload)
-            elif isinstance(payload, ScreenshotCachePayload):
-                pass
-            elif isinstance(payload, dict):
-                payload = cast(ScreenshotCachePayloadType, payload)
-                payload = ScreenshotCachePayload.from_dict(payload)
-            return payload
+        if payload := cache.get(cache_key):
+            return BytesIO(payload)
         logger.info("Failed at getting from cache: %s", cache_key)
         return None
 
     def compute_and_cache(  # pylint: disable=too-many-arguments
         self,
-        force: bool,
         user: User = None,
         window_size: WindowSize | None = None,
         thumb_size: WindowSize | None = None,
+        cache: Cache = None,
+        force: bool = True,
         cache_key: str | None = None,
-    ) -> None:
+    ) -> bytes | None:
         """
-        Computes the thumbnail and caches the result
+        Fetches the screenshot, computes the thumbnail and caches the result
 
         :param user: If no user is given will use the current context
         :param cache: The cache to keep the thumbnail payload
@@ -236,46 +157,34 @@ class BaseScreenshot:
         :param force: Will force the computation even if it's already cached
         :return: Image payload
         """
-        cache_key = cache_key or self.get_cache_key(window_size, thumb_size)
-        cache_payload = self.get_from_cache_key(cache_key) or ScreenshotCachePayload()
-        if (
-            cache_payload.status in [StatusValues.COMPUTING, StatusValues.UPDATED]
-            and not force
-        ):
-            logger.info(
-                "Skipping compute - already processed for thumbnail: %s", cache_key
-            )
-            return
-
+        cache_key = cache_key or self.cache_key(window_size, thumb_size)
         window_size = window_size or self.window_size
         thumb_size = thumb_size or self.thumb_size
+        if not force and cache and cache.get(cache_key):
+            logger.info("Thumb already cached, skipping...")
+            return None
         logger.info("Processing url for thumbnail: %s", cache_key)
-        cache_payload.computing()
-        self.cache.set(cache_key, cache_payload.to_dict())
-        image = None
+
+        payload = None
+
         # Assuming all sorts of things can go wrong with Selenium
         try:
-            logger.info("trying to generate screenshot")
-            with event_logger.log_context(f"screenshot.compute.{self.thumbnail_type}"):
-                image = self.get_screenshot(user=user, window_size=window_size)
+            payload = self.get_screenshot(user=user, window_size=window_size)
         except Exception as ex:  # pylint: disable=broad-except
             logger.warning("Failed at generating thumbnail %s", ex, exc_info=True)
-            cache_payload.error()
-        if image and window_size != thumb_size:
+
+        if payload and window_size != thumb_size:
             try:
-                image = self.resize_image(image, thumb_size=thumb_size)
+                payload = self.resize_image(payload, thumb_size=thumb_size)
             except Exception as ex:  # pylint: disable=broad-except
                 logger.warning("Failed at resizing thumbnail %s", ex, exc_info=True)
-                cache_payload.error()
-                image = None
+                payload = None
 
-        if image:
+        if payload:
             logger.info("Caching thumbnail: %s", cache_key)
-            with event_logger.log_context(f"screenshot.cache.{self.thumbnail_type}"):
-                cache_payload.update(image)
-        self.cache.set(cache_key, cache_payload.to_dict())
-        logger.info("Updated thumbnail cache; Status: %s", cache_payload.get_status())
-        return
+            cache.set(cache_key, payload)
+            logger.info("Done caching thumbnail")
+        return payload
 
     @classmethod
     def resize_image(
@@ -310,7 +219,7 @@ class ChartScreenshot(BaseScreenshot):
     def __init__(
         self,
         url: str,
-        digest: str | None,
+        digest: str,
         window_size: WindowSize | None = None,
         thumb_size: WindowSize | None = None,
     ):
@@ -331,7 +240,7 @@ class DashboardScreenshot(BaseScreenshot):
     def __init__(
         self,
         url: str,
-        digest: str | None,
+        digest: str,
         window_size: WindowSize | None = None,
         thumb_size: WindowSize | None = None,
     ):
@@ -341,11 +250,12 @@ class DashboardScreenshot(BaseScreenshot):
             url,
             standalone=DashboardStandaloneMode.REPORT.value,
         )
+
         super().__init__(url, digest)
         self.window_size = window_size or DEFAULT_DASHBOARD_WINDOW_SIZE
         self.thumb_size = thumb_size or DEFAULT_DASHBOARD_THUMBNAIL_SIZE
 
-    def get_cache_key(
+    def cache_key(
         self,
         window_size: bool | WindowSize | None = None,
         thumb_size: bool | WindowSize | None = None,

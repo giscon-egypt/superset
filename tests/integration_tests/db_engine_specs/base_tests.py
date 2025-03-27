@@ -33,4 +33,4 @@ class TestDbEngineSpec(SupersetTestCase):
     ):
         main = Database(database_name="test_database", sqlalchemy_uri="sqlite://")
         limited = engine_spec_class.apply_limit_to_sql(sql, limit, main, force)
-        assert expected_sql == limited
+        self.assertEqual(expected_sql, limited)

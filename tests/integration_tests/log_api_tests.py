@@ -82,7 +82,7 @@ class TestLogApi(SupersetTestCase):
             arguments = {"filters": [{"col": "action", "opr": "sw", "value": "some_"}]}
             uri = f"api/v1/log/?q={prison.dumps(arguments)}"
             rv = self.client.get(uri)
-            assert rv.status_code == 404
+            self.assertEqual(rv.status_code, 404)
 
     def test_get_list(self):
         """
@@ -94,11 +94,11 @@ class TestLogApi(SupersetTestCase):
         arguments = {"filters": [{"col": "action", "opr": "sw", "value": "some_"}]}
         uri = f"api/v1/log/?q={prison.dumps(arguments)}"
         rv = self.client.get(uri)
-        assert rv.status_code == 200
+        self.assertEqual(rv.status_code, 200)
         response = json.loads(rv.data.decode("utf-8"))
-        assert list(response["result"][0].keys()) == EXPECTED_COLUMNS
-        assert response["result"][0]["action"] == "some_action"
-        assert response["result"][0]["user"] == {"username": "admin"}
+        self.assertEqual(list(response["result"][0].keys()), EXPECTED_COLUMNS)
+        self.assertEqual(response["result"][0]["action"], "some_action")
+        self.assertEqual(response["result"][0]["user"], {"username": "admin"})
         db.session.delete(log)
         db.session.commit()
 
@@ -111,10 +111,10 @@ class TestLogApi(SupersetTestCase):
         self.login(GAMMA_USERNAME)
         uri = "api/v1/log/"
         rv = self.client.get(uri)
-        assert rv.status_code == 403
+        self.assertEqual(rv.status_code, 403)
         self.login(ALPHA_USERNAME)
         rv = self.client.get(uri)
-        assert rv.status_code == 403
+        self.assertEqual(rv.status_code, 403)
         db.session.delete(log)
         db.session.commit()
 
@@ -127,12 +127,12 @@ class TestLogApi(SupersetTestCase):
         self.login(ADMIN_USERNAME)
         uri = f"api/v1/log/{log.id}"
         rv = self.client.get(uri)
-        assert rv.status_code == 200
+        self.assertEqual(rv.status_code, 200)
         response = json.loads(rv.data.decode("utf-8"))
 
-        assert list(response["result"].keys()) == EXPECTED_COLUMNS
-        assert response["result"]["action"] == "some_action"
-        assert response["result"]["user"] == {"username": "admin"}
+        self.assertEqual(list(response["result"].keys()), EXPECTED_COLUMNS)
+        self.assertEqual(response["result"]["action"], "some_action")
+        self.assertEqual(response["result"]["user"], {"username": "admin"})
         db.session.delete(log)
         db.session.commit()
 
@@ -145,7 +145,7 @@ class TestLogApi(SupersetTestCase):
         self.login(ADMIN_USERNAME)
         uri = f"api/v1/log/{log.id}"
         rv = self.client.delete(uri)
-        assert rv.status_code == 405
+        self.assertEqual(rv.status_code, 405)
         db.session.delete(log)
         db.session.commit()
 
@@ -160,7 +160,7 @@ class TestLogApi(SupersetTestCase):
         log_data = {"action": "some_action"}
         uri = f"api/v1/log/{log.id}"
         rv = self.client.put(uri, json=log_data)
-        assert rv.status_code == 405
+        self.assertEqual(rv.status_code, 405)
         db.session.delete(log)
         db.session.commit()
 
@@ -171,22 +171,12 @@ class TestLogApi(SupersetTestCase):
         admin_user = self.get_user("admin")
         self.login(ADMIN_USERNAME)
         dash = create_dashboard("dash_slug", "dash_title", "{}", [])
-        log1 = self.insert_log(
-            "log",
-            admin_user,
-            dashboard_id=dash.id,
-            json='{"event_name": "mount_dashboard"}',
-        )
-        log2 = self.insert_log(
-            "log",
-            admin_user,
-            dashboard_id=dash.id,
-            json='{"event_name": "mount_dashboard"}',
-        )
+        log1 = self.insert_log("dashboard", admin_user, dashboard_id=dash.id)
+        log2 = self.insert_log("dashboard", admin_user, dashboard_id=dash.id)
 
         uri = f"api/v1/log/recent_activity/"  # noqa: F541
         rv = self.client.get(uri)
-        assert rv.status_code == 200
+        self.assertEqual(rv.status_code, 200)
         response = json.loads(rv.data.decode("utf-8"))
 
         db.session.delete(log1)
@@ -194,18 +184,21 @@ class TestLogApi(SupersetTestCase):
         db.session.delete(dash)
         db.session.commit()
 
-        assert response == {
-            "result": [
-                {
-                    "action": "log",
-                    "item_type": "dashboard",
-                    "item_url": "/superset/dashboard/dash_slug/",
-                    "item_title": "dash_title",
-                    "time": ANY,
-                    "time_delta_humanized": ANY,
-                }
-            ]
-        }
+        self.assertEqual(
+            response,
+            {
+                "result": [
+                    {
+                        "action": "dashboard",
+                        "item_type": "dashboard",
+                        "item_url": "/superset/dashboard/dash_slug/",
+                        "item_title": "dash_title",
+                        "time": ANY,
+                        "time_delta_humanized": ANY,
+                    }
+                ]
+            },
+        )
 
     def test_get_recent_activity_actions_filter(self):
         """
@@ -214,20 +207,10 @@ class TestLogApi(SupersetTestCase):
         admin_user = self.get_user("admin")
         self.login(ADMIN_USERNAME)
         dash = create_dashboard("dash_slug", "dash_title", "{}", [])
-        log = self.insert_log(
-            "log",
-            admin_user,
-            dashboard_id=dash.id,
-            json='{"event_name": "mount_dashboard"}',
-        )
-        log2 = self.insert_log(
-            "log",
-            admin_user,
-            dashboard_id=dash.id,
-            json='{"event_name": "mount_explorer"}',
-        )
+        log = self.insert_log("dashboard", admin_user, dashboard_id=dash.id)
+        log2 = self.insert_log("explore", admin_user, dashboard_id=dash.id)
 
-        arguments = {"actions": ["mount_dashboard"]}
+        arguments = {"actions": ["dashboard"]}
         uri = f"api/v1/log/recent_activity/?q={prison.dumps(arguments)}"
         rv = self.client.get(uri)
 
@@ -236,9 +219,9 @@ class TestLogApi(SupersetTestCase):
         db.session.delete(dash)
         db.session.commit()
 
-        assert rv.status_code == 200
+        self.assertEqual(rv.status_code, 200)
         response = json.loads(rv.data.decode("utf-8"))
-        assert len(response["result"]) == 1
+        self.assertEqual(len(response["result"]), 1)
 
     def test_get_recent_activity_distinct_false(self):
         """
@@ -249,18 +232,8 @@ class TestLogApi(SupersetTestCase):
         admin_user = self.get_user("admin")
         self.login(ADMIN_USERNAME)
         dash = create_dashboard("dash_slug", "dash_title", "{}", [])
-        log = self.insert_log(
-            "log",
-            admin_user,
-            dashboard_id=dash.id,
-            json='{"event_name": "mount_dashboard"}',
-        )
-        log2 = self.insert_log(
-            "log",
-            admin_user,
-            dashboard_id=dash.id,
-            json='{"event_name": "mount_dashboard"}',
-        )
+        log = self.insert_log("dashboard", admin_user, dashboard_id=dash.id)
+        log2 = self.insert_log("dashboard", admin_user, dashboard_id=dash.id)
 
         arguments = {"distinct": False}
         uri = f"api/v1/log/recent_activity/?q={prison.dumps(arguments)}"
@@ -270,9 +243,9 @@ class TestLogApi(SupersetTestCase):
         db.session.delete(log2)
         db.session.delete(dash)
         db.session.commit()
-        assert rv.status_code == 200
+        self.assertEqual(rv.status_code, 200)
         response = json.loads(rv.data.decode("utf-8"))
-        assert len(response["result"]) == 2
+        self.assertEqual(len(response["result"]), 2)
 
     def test_get_recent_activity_pagination(self):
         """
@@ -283,24 +256,9 @@ class TestLogApi(SupersetTestCase):
         dash = create_dashboard("dash_slug", "dash_title", "{}", [])
         dash2 = create_dashboard("dash2_slug", "dash2_title", "{}", [])
         dash3 = create_dashboard("dash3_slug", "dash3_title", "{}", [])
-        log = self.insert_log(
-            "log",
-            admin_user,
-            dashboard_id=dash.id,
-            json='{"event_name": "mount_dashboard"}',
-        )
-        log2 = self.insert_log(
-            "log",
-            admin_user,
-            dashboard_id=dash2.id,
-            json='{"event_name": "mount_dashboard"}',
-        )
-        log3 = self.insert_log(
-            "log",
-            admin_user,
-            dashboard_id=dash3.id,
-            json='{"event_name": "mount_dashboard"}',
-        )
+        log = self.insert_log("dashboard", admin_user, dashboard_id=dash.id)
+        log2 = self.insert_log("dashboard", admin_user, dashboard_id=dash2.id)
+        log3 = self.insert_log("dashboard", admin_user, dashboard_id=dash3.id)
 
         now = datetime.now()
         log3.dttm = now
@@ -311,28 +269,31 @@ class TestLogApi(SupersetTestCase):
         uri = f"api/v1/log/recent_activity/?q={prison.dumps(arguments)}"
         rv = self.client.get(uri)
 
-        assert rv.status_code == 200
+        self.assertEqual(rv.status_code, 200)
         response = json.loads(rv.data.decode("utf-8"))
-        assert response == {
-            "result": [
-                {
-                    "action": "log",
-                    "item_type": "dashboard",
-                    "item_url": "/superset/dashboard/dash3_slug/",
-                    "item_title": "dash3_title",
-                    "time": ANY,
-                    "time_delta_humanized": ANY,
-                },
-                {
-                    "action": "log",
-                    "item_type": "dashboard",
-                    "item_url": "/superset/dashboard/dash2_slug/",
-                    "item_title": "dash2_title",
-                    "time": ANY,
-                    "time_delta_humanized": ANY,
-                },
-            ]
-        }
+        self.assertEqual(
+            response,
+            {
+                "result": [
+                    {
+                        "action": "dashboard",
+                        "item_type": "dashboard",
+                        "item_url": "/superset/dashboard/dash3_slug/",
+                        "item_title": "dash3_title",
+                        "time": ANY,
+                        "time_delta_humanized": ANY,
+                    },
+                    {
+                        "action": "dashboard",
+                        "item_type": "dashboard",
+                        "item_url": "/superset/dashboard/dash2_slug/",
+                        "item_title": "dash2_title",
+                        "time": ANY,
+                        "time_delta_humanized": ANY,
+                    },
+                ]
+            },
+        )
 
         arguments = {"page": 1, "page_size": 2}
         uri = f"api/v1/log/recent_activity/?q={prison.dumps(arguments)}"
@@ -346,17 +307,20 @@ class TestLogApi(SupersetTestCase):
         db.session.delete(dash3)
         db.session.commit()
 
-        assert rv.status_code == 200
+        self.assertEqual(rv.status_code, 200)
         response = json.loads(rv.data.decode("utf-8"))
-        assert response == {
-            "result": [
-                {
-                    "action": "log",
-                    "item_type": "dashboard",
-                    "item_url": "/superset/dashboard/dash_slug/",
-                    "item_title": "dash_title",
-                    "time": ANY,
-                    "time_delta_humanized": ANY,
-                }
-            ]
-        }
+        self.assertEqual(
+            response,
+            {
+                "result": [
+                    {
+                        "action": "dashboard",
+                        "item_type": "dashboard",
+                        "item_url": "/superset/dashboard/dash_slug/",
+                        "item_title": "dash_title",
+                        "time": ANY,
+                        "time_delta_humanized": ANY,
+                    }
+                ]
+            },
+        )

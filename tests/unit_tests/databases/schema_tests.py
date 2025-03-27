@@ -103,17 +103,14 @@ def test_database_parameters_schema_mixin_no_engine(
     try:
         dummy_schema.load(payload)
     except ValidationError as err:
-        assert (  # noqa: PT017
-            err.messages
-            == {  # noqa: PT017
-                "_schema": [
-                    (
-                        "An engine must be specified when passing individual parameters to "  # noqa: E501
-                        "a database."
-                    ),
-                ]
-            }
-        )
+        assert err.messages == {
+            "_schema": [
+                (
+                    "An engine must be specified when passing individual parameters to "
+                    "a database."
+                ),
+            ]
+        }
 
 
 def test_database_parameters_schema_mixin_invalid_engine(
@@ -136,7 +133,7 @@ def test_database_parameters_schema_mixin_invalid_engine(
     try:
         dummy_schema.load(payload)
     except ValidationError as err:
-        assert err.messages == {  # noqa: PT017
+        assert err.messages == {
             "_schema": ['Engine "dummy_engine" is not a valid engine.']
         }
 
@@ -161,17 +158,14 @@ def test_database_parameters_schema_no_mixin(
     try:
         dummy_schema.load(payload)
     except ValidationError as err:
-        assert (  # noqa: PT017
-            err.messages
-            == {  # noqa: PT017
-                "_schema": [
-                    (
-                        'Engine spec "InvalidEngine" does not support '
-                        "being configured via individual parameters."
-                    )
-                ]
-            }
-        )
+        assert err.messages == {
+            "_schema": [
+                (
+                    'Engine spec "InvalidEngine" does not support '
+                    "being configured via individual parameters."
+                )
+            ]
+        }
 
 
 def test_database_parameters_schema_mixin_invalid_type(
@@ -194,7 +188,7 @@ def test_database_parameters_schema_mixin_invalid_type(
     try:
         dummy_schema.load(payload)
     except ValidationError as err:
-        assert err.messages == {"port": ["Not a valid integer."]}  # noqa: PT017
+        assert err.messages == {"port": ["Not a valid integer."]}
 
 
 def test_rename_encrypted_extra() -> None:

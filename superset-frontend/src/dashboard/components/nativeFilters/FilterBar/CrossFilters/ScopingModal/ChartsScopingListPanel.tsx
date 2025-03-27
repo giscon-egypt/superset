@@ -35,16 +35,17 @@ import { NEW_CHART_SCOPING_ID } from './constants';
 const AddButtonContainer = styled.div`
   ${({ theme }) => css`
     margin-top: ${theme.gridUnit * 2}px;
+
     & button > [role='img']:first-of-type {
+      margin-right: ${theme.gridUnit}px;
       line-height: 0;
     }
+
     span[role='img'] {
       padding-bottom: 1px;
     }
-    button > span > :first-of-type {
-      margin-right: 0;
-    }
-    .antd5-btn > .anticon + span {
+
+    .ant-btn > .anticon + span {
       margin-left: 0;
     }
   `}
@@ -70,15 +71,14 @@ const ScopingTitle = ({
       onClick={() => onClick(id)}
     >
       {label}
-      <Icons.DeleteOutlined
+      <Icons.Trash
         iconColor={theme.colors.grayscale.light3}
-        iconSize="xl"
         onClick={event => {
           event.stopPropagation();
           onRemove(id);
         }}
         css={css`
-          margin: auto auto auto ${theme.gridUnit}px;
+          margin-left: auto;
         `}
       />
     </FilterTitle>
@@ -136,7 +136,7 @@ export const ChartsScopingListPanel = ({
           buttonSize="xsmall"
           onClick={addNewCustomScope}
         >
-          <Icons.PlusOutlined iconSize="s" /> {t('Add custom scoping')}
+          <Icons.PlusSmall /> {t('Add custom scoping')}
         </Button>
       </AddButtonContainer>
       <FilterTitle

@@ -20,7 +20,7 @@ import { ReactChild, useCallback, Key } from 'react';
 
 import { t, styled } from '@superset-ui/core';
 import Icons from 'src/components/Icons';
-import { Dropdown } from 'src/components/Dropdown';
+import { AntdDropdown } from 'src/components';
 import { Menu } from 'src/components/Menu';
 
 enum MenuKeys {
@@ -67,26 +67,26 @@ export const ExportToCSVDropdown = ({
   );
 
   return (
-    <Dropdown
+    <AntdDropdown
       trigger={['click']}
-      dropdownRender={() => (
+      overlay={
         <Menu onClick={handleMenuClick} selectable={false}>
           <Menu.Item key={MenuKeys.ExportOriginal}>
             <MenuItemContent>
               {t('Original')}
-              <Icons.DownloadOutlined />
+              <Icons.Download />
             </MenuItemContent>
           </Menu.Item>
           <Menu.Item key={MenuKeys.ExportPivoted}>
             <MenuItemContent>
               {t('Pivoted')}
-              <Icons.DownloadOutlined />
+              <Icons.Download />
             </MenuItemContent>
           </Menu.Item>
         </Menu>
-      )}
+      }
     >
       {children}
-    </Dropdown>
+    </AntdDropdown>
   );
 };

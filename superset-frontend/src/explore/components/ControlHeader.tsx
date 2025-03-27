@@ -79,8 +79,8 @@ const ControlHeader: FC<ControlHeaderProps> = ({
       return 'unset';
     }
 
-    return colors.warning.base;
-  }, [colors.error.base, colors.warning.base, validationErrors.length]);
+    return colors.alert.base;
+  }, [colors.error.base, colors.alert.base, validationErrors.length]);
 
   if (!label) {
     return null;
@@ -151,23 +151,14 @@ const ControlHeader: FC<ControlHeaderProps> = ({
           {warning && (
             <span>
               <Tooltip id="error-tooltip" placement="top" title={warning}>
-                <Icons.WarningOutlined
-                  iconColor={colors.warning.base}
-                  css={css`
-                    vertical-align: baseline;
-                  `}
-                  iconSize="s"
-                />
+                <Icons.AlertSolid iconColor={colors.alert.base} iconSize="s" />
               </Tooltip>{' '}
             </span>
           )}
           {danger && (
             <span>
               <Tooltip id="error-tooltip" placement="top" title={danger}>
-                <Icons.ExclamationCircleOutlined
-                  iconColor={colors.error.base}
-                  iconSize="s"
-                />
+                <Icons.ErrorSolid iconColor={colors.error.base} iconSize="s" />
               </Tooltip>{' '}
             </span>
           )}

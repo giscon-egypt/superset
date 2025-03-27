@@ -23,21 +23,18 @@ import {
   ColorScheme,
   ColorSchemeGroup,
   SequentialScheme,
+  styled,
   t,
   useTheme,
-  getLabelsColorMap,
-  CategoricalColorNamespace,
 } from '@superset-ui/core';
-// eslint-disable-next-line no-restricted-imports
-import AntdSelect from 'antd/lib/select'; // TODO: Remove antd
-import { sortBy } from 'lodash';
+import AntdSelect from 'antd/lib/select';
+import { isFunction, sortBy } from 'lodash';
 import ControlHeader from 'src/explore/components/ControlHeader';
 import { Tooltip } from 'src/components/Tooltip';
 import Icons from 'src/components/Icons';
 import { SelectOptionsType } from 'src/components/Select/types';
 import { StyledSelect } from 'src/components/Select/styles';
 import { handleFilterOptionHelper } from 'src/components/Select/utils';
-import { getColorNamespace } from 'src/utils/colorScheme';
 import ColorSchemeLabel from './ColorSchemeLabel';
 
 const { Option, OptGroup } = AntdSelect;
@@ -50,14 +47,8 @@ export interface ColorSchemes {
 
 export interface ColorSchemeControlProps {
   hasCustomLabelsColor: boolean;
-  hasDashboardColorScheme?: boolean;
-  hasSharedLabelsColor?: boolean;
-  sharedLabelsColors?: string[];
-  mapLabelsColors?: Record<string, any>;
-  colorNamespace?: string;
-  chartId?: number;
   dashboardId?: number;
-  label?: string;
+  label: string;
   name: string;
   onChange?: (value: string) => void;
   value: string;
@@ -65,14 +56,16 @@ export interface ColorSchemeControlProps {
   defaultScheme?: string;
   choices: string[][] | (() => string[][]);
   schemes: ColorSchemes | (() => ColorSchemes);
-  isLinear?: boolean;
-  description?: string;
-  hovered?: boolean;
+  isLinear: boolean;
 }
 
+const StyledAlert = styled(Icons.AlertSolid)`
+  color: ${({ theme }) => theme.colors.alert.base};
+`;
+
 const CUSTOM_LABEL_ALERT = t(
-  `The colors of this chart might be overridden by custom label colors of the related dashboard.
-    Check the JSON metadata in the Advanced settings.`,
+  `This color scheme is being overridden by custom label colors.
+    Check the JSON metadata in the Advanced settings`,
 );
 
 const DASHBOARD_ALERT = t(
@@ -80,49 +73,23 @@ const DASHBOARD_ALERT = t(
         Edit the color scheme in the dashboard properties.`,
 );
 
-const DASHBOARD_CONTEXT_ALERT = t(
-  `You are viewing this chart in a dashboard context with labels shared across multiple charts.
-        The color scheme selection is disabled.`,
-);
-
-const DASHBOARD_CONTEXT_TOOLTIP = t(
-  `You are viewing this chart in the context of a dashboard that is directly affecting its colors.
-        To edit the color scheme, open this chart outside of the dashboard.`,
-);
-
 const Label = ({
   label,
-  dashboardId,
-  hasSharedLabelsColor,
   hasCustomLabelsColor,
-  hasDashboardColorScheme,
+  dashboardId,
 }: Pick<
   ColorSchemeControlProps,
-  | 'label'
-  | 'dashboardId'
-  | 'hasCustomLabelsColor'
-  | 'hasSharedLabelsColor'
-  | 'hasDashboardColorScheme'
+  'label' | 'hasCustomLabelsColor' | 'dashboardId'
 >) => {
-  const theme = useTheme();
-  if (hasSharedLabelsColor || hasCustomLabelsColor || hasDashboardColorScheme) {
-    const alertTitle =
-      hasCustomLabelsColor && !hasSharedLabelsColor
-        ? CUSTOM_LABEL_ALERT
-        : dashboardId && hasDashboardColorScheme
-          ? DASHBOARD_ALERT
-          : DASHBOARD_CONTEXT_ALERT;
+  if (hasCustomLabelsColor || dashboardId) {
+    const alertTitle = hasCustomLabelsColor
+      ? CUSTOM_LABEL_ALERT
+      : DASHBOARD_ALERT;
     return (
       <>
         {label}{' '}
         <Tooltip title={alertTitle}>
-          <Icons.WarningOutlined
-            iconColor={theme.colors.warning.base}
-            css={css`
-              vertical-align: baseline;
-            `}
-            iconSize="s"
-          />
+          <StyledAlert iconSize="s" />
         </Tooltip>
       </>
     );
@@ -132,12 +99,7 @@ const Label = ({
 
 const ColorSchemeControl = ({
   hasCustomLabelsColor = false,
-  hasDashboardColorScheme = false,
-  mapLabelsColors = {},
-  sharedLabelsColors = [],
   dashboardId,
-  colorNamespace,
-  chartId,
   label = t('Color scheme'),
   onChange = () => {},
   value,
@@ -148,43 +110,29 @@ const ColorSchemeControl = ({
   isLinear,
   ...rest
 }: ColorSchemeControlProps) => {
-  const countSharedLabelsColor = sharedLabelsColors.length;
-  const colorMapInstance = getLabelsColorMap();
-  const chartLabels = chartId
-    ? colorMapInstance.chartsLabelsMap.get(chartId)?.labels || []
-    : [];
-  const hasSharedLabelsColor = !!(
-    dashboardId &&
-    countSharedLabelsColor > 0 &&
-    chartLabels.some(label => sharedLabelsColors.includes(label))
-  );
-  const hasDashboardScheme = dashboardId && hasDashboardColorScheme;
-  const showDashboardLockedOption = hasDashboardScheme || hasSharedLabelsColor;
   const theme = useTheme();
   const currentScheme = useMemo(() => {
-    if (showDashboardLockedOption) {
+    if (dashboardId) {
       return 'dashboard';
     }
     let result = value || defaultScheme;
     if (result === 'SUPERSET_DEFAULT') {
-      const schemesObject = typeof schemes === 'function' ? schemes() : schemes;
+      const schemesObject = isFunction(schemes) ? schemes() : schemes;
       result = schemesObject?.SUPERSET_DEFAULT?.id;
     }
     return result;
-  }, [defaultScheme, schemes, showDashboardLockedOption, value]);
+  }, [dashboardId, defaultScheme, schemes, value]);
 
   const options = useMemo(() => {
-    if (showDashboardLockedOption) {
+    if (dashboardId) {
       return [
-        <Option value="dashboard" label={t('Dashboard')} key="dashboard">
-          <Tooltip title={DASHBOARD_CONTEXT_TOOLTIP}>
-            {t('Dashboard scheme')}
-          </Tooltip>
+        <Option value="dashboard" label={t('dashboard')} key="dashboard">
+          <Tooltip title={DASHBOARD_ALERT}>{t('Dashboard scheme')}</Tooltip>
         </Option>,
       ];
     }
-    const schemesObject = typeof schemes === 'function' ? schemes() : schemes;
-    const controlChoices = typeof choices === 'function' ? choices() : choices;
+    const schemesObject = isFunction(schemes) ? schemes() : schemes;
+    const controlChoices = isFunction(choices) ? choices() : choices;
     const allColorOptions: string[] = [];
     const filteredColorOptions = controlChoices.filter(o => {
       const option = o[0];
@@ -270,29 +218,11 @@ const ColorSchemeControl = ({
         ))}
       </OptGroup>
     ));
-  }, [choices, hasDashboardScheme, hasSharedLabelsColor, isLinear, schemes]);
+  }, [choices, dashboardId, isLinear, schemes]);
 
   // We can't pass on change directly because it receives a second
   // parameter and it would be interpreted as the error parameter
-  const handleOnChange = (value: string) => {
-    if (chartId) {
-      colorMapInstance.setOwnColorScheme(chartId, value);
-      if (dashboardId) {
-        const colorNameSpace = getColorNamespace(colorNamespace);
-        const categoricalNamespace =
-          CategoricalColorNamespace.getNamespace(colorNameSpace);
-
-        const sharedLabelsSet = new Set(sharedLabelsColors);
-        // reset colors except shared and custom labels to keep dashboard consistency
-        const resettableLabels = Object.keys(mapLabelsColors).filter(
-          l => !sharedLabelsSet.has(l),
-        );
-        categoricalNamespace.resetColorsForLabels(resettableLabels);
-      }
-    }
-
-    onChange(value);
-  };
+  const handleOnChange = (value: string) => onChange(value);
 
   return (
     <>
@@ -301,10 +231,8 @@ const ColorSchemeControl = ({
         label={
           <Label
             label={label}
-            dashboardId={dashboardId}
             hasCustomLabelsColor={hasCustomLabelsColor}
-            hasDashboardColorScheme={hasDashboardColorScheme}
-            hasSharedLabelsColor={hasSharedLabelsColor}
+            dashboardId={dashboardId}
           />
         }
       />
@@ -321,7 +249,7 @@ const ColorSchemeControl = ({
         `}
         aria-label={t('Select color scheme')}
         allowClear={clearable}
-        disabled={hasDashboardScheme || hasSharedLabelsColor}
+        disabled={!!dashboardId}
         onChange={handleOnChange}
         placeholder={t('Select scheme')}
         value={currentScheme}

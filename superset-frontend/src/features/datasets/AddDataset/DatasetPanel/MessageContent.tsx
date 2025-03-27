@@ -18,7 +18,7 @@
  */
 
 import { t, styled } from '@superset-ui/core';
-import { EmptyState } from 'src/components/EmptyState';
+import { EmptyStateBig } from 'src/components/EmptyState';
 import { Link } from 'react-router-dom';
 
 const StyledContainer = styled.div`
@@ -31,7 +31,7 @@ const StyledContainer = styled.div`
   height: 100%;
 `;
 
-const StyledEmptyState = styled(EmptyState)`
+const StyledEmptyStateBig = styled(EmptyStateBig)`
   max-width: 50%;
 
   p {
@@ -91,9 +91,8 @@ export const MessageContent = (props: MessageContentProps) => {
   }
   return (
     <StyledContainer>
-      <StyledEmptyState
+      <StyledEmptyStateBig
         image={currentImage}
-        size="large"
         title={currentTitle}
         description={currentDescription}
       />

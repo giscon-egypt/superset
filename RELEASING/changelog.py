@@ -232,7 +232,8 @@ class GitChangeLog:
         for log in self._logs:
             yield {
                 "pr_number": log.pr_number,
-                "pr_link": f"https://github.com/{SUPERSET_REPO}/pull/{log.pr_number}",
+                "pr_link": f"https://github.com/{SUPERSET_REPO}/pull/"
+                f"{log.pr_number}",
                 "message": log.message,
                 "time": log.time,
                 "author": log.author,
@@ -271,14 +272,14 @@ class GitLogs:
 
     @staticmethod
     def _git_get_current_head() -> str:
-        output = os.popen("git status | head -1").read()  # noqa: S605, S607
+        output = os.popen("git status | head -1").read()
         match = re.match("(?:HEAD detached at|On branch) (.*)", output)
         if not match:
             return ""
         return match.group(1)
 
     def _git_checkout(self, git_ref: str) -> None:
-        os.popen(f"git checkout {git_ref}").read()  # noqa: S605
+        os.popen(f"git checkout {git_ref}").read()
         current_head = self._git_get_current_head()
         if current_head != git_ref:
             print(f"Could not checkout {git_ref}")
@@ -289,7 +290,7 @@ class GitLogs:
         current_git_ref = self._git_get_current_head()
         self._git_checkout(self._git_ref)
         output = (
-            os.popen('git --no-pager log --pretty=format:"%h|%an|%ae|%ad|%s|"')  # noqa: S605, S607
+            os.popen('git --no-pager log --pretty=format:"%h|%an|%ae|%ad|%s|"')
             .read()
             .split("\n")
         )
@@ -322,9 +323,9 @@ class BaseParameters:
 
 
 def print_title(message: str) -> None:
-    print(f"{50 * '-'}")
+    print(f"{50*'-'}")
     print(message)
-    print(f"{50 * '-'}")
+    print(f"{50*'-'}")
 
 
 @click.group()
@@ -348,14 +349,14 @@ def compare(base_parameters: BaseParameters) -> None:
     previous_logs = base_parameters.previous_logs
     current_logs = base_parameters.current_logs
     print_title(
-        f"Pull requests from {current_logs.git_ref} not in {previous_logs.git_ref}"
+        f"Pull requests from " f"{current_logs.git_ref} not in {previous_logs.git_ref}"
     )
     previous_diff_logs = previous_logs.diff(current_logs)
     for diff_log in previous_diff_logs:
         print(f"{diff_log}")
 
     print_title(
-        f"Pull requests from {previous_logs.git_ref} not in {current_logs.git_ref}"
+        f"Pull requests from " f"{previous_logs.git_ref} not in {current_logs.git_ref}"
     )
     current_diff_logs = current_logs.diff(previous_logs)
     for diff_log in current_diff_logs:

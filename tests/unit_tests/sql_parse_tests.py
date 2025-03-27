@@ -17,7 +17,7 @@
 # pylint: disable=invalid-name, redefined-outer-name, too-many-lines
 
 from typing import Optional
-from unittest import mock
+from unittest.mock import Mock
 
 import pytest
 import sqlparse
@@ -58,7 +58,7 @@ def test_table() -> None:
     Test the ``Table`` class and its string conversion.
 
     Special characters in the table, schema, or catalog name should be escaped correctly.
-    """  # noqa: E501
+    """
     assert str(Table("tbname")) == "tbname"
     assert str(Table("tbname", "schemaname")) == "schemaname.tbname"
     assert (
@@ -260,21 +260,21 @@ def test_extract_tables_illdefined() -> None:
         extract_tables("SELECT * FROM schemaname.")
     assert (
         str(excinfo.value)
-        == "You may have an error in your SQL statement. Error parsing near '.' at line 1:25"  # noqa: E501
+        == "You may have an error in your SQL statement. Error parsing near '.' at line 1:25"
     )
 
     with pytest.raises(SupersetSecurityException) as excinfo:
         extract_tables("SELECT * FROM catalogname.schemaname.")
     assert (
         str(excinfo.value)
-        == "You may have an error in your SQL statement. Error parsing near '.' at line 1:37"  # noqa: E501
+        == "You may have an error in your SQL statement. Error parsing near '.' at line 1:37"
     )
 
     with pytest.raises(SupersetSecurityException) as excinfo:
         extract_tables("SELECT * FROM catalogname..")
     assert (
         str(excinfo.value)
-        == "You may have an error in your SQL statement. Error parsing near '.' at line 1:27"  # noqa: E501
+        == "You may have an error in your SQL statement. Error parsing near '.' at line 1:27"
     )
 
     with pytest.raises(SupersetSecurityException) as excinfo:
@@ -1313,12 +1313,12 @@ def test_sqlparse_issue_652():
         ("postgresql", "(SELECT COUNT(DISTINCT name) from birth_names)", True),
         (
             "postgresql",
-            "(SELECT table_name FROM information_schema.tables WHERE table_name LIKE '%user%' LIMIT 1)",  # noqa: E501
+            "(SELECT table_name FROM information_schema.tables WHERE table_name LIKE '%user%' LIMIT 1)",
             True,
         ),
         (
             "postgresql",
-            "(SELECT table_name FROM /**/ information_schema.tables WHERE table_name LIKE '%user%' LIMIT 1)",  # noqa: E501
+            "(SELECT table_name FROM /**/ information_schema.tables WHERE table_name LIKE '%user%' LIMIT 1)",
             True,
         ),
         (
@@ -1333,7 +1333,7 @@ def test_sqlparse_issue_652():
         ),
         (
             "postgresql",
-            "((select users.id from (select 'majorie' as a) b, users where b.a = users.name and users.name in ('majorie') limit 1) like 'U%')",  # noqa: E501
+            "((select users.id from (select 'majorie' as a) b, users where b.a = users.name and users.name in ('majorie') limit 1) like 'U%')",
             True,
         ),
     ],
@@ -1507,7 +1507,7 @@ def test_insert_rls_as_subquery(
             else candidate_table.table
         )
         for left, right in zip(
-            candidate_table_name.split(".")[::-1], table.split(".")[::-1], strict=False
+            candidate_table_name.split(".")[::-1], table.split(".")[::-1]
         ):
             if left != right:
                 return None
@@ -1536,7 +1536,7 @@ def test_insert_rls_as_subquery(
             "id=42",
             "SELECT * FROM some_table WHERE ( 1=1) AND some_table.id=42",
         ),
-        # Any existing predicates MUST to be wrapped in parenthesis because AND has higher  # noqa: E501
+        # Any existing predicates MUST to be wrapped in parenthesis because AND has higher
         # precedence than OR. If the RLS it `1=0` and we didn't add parenthesis a user
         # could bypass it by crafting a query with `WHERE TRUE OR FALSE`, since
         # `WHERE TRUE OR FALSE AND 1=0` evaluates to `WHERE TRUE OR (FALSE AND 1=0)`.
@@ -1567,7 +1567,7 @@ def test_insert_rls_as_subquery(
             "id=42",
             "SELECT * FROM other_table WHERE 1=1",
         ),
-        # If there's no preexisting WHERE clause we create one.
+        # If there's no pre-existing WHERE clause we create one.
         (
             "SELECT * FROM table",
             "table",
@@ -1604,7 +1604,7 @@ def test_insert_rls_as_subquery(
             "id=42",
             "SELECT * FROM some_table        WHERE some_table.id=42",
         ),
-        # We add the RLS even if it's already present, to be conservative. It should have  # noqa: E501
+        # We add the RLS even if it's already present, to be conservative. It should have
         # no impact on the query, and it's easier than testing if the RLS is already
         # present (it could be present in an OR clause, eg).
         (
@@ -1666,7 +1666,7 @@ def test_insert_rls_as_subquery(
             "SELECT * FROM table UNION ALL SELECT * FROM other_table",
             "table",
             "id=42",
-            "SELECT * FROM table  WHERE table.id=42 UNION ALL SELECT * FROM other_table",  # noqa: E501
+            "SELECT * FROM table  WHERE table.id=42 UNION ALL SELECT * FROM other_table",
         ),
         (
             "SELECT * FROM table UNION ALL SELECT * FROM other_table",
@@ -1719,9 +1719,7 @@ def test_insert_rls_in_predicate(
         Return the RLS ``condition`` if ``candidate`` matches ``table``.
         """
         # compare ignoring schema
-        for left, right in zip(
-            str(candidate).split(".")[::-1], table.split(".")[::-1], strict=False
-        ):
+        for left, right in zip(str(candidate).split(".")[::-1], table.split(".")[::-1]):
             if left != right:
                 return None
         return condition
@@ -1838,7 +1836,7 @@ def test_is_select() -> None:
     """
     assert not ParsedQuery("SELECT 1; DROP DATABASE superset").is_select()
     assert ParsedQuery(
-        "with base as(select id from table1 union all select id from table2) select * from base"  # noqa: E501
+        "with base as(select id from table1 union all select id from table2) select * from base"
     ).is_select()
     assert ParsedQuery(
         """
@@ -1890,33 +1888,12 @@ SELECT * FROM t"""
     ],
 )
 def test_extract_tables_from_jinja_sql(
-    mocker: MockerFixture,
-    engine: str,
-    macro: str,
-    expected: set[Table],
+    engine: str, macro: str, expected: set[Table]
 ) -> None:
     assert (
         extract_tables_from_jinja_sql(
             sql=f"'{{{{ {engine}.{macro} }}}}'",
-            database=mocker.Mock(),
+            database=Mock(),
         )
         == expected
     )
-
-
-@mock.patch.dict(
-    "superset.extensions.feature_flag_manager._feature_flags",
-    {"ENABLE_TEMPLATE_PROCESSING": False},
-    clear=True,
-)
-def test_extract_tables_from_jinja_sql_disabled(mocker: MockerFixture) -> None:
-    """
-    Test the function when the feature flag is disabled.
-    """
-    database = mocker.Mock()
-    database.db_engine_spec.engine = "mssql"
-
-    assert extract_tables_from_jinja_sql(
-        sql="SELECT 1 FROM t",
-        database=database,
-    ) == {Table("t")}

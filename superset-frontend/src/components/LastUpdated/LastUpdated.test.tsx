@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { fireEvent, render, screen } from 'spec/helpers/testing-library';
+import { fireEvent, render } from 'spec/helpers/testing-library';
 
 import LastUpdated from '.';
 
@@ -27,13 +27,11 @@ test('renders the base component (no refresh)', () => {
   expect(getByText(/^Last Updated .+$/)).toBeInTheDocument();
 });
 
-test('renders a refresh action', () => {
+test('renders a refresh action', async () => {
   const mockAction = jest.fn();
-  render(<LastUpdated updatedAt={updatedAt} update={mockAction} />);
-
-  const button = screen.getByRole('button');
-  expect(button).toBeInTheDocument();
-
-  fireEvent.click(button);
+  const { getByLabelText } = render(
+    <LastUpdated updatedAt={updatedAt} update={mockAction} />,
+  );
+  fireEvent.click(getByLabelText('refresh'));
   expect(mockAction).toHaveBeenCalled();
 });

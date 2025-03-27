@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Fragment, useMemo, useCallback, RefObject, createRef } from 'react';
-import { extendedDayjs } from 'src/utils/dates';
+import moment from 'moment';
 import { useDispatch } from 'react-redux';
 import ReactDiffViewer from 'react-diff-viewer-continued';
 import { useInView } from 'react-intersection-observer';
@@ -179,9 +179,7 @@ const OverrideConfirmModal = ({ overwriteConfirmMetadata }: Props) => {
                     newValue={newValue}
                     leftTitle={t(
                       'Last Updated %s by %s',
-                      extendedDayjs
-                        .utc(overwriteConfirmMetadata.updatedAt)
-                        .calendar(),
+                      moment.utc(overwriteConfirmMetadata.updatedAt).calendar(),
                       overwriteConfirmMetadata.updatedBy,
                     )}
                     rightTitle="new value"

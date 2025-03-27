@@ -61,7 +61,7 @@ export const antdCollapseStyles = (theme: SupersetTheme) => css`
 `;
 
 export const antDModalNoPaddingStyles = css`
-  .antd5-modal-body {
+  .ant-modal-body {
     padding-left: 0;
     padding-right: 0;
     padding-top: 0;
@@ -76,20 +76,21 @@ export const formStyles = (theme: SupersetTheme) => css`
 `;
 
 export const antDModalStyles = (theme: SupersetTheme) => css`
-  .antd5-modal-header {
+  .ant-modal-header {
     padding: ${theme.gridUnit * 4.5}px ${theme.gridUnit * 4}px
       ${theme.gridUnit * 4}px;
   }
 
-  .antd5-modal-close-x .close {
+  .ant-modal-close-x .close {
+    color: ${theme.colors.grayscale.dark1};
     opacity: 1;
   }
 
-  .antd5-modal-body {
+  .ant-modal-body {
     height: ${theme.gridUnit * MODAL_BODY_HEIGHT}px;
   }
 
-  .antd5-modal-footer {
+  .ant-modal-footer {
     height: ${theme.gridUnit * 16.25}px;
   }
 

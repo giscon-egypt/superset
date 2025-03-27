@@ -21,11 +21,9 @@ import logging
 from abc import ABC, abstractmethod
 from enum import Enum
 from time import sleep
-from typing import TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 from flask import current_app
-from packaging import version
-from selenium import __version__ as selenium_version
 from selenium.common.exceptions import (
     StaleElementReferenceException,
     TimeoutException,
@@ -33,9 +31,8 @@ from selenium.common.exceptions import (
 )
 from selenium.webdriver import chrome, firefox, FirefoxProfile
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.service import Service
 from selenium.webdriver.remote.webdriver import WebDriver
-from selenium.webdriver.support import expected_conditions as EC  # noqa: N812
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from superset import feature_flag_manager
@@ -108,8 +105,8 @@ class WebDriverPlaywright(WebDriverProxy):
                 alert_div.get_by_role("button").click()
 
                 # wait for modal to show up
-                page.locator(".antd5-modal-content").wait_for(state="visible")
-                err_msg_div = page.locator(".antd5-modal-content .antd5-modal-body")
+                page.locator(".ant-modal-content").wait_for(state="visible")
+                err_msg_div = page.locator(".ant-modal-content .ant-modal-body")
                 #
                 # # collect error message
                 error_messages.append(err_msg_div.text_content())
@@ -118,10 +115,10 @@ class WebDriverPlaywright(WebDriverProxy):
                 error_as_html = err_msg_div.inner_html().replace("'", "\\'")
                 #
                 # # close modal after collecting error messages
-                page.locator(".antd5-modal-content .antd5-modal-close").click()
+                page.locator(".ant-modal-content .ant-modal-close").click()
                 #
                 # # wait until the modal becomes invisible
-                page.locator(".antd5-modal-content").wait_for(state="detached")
+                page.locator(".ant-modal-content").wait_for(state="detached")
                 try:
                     # Even if some errors can't be updated in the screenshot,
                     # keep all the errors in the server log and do not fail the loop
@@ -136,7 +133,7 @@ class WebDriverPlaywright(WebDriverProxy):
 
         return error_messages
 
-    def get_screenshot(  # pylint: disable=too-many-locals, too-many-statements  # noqa: C901
+    def get_screenshot(  # pylint: disable=too-many-locals, too-many-statements
         self, url: str, element_name: str, user: User
     ) -> bytes | None:
         with sync_playwright() as playwright:
@@ -165,7 +162,7 @@ class WebDriverPlaywright(WebDriverProxy):
                 )
             except PlaywrightTimeout:
                 logger.exception(
-                    "Web event %s not detected. Page %s might not have been fully loaded",  # noqa: E501
+                    "Web event %s not detected. Page %s might not have been fully loaded",
                     current_app.config["SCREENSHOT_PLAYWRIGHT_WAIT_EVENT"],
                     url,
                 )
@@ -229,7 +226,7 @@ class WebDriverPlaywright(WebDriverProxy):
                     unexpected_errors = WebDriverPlaywright.find_unexpected_errors(page)
                     if unexpected_errors:
                         logger.warning(
-                            "%i errors found in the screenshot. URL: %s. Errors are: %s",  # noqa: E501
+                            "%i errors found in the screenshot. URL: %s. Errors are: %s",
                             len(unexpected_errors),
                             url,
                             unexpected_errors,
@@ -249,16 +246,13 @@ class WebDriverSelenium(WebDriverProxy):
     def create(self) -> WebDriver:
         pixel_density = current_app.config["WEBDRIVER_WINDOW"].get("pixel_density", 1)
         if self._driver_type == "firefox":
-            driver_class: type[WebDriver] = firefox.webdriver.WebDriver
-            service_class: type[Service] = firefox.service.Service
+            driver_class = firefox.webdriver.WebDriver
             options = firefox.options.Options()
             profile = FirefoxProfile()
             profile.set_preference("layout.css.devPixelsPerPx", str(pixel_density))
-            options.profile = profile
-            kwargs = {"options": options}
+            kwargs: dict[Any, Any] = {"options": options, "firefox_profile": profile}
         elif self._driver_type == "chrome":
             driver_class = chrome.webdriver.WebDriver
-            service_class = chrome.service.Service
             options = chrome.options.Options()
             options.add_argument(f"--force-device-scale-factor={pixel_density}")
             options.add_argument(f"--window-size={self._window[0]},{self._window[1]}")
@@ -267,41 +261,15 @@ class WebDriverSelenium(WebDriverProxy):
             raise Exception(  # pylint: disable=broad-exception-raised
                 f"Webdriver name ({self._driver_type}) not supported"
             )
-
         # Prepare args for the webdriver init
-        for arg in list(current_app.config["WEBDRIVER_OPTION_ARGS"]):
+
+        # Add additional configured options
+        for arg in current_app.config["WEBDRIVER_OPTION_ARGS"]:
             options.add_argument(arg)
 
-        # Add additional configured webdriver options
-        webdriver_conf = dict(current_app.config["WEBDRIVER_CONFIGURATION"])
-
-        if version.parse(selenium_version) < version.parse("4.10.0"):
-            kwargs |= webdriver_conf
-        else:
-            driver_opts = dict(
-                webdriver_conf.get("options", {"capabilities": {}, "preferences": {}})
-            )
-            driver_srv = dict(
-                webdriver_conf.get(
-                    "service",
-                    {
-                        "log_output": "/dev/null",
-                        "service_args": [],
-                        "port": 0,
-                        "env": {},
-                    },
-                )
-            )
-            for name, value in driver_opts.get("capabilities", {}).items():
-                options.set_capability(name, value)
-            if hasattr(options, "profile"):
-                for name, value in driver_opts.get("preferences", {}).items():
-                    options.profile.set_preference(str(name), value)
-            kwargs |= {
-                "service": service_class(**driver_srv),
-            }
-
+        kwargs.update(current_app.config["WEBDRIVER_CONFIGURATION"])
         logger.debug("Init selenium driver")
+
         return driver_class(**kwargs)
 
     def auth(self, user: User) -> WebDriver:
@@ -317,11 +285,11 @@ class WebDriverSelenium(WebDriverProxy):
         # and catch-all exceptions
         try:
             retry_call(driver.close, max_tries=tries)
-        except Exception:  # pylint: disable=broad-except  # noqa: S110
+        except Exception:  # pylint: disable=broad-except
             pass
         try:
             driver.quit()
-        except Exception:  # pylint: disable=broad-except  # noqa: S110
+        except Exception:  # pylint: disable=broad-except
             pass
 
     @staticmethod
@@ -344,17 +312,17 @@ class WebDriverSelenium(WebDriverProxy):
                     current_app.config["SCREENSHOT_WAIT_FOR_ERROR_MODAL_VISIBLE"],
                 ).until(
                     EC.visibility_of_any_elements_located(
-                        (By.CLASS_NAME, "antd5-modal-content")
+                        (By.CLASS_NAME, "ant-modal-content")
                     )
                 )[0]
 
-                err_msg_div = modal.find_element(By.CLASS_NAME, "antd5-modal-body")
+                err_msg_div = modal.find_element(By.CLASS_NAME, "ant-modal-body")
 
                 # collect error message
                 error_messages.append(err_msg_div.text)
 
                 # close modal after collecting error messages
-                modal.find_element(By.CLASS_NAME, "antd5-modal-close").click()
+                modal.find_element(By.CLASS_NAME, "ant-modal-close").click()
 
                 # wait until the modal becomes invisible
                 WebDriverWait(
@@ -380,7 +348,7 @@ class WebDriverSelenium(WebDriverProxy):
 
         return error_messages
 
-    def get_screenshot(self, url: str, element_name: str, user: User) -> bytes | None:  # noqa: C901
+    def get_screenshot(self, url: str, element_name: str, user: User) -> bytes | None:
         driver = self.auth(user)
         driver.set_window_size(*self._window)
         driver.get(url)
@@ -411,20 +379,11 @@ class WebDriverSelenium(WebDriverProxy):
                     )
                 )
             except TimeoutException:
-                logger.info("Timeout Exception caught")
-                # Fallback to allow a screenshot of an empty dashboard
-                try:
-                    WebDriverWait(driver, 0).until(
-                        EC.visibility_of_all_elements_located(
-                            (By.CLASS_NAME, "grid-container")
-                        )
-                    )
-                except:
-                    logger.exception(
-                        "Selenium timed out waiting for dashboard to draw at url %s",
-                        url,
-                    )
-                    raise
+                logger.exception(
+                    "Selenium timed out waiting for chart containers to draw at url %s",
+                    url,
+                )
+                raise
 
             try:
                 # charts took too long to load
@@ -462,23 +421,18 @@ class WebDriverSelenium(WebDriverProxy):
                     )
 
             img = element.screenshot_as_png
-        except Exception as ex:
-            logger.warning("exception in webdriver", exc_info=ex)
-            raise
         except TimeoutException:
             # raise again for the finally block, but handled above
-            raise
+            pass
         except StaleElementReferenceException:
             logger.exception(
                 "Selenium got a stale element while requesting url %s",
                 url,
             )
-            raise
         except WebDriverException:
             logger.exception(
                 "Encountered an unexpected error when requesting url %s", url
             )
-            raise
         finally:
             self.destroy(driver, current_app.config["SCREENSHOT_SELENIUM_RETRIES"])
         return img

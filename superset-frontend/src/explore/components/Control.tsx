@@ -102,10 +102,7 @@ export default function Control(props: ControlProps) {
 
   if (!type || isVisible === false) return null;
 
-  const ControlComponent =
-    typeof type === 'string'
-      ? controlMap[type as keyof typeof controlMap]
-      : type;
+  const ControlComponent = typeof type === 'string' ? controlMap[type] : type;
   if (!ControlComponent) {
     // eslint-disable-next-line no-console
     console.warn(`Unknown controlType: ${type}`);

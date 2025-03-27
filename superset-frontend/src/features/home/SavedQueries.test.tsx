@@ -20,7 +20,7 @@ import thunk from 'redux-thunk';
 import { styledMount as mount } from 'spec/helpers/theming';
 import fetchMock from 'fetch-mock';
 import configureStore from 'redux-mock-store';
-import { act } from 'spec/helpers/testing-library';
+import { act } from 'react-dom/test-utils';
 import waitForComponentToPaint from 'spec/helpers/waitForComponentToPaint';
 import SubMenu from './SubMenu';
 import SavedQueries from './SavedQueries';
@@ -91,20 +91,20 @@ describe('SavedQueries', () => {
   });
 
   it('is valid', () => {
-    expect(wrapper.find(SavedQueries)).toBeTruthy();
+    expect(wrapper.find(SavedQueries)).toExist();
   });
 
   it('fetches queries mine and renders listviewcard cards', async () => {
     clickTab(0);
     await waitForComponentToPaint(wrapper);
     expect(fetchMock.calls(/saved_query\/\?q/)).toHaveLength(1);
-    expect(wrapper.find('ListViewCard')).toBeTruthy();
+    expect(wrapper.find('ListViewCard')).toExist();
   });
 
   it('renders a submenu with clickable tables and buttons', async () => {
-    expect(wrapper.find(SubMenu)).toBeTruthy();
+    expect(wrapper.find(SubMenu)).toExist();
     expect(wrapper.find('[role="tab"]')).toHaveLength(1);
-    expect(wrapper.find('button')).toHaveLength(5);
+    expect(wrapper.find('button')).toHaveLength(2);
     clickTab(0);
     await waitForComponentToPaint(wrapper);
     expect(fetchMock.calls(/saved_query\/\?q/)).toHaveLength(2);

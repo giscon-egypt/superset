@@ -59,7 +59,7 @@ const BulkTagModal: FC<BulkTagModalProps> = ({
       endpoint: `/api/v1/tag/bulk_create`,
       jsonPayload: {
         tags: tags.map(tag => ({
-          name: tag.label,
+          name: tag.value,
           objects_to_tag: selected.map(item => [
             resourceName,
             +item.original.id,

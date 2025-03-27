@@ -29,7 +29,7 @@ import {
   SupersetThemeProps,
   withTheme,
   seed,
-  CategoricalColorNamespace,
+  CategoricalColorScale,
 } from '@superset-ui/core';
 import { isEqual } from 'lodash';
 
@@ -199,17 +199,15 @@ class WordCloud extends PureComponent<FullWordCloudProps, WordCloudState> {
       .words(data.map(d => ({ ...d })))
       .padding(5)
       .rotate(ROTATION[rotation] || ROTATION.flat)
-      .text((d: PlainObject) => encoder.channels.text.getValueFromDatum(d))
-      .font((d: PlainObject) =>
+      .text(d => encoder.channels.text.getValueFromDatum(d))
+      .font(d =>
         encoder.channels.fontFamily.encodeDatum(
           d,
           this.props.theme.typography.families.sansSerif,
         ),
       )
-      .fontWeight((d: PlainObject) =>
-        encoder.channels.fontWeight.encodeDatum(d, 'normal'),
-      )
-      .fontSize((d: PlainObject) => encoder.channels.fontSize.encodeDatum(d, 0))
+      .fontWeight(d => encoder.channels.fontWeight.encodeDatum(d, 'normal'))
+      .fontSize(d => encoder.channels.fontSize.encodeDatum(d, 0))
       .on('end', (words: Word[]) => {
         if (isValid(words) || scaleFactor > MAX_SCALE_FACTOR) {
           if (this.isComponentMounted) {
@@ -232,7 +230,7 @@ class WordCloud extends PureComponent<FullWordCloudProps, WordCloudState> {
     encoder.channels.color.setDomainFromDataset(words);
 
     const { getValueFromDatum } = encoder.channels.color;
-    const colorFn = CategoricalColorNamespace.getScale(colorScheme);
+    const colorFn = encoder.channels.color.scale as CategoricalColorScale;
 
     const viewBoxWidth = width * scaleFactor;
     const viewBoxHeight = height * scaleFactor;
@@ -252,7 +250,11 @@ class WordCloud extends PureComponent<FullWordCloudProps, WordCloudState> {
               fontSize={`${w.size}px`}
               fontWeight={w.weight}
               fontFamily={w.font}
-              fill={colorFn(getValueFromDatum(w) as string, sliceId)}
+              fill={colorFn(
+                getValueFromDatum(w) as string,
+                sliceId,
+                colorScheme,
+              )}
               textAnchor="middle"
               transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
             >

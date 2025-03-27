@@ -18,7 +18,7 @@
  */
 import { Component } from 'react';
 import PropTypes from 'prop-types';
-import { List } from 'src/components/List';
+import { List } from 'src/components';
 import { nanoid } from 'nanoid';
 import { t, withTheme } from '@superset-ui/core';
 import {
@@ -65,8 +65,6 @@ const defaultProps = {
 const SortableListItem = SortableElement(CustomListItem);
 const SortableList = SortableContainer(List);
 const SortableDragger = SortableHandle(() => (
-  // TODO: Remove fa-icon
-  // eslint-disable-next-line icons/no-fa-icons-usage
   <i
     role="img"
     aria-label="drag"
@@ -120,11 +118,7 @@ class CollectionControl extends Component {
           return (
             <SortableListItem
               className="clearfix"
-              css={theme => ({
-                justifyContent: 'flex-start',
-                display: '-webkit-flex',
-                paddingInline: theme.gridUnit * 3,
-              })}
+              css={{ justifyContent: 'flex-start' }}
               key={this.props.keyAccessor(o)}
               index={i}
             >
@@ -163,7 +157,7 @@ class CollectionControl extends Component {
         <HeaderContainer>
           <ControlHeader {...this.props} />
           <AddIconButton onClick={this.onAdd}>
-            <Icons.PlusOutlined
+            <Icons.PlusLarge
               iconSize="s"
               iconColor={theme.colors.grayscale.light5}
             />

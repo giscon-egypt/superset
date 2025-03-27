@@ -15,8 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import logging
-
 from superset import db
 from superset.models.dashboard import Dashboard
 from superset.models.slice import Slice
@@ -29,8 +27,6 @@ from .helpers import (
     merge_slice,
     update_slice_ids,
 )
-
-logger = logging.getLogger(__name__)
 
 COLOR_RED = {"r": 205, "g": 0, "b": 3, "a": 0.82}
 POSITION_JSON = """\
@@ -184,7 +180,7 @@ POSITION_JSON = """\
 
 
 def load_deck_dash() -> None:  # pylint: disable=too-many-statements
-    logger.debug("Loading deck.gl dashboard")
+    print("Loading deck.gl dashboard")
     slices = []
     table = get_table_connector_registry()
     tbl = db.session.query(table).filter_by(table_name="long_lat").first()
@@ -214,7 +210,7 @@ def load_deck_dash() -> None:  # pylint: disable=too-many-statements
         "viz_type": "deck_scatter",
     }
 
-    logger.debug("Creating Scatterplot slice")
+    print("Creating Scatterplot slice")
     slc = Slice(
         slice_name="Deck.gl Scatterplot",
         viz_type="deck_scatter",
@@ -249,7 +245,7 @@ def load_deck_dash() -> None:  # pylint: disable=too-many-statements
         "time_grain_sqla": None,
         "groupby": [],
     }
-    logger.debug("Creating Screen Grid slice")
+    print("Creating Screen Grid slice")
     slc = Slice(
         slice_name="Deck.gl Screen grid",
         viz_type="deck_screengrid",
@@ -285,7 +281,7 @@ def load_deck_dash() -> None:  # pylint: disable=too-many-statements
         "time_grain_sqla": None,
         "groupby": [],
     }
-    logger.debug("Creating Hex slice")
+    print("Creating Hex slice")
     slc = Slice(
         slice_name="Deck.gl Hexagons",
         viz_type="deck_hex",
@@ -322,7 +318,7 @@ def load_deck_dash() -> None:  # pylint: disable=too-many-statements
         "time_grain_sqla": None,
         "groupby": [],
     }
-    logger.debug("Creating Grid slice")
+    print("Creating Grid slice")
     slc = Slice(
         slice_name="Deck.gl Grid",
         viz_type="deck_grid",
@@ -413,7 +409,7 @@ def load_deck_dash() -> None:  # pylint: disable=too-many-statements
         "legend_position": "tr",
     }
 
-    logger.debug("Creating Polygon slice")
+    print("Creating Polygon slice")
     slc = Slice(
         slice_name="Deck.gl Polygons",
         viz_type="deck_polygon",
@@ -463,7 +459,7 @@ def load_deck_dash() -> None:  # pylint: disable=too-many-statements
         "stroke_width": 1,
     }
 
-    logger.debug("Creating Arc slice")
+    print("Creating Arc slice")
     slc = Slice(
         slice_name="Deck.gl Arcs",
         viz_type="deck_arc",
@@ -515,7 +511,7 @@ def load_deck_dash() -> None:  # pylint: disable=too-many-statements
         "js_onclick_href": "",
     }
 
-    logger.debug("Creating Path slice")
+    print("Creating Path slice")
     slc = Slice(
         slice_name="Deck.gl Path",
         viz_type="deck_path",
@@ -530,7 +526,7 @@ def load_deck_dash() -> None:  # pylint: disable=too-many-statements
     slices.append(slc)
     slug = "deck"
 
-    logger.debug("Creating a dashboard")
+    print("Creating a dashboard")
     title = "deck.gl Demo"
     dash = db.session.query(Dashboard).filter_by(slug=slug).first()
 

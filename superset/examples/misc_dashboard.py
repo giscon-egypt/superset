@@ -14,7 +14,6 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import logging
 import textwrap
 
 from superset import db
@@ -23,15 +22,13 @@ from superset.utils import json
 
 from .helpers import update_slice_ids
 
-logger = logging.getLogger(__name__)
-
 DASH_SLUG = "misc_charts"
 
 
 def load_misc_dashboard() -> None:
     """Loading a dashboard featuring misc charts"""
 
-    logger.debug("Creating the dashboard")
+    print("Creating the dashboard")
     db.session.expunge_all()
     dash = db.session.query(Dashboard).filter_by(slug=DASH_SLUG).first()
 

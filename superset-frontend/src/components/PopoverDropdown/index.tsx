@@ -19,7 +19,7 @@
 import { Key } from 'react';
 import cx from 'classnames';
 import { styled, useTheme } from '@superset-ui/core';
-import { Dropdown } from 'src/components/Dropdown';
+import { AntdDropdown } from 'src/components';
 import { Menu } from 'src/components/Menu';
 import Icons from 'src/components/Icons';
 
@@ -46,7 +46,7 @@ interface HandleSelectProps {
 }
 
 const MenuItem = styled(Menu.Item)`
-  &.antd5-menu-item {
+  &.ant-menu-item {
     height: auto;
     line-height: 1.4;
 
@@ -70,7 +70,7 @@ const MenuItem = styled(Menu.Item)`
     }
   }
 
-  &.antd5-menu-item-selected {
+  &.ant-menu-item-selected {
     color: unset;
   }
 `;
@@ -89,10 +89,10 @@ const PopoverDropdown = (props: PopoverDropdownProps) => {
   const theme = useTheme();
   const selected = options.find(opt => opt.value === value);
   return (
-    <Dropdown
+    <AntdDropdown
       trigger={['click']}
       overlayStyle={{ zIndex: theme.zIndex.max }}
-      dropdownRender={() => (
+      overlay={
         <Menu onClick={({ key }: HandleSelectProps) => onChange(key)}>
           {options.map(option => (
             <MenuItem
@@ -106,19 +106,16 @@ const PopoverDropdown = (props: PopoverDropdownProps) => {
             </MenuItem>
           ))}
         </Menu>
-      )}
+      }
     >
       <div role="button" css={{ display: 'flex', alignItems: 'center' }}>
         {selected && renderButton(selected)}
-        <Icons.DownOutlined
-          iconSize="s"
-          css={{
-            marginTop: theme.gridUnit * 0.5,
-            marginLeft: theme.gridUnit * 0.5,
-          }}
+        <Icons.CaretDown
+          iconColor={theme.colors.grayscale.base}
+          css={{ marginTop: theme.gridUnit * 0.5 }}
         />
       </div>
-    </Dropdown>
+    </AntdDropdown>
   );
 };
 

@@ -130,7 +130,7 @@ class LogRestApi(LogMixin, BaseSupersetModelRestApi):
         """
         args = kwargs["rison"]
         page, page_size = self._sanitize_page_args(*self._handle_page_args(args))
-        actions = args.get("actions", ["mount_explorer", "mount_dashboard"])
+        actions = args.get("actions", ["explore", "dashboard"])
         distinct = args.get("distinct", True)
 
         payload = LogDAO.get_recent_activity(actions, distinct, page, page_size)

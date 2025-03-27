@@ -39,6 +39,7 @@ module.exports = {
       {
         development: process.env.BABEL_ENV === 'development',
         runtime: 'automatic',
+        importSource: '@emotion/react',
       },
     ],
     '@babel/preset-typescript',
@@ -73,23 +74,12 @@ module.exports = {
             corejs: 3,
             loose: true,
             shippedProposals: true,
-            modules: 'auto',
+            modules: 'commonjs',
             targets: { node: 'current' },
           },
         ],
-        [
-          '@babel/preset-react',
-          {
-            development: process.env.BABEL_ENV === 'development',
-            runtime: 'automatic',
-          },
-        ],
-        '@babel/preset-typescript',
       ],
-      plugins: [
-        'babel-plugin-dynamic-import-node',
-        '@babel/plugin-transform-modules-commonjs',
-      ],
+      plugins: ['babel-plugin-dynamic-import-node'],
     },
     // build instrumented code for testing code coverage with Cypress
     instrumented: {

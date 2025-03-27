@@ -24,24 +24,19 @@ import Icons, { IconType } from 'src/components/Icons';
 export interface RefreshLabelProps {
   onClick: MouseEventHandler<HTMLSpanElement>;
   tooltipContent: string;
-  disabled?: boolean;
 }
 
-const RefreshLabel = ({
-  onClick,
-  tooltipContent,
-  disabled,
-}: RefreshLabelProps) => {
+const RefreshLabel = ({ onClick, tooltipContent }: RefreshLabelProps) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const IconWithoutRef = forwardRef((props: IconType, ref: any) => (
-    <Icons.SyncOutlined iconSize="l" {...props} />
+    <Icons.Refresh {...props} />
   ));
 
   return (
     <Tooltip title={tooltipContent}>
       <IconWithoutRef
         role="button"
-        onClick={disabled ? undefined : onClick}
+        onClick={onClick}
         css={(theme: SupersetTheme) => ({
           cursor: 'pointer',
           color: theme.colors.grayscale.base,

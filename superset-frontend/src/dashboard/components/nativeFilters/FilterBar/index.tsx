@@ -24,8 +24,8 @@ import {
   useEffect,
   useState,
   useCallback,
+  createContext,
   useRef,
-  useMemo,
 } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -129,6 +129,7 @@ const publishDataMask = debounce(
   SLOW_DEBOUNCE,
 );
 
+export const FilterBarScrollContext = createContext(false);
 const FilterBar: FC<FiltersBarProps> = ({
   orientation = FilterBarOrientation.Vertical,
   verticalConfig,
@@ -143,11 +144,8 @@ const FilterBar: FC<FiltersBarProps> = ({
   const tabId = useTabId();
   const filters = useFilters();
   const previousFilters = usePrevious(filters);
-  const filterValues = useMemo(() => Object.values(filters), [filters]);
-  const nativeFilterValues = useMemo(
-    () => filterValues.filter(isNativeFilter),
-    [filterValues],
-  );
+  const filterValues = Object.values(filters);
+  const nativeFilterValues = filterValues.filter(isNativeFilter);
   const dashboardId = useSelector<any, number>(
     ({ dashboardInfo }) => dashboardInfo?.id,
   );
@@ -191,7 +189,7 @@ const FilterBar: FC<FiltersBarProps> = ({
 
   useEffect(() => {
     if (previousFilters && dashboardId === previousDashboardId) {
-      const updates: Record<string, DataMaskWithId> = {};
+      const updates = {};
       Object.values(filters).forEach(currentFilter => {
         const previousFilter = previousFilters?.[currentFilter.id];
         if (!previousFilter) {
@@ -208,17 +206,20 @@ const FilterBar: FC<FiltersBarProps> = ({
         const dataMaskChanged = !isEqual(currentDataMask, previousDataMask);
 
         if (typeChanged || targetsChanged || dataMaskChanged) {
-          updates[currentFilter.id] = getInitialDataMask(
-            currentFilter.id,
-          ) as DataMaskWithId;
+          updates[currentFilter.id] = getInitialDataMask(currentFilter.id);
         }
       });
 
       if (!isEmpty(updates)) {
         setDataMaskSelected(draft => ({ ...draft, ...updates }));
+        Object.keys(updates).forEach(key => dispatch(clearDataMask(key)));
       }
     }
-  }, [dashboardId, filters, previousDashboardId, setDataMaskSelected]);
+  }, [
+    JSON.stringify(filters),
+    JSON.stringify(previousFilters),
+    previousDashboardId,
+  ]);
 
   const dataMaskAppliedText = JSON.stringify(dataMaskApplied);
 
@@ -275,27 +276,16 @@ const FilterBar: FC<FiltersBarProps> = ({
   );
   const isInitialized = useInitialization();
 
-  const actions = useMemo(
-    () => (
-      <ActionButtons
-        filterBarOrientation={orientation}
-        width={verticalConfig?.width}
-        onApply={handleApply}
-        onClearAll={handleClearAll}
-        dataMaskSelected={dataMaskSelected}
-        dataMaskApplied={dataMaskApplied}
-        isApplyDisabled={isApplyDisabled}
-      />
-    ),
-    [
-      orientation,
-      verticalConfig?.width,
-      handleApply,
-      handleClearAll,
-      dataMaskSelected,
-      dataMaskAppliedText,
-      isApplyDisabled,
-    ],
+  const actions = (
+    <ActionButtons
+      filterBarOrientation={orientation}
+      width={verticalConfig?.width}
+      onApply={handleApply}
+      onClearAll={handleClearAll}
+      dataMaskSelected={dataMaskSelected}
+      dataMaskApplied={dataMaskApplied}
+      isApplyDisabled={isApplyDisabled}
+    />
   );
 
   const filterBarComponent =

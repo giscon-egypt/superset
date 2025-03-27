@@ -53,7 +53,7 @@ const AddFilter = styled.div`
   `}
 `;
 
-const DeleteFilter = styled(Icons.DeleteOutlined)`
+const DeleteFilter = styled(Icons.Trash)`
   ${({ theme }) => `
     cursor: pointer;
     margin-left: ${theme.gridUnit * 2}px;
@@ -78,6 +78,7 @@ const RowPanel = styled.div`
 `;
 
 const Label = styled.div`
+  text-transform: uppercase;
   font-size: ${({ theme }) => theme.typography.sizes.s}px;
   color: ${({ theme }) => theme.colors.grayscale.base};
   margin-bottom: ${({ theme }) => theme.gridUnit}px;
@@ -171,7 +172,7 @@ const List = ({
       ))}
       {availableFilters.length > rows.length && (
         <AddFilter role="button" onClick={onAdd}>
-          <Icons.PlusOutlined iconSize="xs" />
+          <Icons.PlusSmall />
           {t('Add filter')}
         </AddFilter>
       )}

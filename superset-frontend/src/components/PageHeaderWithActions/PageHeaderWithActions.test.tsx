@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { render, screen, userEvent } from 'spec/helpers/testing-library';
+import { render, screen } from 'spec/helpers/testing-library';
+import userEvent from '@testing-library/user-event';
 import { PageHeaderWithActions, PageHeaderWithActionsProps } from './index';
 import { Menu } from '../Menu';
 

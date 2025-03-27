@@ -96,7 +96,7 @@ def downgrade():
         )
         if not dashboard.json_metadata:
             logger.info(
-                "[RemoveTypeToNativeFilter] Skipping Dashboard<pk:%s> json_metadata is %s",  # noqa: E501
+                "[RemoveTypeToNativeFilter] Skipping Dashboard<pk:%s> json_metadata is %s",
                 dashboard.id,
                 dashboard.json_metadata,
             )

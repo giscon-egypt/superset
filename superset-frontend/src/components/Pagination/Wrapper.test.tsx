@@ -17,15 +17,8 @@
  * under the License.
  */
 
-import { render, screen, cleanup } from 'spec/helpers/testing-library';
+import { render, screen } from 'spec/helpers/testing-library';
 import Wrapper from './Wrapper';
-
-// Add cleanup after each test
-afterEach(async () => {
-  cleanup();
-  // Wait for any pending effects to complete
-  await new Promise(resolve => setTimeout(resolve, 0));
-});
 
 jest.mock('./Next', () => ({
   Next: () => <div data-test="next" />,
@@ -40,7 +33,7 @@ jest.mock('./Ellipsis', () => ({
   Ellipsis: () => <div data-test="ellipsis" />,
 }));
 
-test('Pagination rendering correctly', async () => {
+test('Pagination rendering correctly', () => {
   render(
     <Wrapper>
       <li data-test="test" />
@@ -50,17 +43,17 @@ test('Pagination rendering correctly', async () => {
   expect(screen.getByTestId('test')).toBeInTheDocument();
 });
 
-test('Next attribute', async () => {
+test('Next attribute', () => {
   render(<Wrapper.Next onClick={jest.fn()} />);
   expect(screen.getByTestId('next')).toBeInTheDocument();
 });
 
-test('Prev attribute', async () => {
+test('Prev attribute', () => {
   render(<Wrapper.Next onClick={jest.fn()} />);
   expect(screen.getByTestId('next')).toBeInTheDocument();
 });
 
-test('Item attribute', async () => {
+test('Item attribute', () => {
   render(
     <Wrapper.Item onClick={jest.fn()}>
       <></>
@@ -69,7 +62,7 @@ test('Item attribute', async () => {
   expect(screen.getByTestId('item')).toBeInTheDocument();
 });
 
-test('Ellipsis attribute', async () => {
+test('Ellipsis attribute', () => {
   render(<Wrapper.Ellipsis onClick={jest.fn()} />);
   expect(screen.getByTestId('ellipsis')).toBeInTheDocument();
 });

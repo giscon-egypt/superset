@@ -16,11 +16,14 @@
 #
 
 # -----------------------------------------------------------------------
-# We don't support docker compose for production environments.
+# We don't support docker-compose for production environments.
 # If you choose to use this type of deployment make sure to
 # create you own docker environment file (docker/.env) with your own
 # unique random secure passwords and SECRET_KEY.
 # -----------------------------------------------------------------------
+x-superset-depends-on: &superset-depends-on
+  - db
+  - redis
 x-superset-volumes:
   &superset-volumes # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
   - ./docker:/app/docker
@@ -46,7 +49,7 @@ services:
         required: true
       - path: docker/.env-local # optional override
         required: false
-    image: postgres:16
+    image: postgres:15
     container_name: superset_db
     restart: unless-stopped
     volumes:
@@ -67,12 +70,8 @@ services:
     restart: unless-stopped
     ports:
       - 8088:8088
-    depends_on:
-      superset-init:
-        condition: service_completed_successfully
+    depends_on: *superset-depends-on
     volumes: *superset-volumes
-    environment:
-      SUPERSET_LOG_LEVEL: "${SUPERSET_LOG_LEVEL:-info}"
 
   superset-init:
     container_name: superset_init
@@ -84,18 +83,11 @@ services:
         required: true
       - path: docker/.env-local # optional override
         required: false
-    depends_on:
-      db:
-        condition: service_started
-      redis:
-        condition: service_started
+    depends_on: *superset-depends-on
     user: "root"
     volumes: *superset-volumes
     healthcheck:
       disable: true
-    environment:
-      SUPERSET_LOAD_EXAMPLES: "${SUPERSET_LOAD_EXAMPLES:-yes}"
-      SUPERSET_LOG_LEVEL: "${SUPERSET_LOG_LEVEL:-info}"
 
   superset-worker:
     build:
@@ -108,9 +100,7 @@ services:
       - path: docker/.env-local # optional override
         required: false
     restart: unless-stopped
-    depends_on:
-      superset-init:
-        condition: service_completed_successfully
+    depends_on: *superset-depends-on
     user: "root"
     volumes: *superset-volumes
     healthcheck:
@@ -119,8 +109,6 @@ services:
           "CMD-SHELL",
           "celery -A superset.tasks.celery_app:app inspect ping -d celery@$$HOSTNAME",
         ]
-    environment:
-      SUPERSET_LOG_LEVEL: "${SUPERSET_LOG_LEVEL:-info}"
 
   superset-worker-beat:
     build:
@@ -133,15 +121,11 @@ services:
       - path: docker/.env-local # optional override
         required: false
     restart: unless-stopped
-    depends_on:
-      superset-init:
-        condition: service_completed_successfully
+    depends_on: *superset-depends-on
     user: "root"
     volumes: *superset-volumes
     healthcheck:
       disable: true
-    environment:
-      SUPERSET_LOG_LEVEL: "${SUPERSET_LOG_LEVEL:-info}"
 
 volumes:
   superset_home:

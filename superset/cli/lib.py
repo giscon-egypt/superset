@@ -29,7 +29,7 @@ if feature_flags_func:
     try:
         # pylint: disable=not-callable
         feature_flags = feature_flags_func(feature_flags)
-    except Exception:  # pylint: disable=broad-except  # noqa: S110
+    except Exception:  # pylint: disable=broad-except
         # bypass any feature flags that depend on context
         # that's not available
         pass

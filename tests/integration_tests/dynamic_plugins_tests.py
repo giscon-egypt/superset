@@ -28,7 +28,7 @@ class TestDynamicPlugins(SupersetTestCase):
         self.login(ADMIN_USERNAME)
         uri = "/dynamic-plugins/api"
         rv = self.client.get(uri)
-        assert rv.status_code == 404
+        self.assertEqual(rv.status_code, 404)
 
     @with_feature_flags(DYNAMIC_PLUGINS=True)
     def test_dynamic_plugins_enabled(self):
@@ -38,4 +38,4 @@ class TestDynamicPlugins(SupersetTestCase):
         self.login(ADMIN_USERNAME)
         uri = "/dynamic-plugins/api"
         rv = self.client.get(uri)
-        assert rv.status_code == 200
+        self.assertEqual(rv.status_code, 200)

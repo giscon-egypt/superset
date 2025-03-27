@@ -18,7 +18,8 @@
  */
 import { Component } from 'react';
 import PropTypes from 'prop-types';
-import { css, t } from '@superset-ui/core';
+import { css } from '@emotion/react';
+import { t } from '@superset-ui/core';
 import Label from 'src/components/Label';
 import Collapse from 'src/components/Collapse';
 import TextControl from 'src/explore/components/controls/TextControl';

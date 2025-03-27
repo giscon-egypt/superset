@@ -49,8 +49,10 @@ test('Return all chart ids in global scope with native filters', () => {
     } as unknown as Filter,
   };
 
-  const result = getRelatedCharts('filterKey1', filters.filterKey1, slices);
-  expect(result).toEqual([1, 2, 3]);
+  const result = getRelatedCharts(filters, null, slices);
+  expect(result).toEqual({
+    filterKey1: [1, 2, 3],
+  });
 });
 
 test('Return only chart ids in specific scope with native filters', () => {
@@ -72,8 +74,10 @@ test('Return only chart ids in specific scope with native filters', () => {
     } as unknown as Filter,
   };
 
-  const result = getRelatedCharts('filterKey1', filters.filterKey1, slices);
-  expect(result).toEqual([1, 3]);
+  const result = getRelatedCharts(filters, null, slices);
+  expect(result).toEqual({
+    filterKey1: [1, 3],
+  });
 });
 
 test('Return all chart ids with cross filter in global scope', () => {
@@ -86,8 +90,10 @@ test('Return all chart ids with cross filter in global scope', () => {
     } as AppliedCrossFilterType,
   };
 
-  const result = getRelatedCharts('3', filters['3'], slices);
-  expect(result).toEqual([1, 2]);
+  const result = getRelatedCharts(filters, null, slices);
+  expect(result).toEqual({
+    '3': [1, 2],
+  });
 });
 
 test('Return only chart ids in specific scope with cross filter', () => {
@@ -102,6 +108,8 @@ test('Return only chart ids in specific scope with cross filter', () => {
     } as AppliedCrossFilterType,
   };
 
-  const result = getRelatedCharts('1', filters['1'], slices);
-  expect(result).toEqual([2]);
+  const result = getRelatedCharts(filters, null, slices);
+  expect(result).toEqual({
+    '1': [2],
+  });
 });

@@ -17,10 +17,8 @@
  * under the License.
  */
 import { styled } from '@superset-ui/core';
-// eslint-disable-next-line no-restricted-imports
-import { Collapse as AntdCollapse } from 'antd'; // TODO: Remove antd
-// eslint-disable-next-line no-restricted-imports
-import { CollapseProps as AntdCollapseProps } from 'antd/lib/collapse'; // TODO: Remove antd
+import { Collapse as AntdCollapse } from 'antd';
+import { CollapseProps as AntdCollapseProps } from 'antd/lib/collapse';
 
 export interface CollapseProps extends AntdCollapseProps {
   light?: boolean;

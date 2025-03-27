@@ -17,7 +17,8 @@
  * under the License.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { t, useTheme } from '@superset-ui/core';
+import { t } from '@superset-ui/core';
+import { filter } from 'lodash';
 import {
   useChartEditModal,
   useFavoriteStatus,
@@ -44,7 +45,6 @@ import Chart from 'src/types/Chart';
 import handleResourceExport from 'src/utils/export';
 import Loading from 'src/components/Loading';
 import ErrorBoundary from 'src/components/ErrorBoundary';
-import Icons from 'src/components/Icons';
 import EmptyState from './EmptyState';
 import { WelcomeTable } from './types';
 import SubMenu from './SubMenu';
@@ -70,14 +70,13 @@ function ChartTable({
   otherTabFilters,
   otherTabTitle,
 }: ChartTableProps) {
-  const theme = useTheme();
   const history = useHistory();
   const initialTab = getItem(
     LocalStorageKeys.HomepageChartFilter,
     TableTab.Other,
   );
 
-  const filteredOtherTabData = otherTabData?.filter(obj => 'viz_type' in obj);
+  const filteredOtherTabData = filter(otherTabData, obj => 'viz_type' in obj);
 
   const {
     state: { loading, resourceCollection: charts, bulkSelectEnabled },
@@ -188,11 +187,7 @@ function ChartTable({
           {
             name: (
               <>
-                <Icons.PlusOutlined
-                  iconColor={theme.colors.primary.dark1}
-                  iconSize="m"
-                  data-test="add-annotation-layer-button"
-                />
+                <i className="fa fa-plus" />
                 {t('Chart')}
               </>
             ),

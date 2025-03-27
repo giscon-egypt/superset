@@ -24,8 +24,6 @@ import {
   styled,
   SupersetClient,
   t,
-  useTheme,
-  css,
 } from '@superset-ui/core';
 import { useState, useMemo, useCallback } from 'react';
 import rison from 'rison';
@@ -159,7 +157,6 @@ const StyledActions = styled.div`
 `;
 
 function ChartList(props: ChartListProps) {
-  const theme = useTheme();
   const {
     addDangerToast,
     addSuccessToast,
@@ -381,11 +378,7 @@ function ChartList(props: ChartListProps) {
               datasource_url: dsUrl,
             },
           },
-        }: any) => (
-          <Tooltip title={dsNameTxt} placement="top">
-            <GenericLink to={dsUrl}>{dsNameTxt?.split('.')[1]}</GenericLink>
-          </Tooltip>
-        ),
+        }: any) => <GenericLink to={dsUrl}>{dsNameTxt}</GenericLink>,
         Header: t('Dataset'),
         accessor: 'datasource_id',
         disableSortBy: true,
@@ -482,12 +475,13 @@ function ChartList(props: ChartListProps) {
                       placement="bottom"
                     >
                       <span
+                        data-test="trash"
                         role="button"
                         tabIndex={0}
                         className="action-button"
                         onClick={confirmDelete}
                       >
-                        <Icons.DeleteOutlined iconSize="l" />
+                        <Icons.Trash />
                       </span>
                     </Tooltip>
                   )}
@@ -505,7 +499,7 @@ function ChartList(props: ChartListProps) {
                     className="action-button"
                     onClick={handleExport}
                   >
-                    <Icons.UploadOutlined iconSize="l" />
+                    <Icons.Share />
                   </span>
                 </Tooltip>
               )}
@@ -521,7 +515,7 @@ function ChartList(props: ChartListProps) {
                     className="action-button"
                     onClick={openEditModal}
                   >
-                    <Icons.EditOutlined data-test="edit-alt" iconSize="l" />
+                    <Icons.EditAlt data-test="edit-alt" />
                   </span>
                 </Tooltip>
               )}
@@ -762,14 +756,7 @@ function ChartList(props: ChartListProps) {
     subMenuButtons.push({
       name: (
         <>
-          <Icons.PlusOutlined
-            iconColor={theme.colors.primary.light5}
-            iconSize="m"
-            css={css`
-              vertical-align: text-top;
-            `}
-          />
-          <span>{t('Chart')}</span>
+          <i className="fa fa-plus" /> {t('Chart')}
         </>
       ),
       buttonStyle: 'primary',
@@ -785,10 +772,7 @@ function ChartList(props: ChartListProps) {
           title={t('Import charts')}
           placement="bottomRight"
         >
-          <Icons.DownloadOutlined
-            data-test="import-button"
-            iconColor={theme.colors.primary.dark1}
-          />
+          <Icons.Import data-test="import-button" />
         </Tooltip>
       ),
       buttonStyle: 'link',

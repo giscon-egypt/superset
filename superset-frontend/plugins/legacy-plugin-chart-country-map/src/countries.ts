@@ -80,7 +80,6 @@ import ethiopia from './countries/ethiopia.geojson';
 import fiji from './countries/fiji.geojson';
 import finland from './countries/finland.geojson';
 import france from './countries/france.geojson';
-import france_overseas from './countries/france_overseas.geojson';
 import france_regions from './countries/france_regions.geojson';
 import french_polynesia from './countries/french_polynesia.geojson';
 import gabon from './countries/gabon.geojson';
@@ -95,7 +94,6 @@ import guinea from './countries/guinea.geojson';
 import guyana from './countries/guyana.geojson';
 import haiti from './countries/haiti.geojson';
 import honduras from './countries/honduras.geojson';
-import hungary from './countries/hungary.geojson';
 import iceland from './countries/iceland.geojson';
 import india from './countries/india.geojson';
 import indonesia from './countries/indonesia.geojson';
@@ -281,7 +279,6 @@ export const countries = {
   fiji,
   finland,
   france,
-  france_overseas,
   france_regions,
   french_polynesia,
   gabon,
@@ -296,7 +293,6 @@ export const countries = {
   guyana,
   haiti,
   honduras,
-  hungary,
   iceland,
   india,
   indonesia,
@@ -428,9 +424,6 @@ export const countryOptions = Object.keys(countries).map(x => {
   }
   if (x === 'france_regions') {
     return [x, 'France (regions)'];
-  }
-  if (x === 'france_overseas') {
-    return [x, 'France (with overseas)'];
   }
   if (x === 'turkey_regions') {
     return [x, 'Turkey (regions)'];

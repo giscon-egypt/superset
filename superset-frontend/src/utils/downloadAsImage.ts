@@ -19,7 +19,6 @@
 import { SyntheticEvent } from 'react';
 import domToImage from 'dom-to-image-more';
 import { kebabCase } from 'lodash';
-// eslint-disable-next-line no-restricted-imports
 import { t, supersetTheme } from '@superset-ui/core';
 import { addWarningToast } from 'src/components/MessageToasts/actions';
 

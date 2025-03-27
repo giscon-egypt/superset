@@ -78,7 +78,7 @@ export default function SyntaxHighlighterCopy({
   }
   return (
     <SyntaxHighlighterWrapper>
-      <Icons.CopyOutlined
+      <Icons.Copy
         tabIndex={0}
         role="button"
         onClick={e => {

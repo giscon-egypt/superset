@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { AntdThemeProvider } from 'src/components/AntdThemeProvider';
 import Badge, { BadgeProps } from '.';
 
 export default {
@@ -58,7 +59,11 @@ const SIZES = {
   defaultValue: undefined,
 };
 
-export const InteractiveBadge = (args: BadgeProps) => <Badge {...args} />;
+export const InteractiveBadge = (args: BadgeProps) => (
+  <AntdThemeProvider>
+    <Badge {...args} />
+  </AntdThemeProvider>
+);
 
 InteractiveBadge.args = {
   count: undefined,
@@ -115,14 +120,16 @@ export const BadgeGallery = () => (
     {SIZES.options.map(size => (
       <div key={size} style={{ marginBottom: 40 }}>
         <h4>{size}</h4>
-        {COLORS.options.map(color => (
-          <Badge
-            count={9}
-            size={size}
-            key={`${color}_${size}`}
-            style={{ marginRight: '15px' }}
-          />
-        ))}
+        <AntdThemeProvider>
+          {COLORS.options.map(color => (
+            <Badge
+              count={9}
+              size={size}
+              key={`${color}_${size}`}
+              style={{ marginRight: '15px' }}
+            />
+          ))}
+        </AntdThemeProvider>
       </div>
     ))}
   </>

@@ -18,10 +18,8 @@
  */
 import { styled } from '@superset-ui/core';
 import Icons from 'src/components/Icons';
-// eslint-disable-next-line no-restricted-imports
-import { Spin, Tag } from 'antd'; // TODO: Remove antd
-// eslint-disable-next-line no-restricted-imports
-import AntdSelect from 'antd/lib/select'; // TODO: Remove antd
+import { Spin, Tag } from 'antd';
+import AntdSelect from 'antd/lib/select';
 
 export const StyledHeader = styled.span<{ headerPosition: string }>`
   ${({ theme, headerPosition }) => `

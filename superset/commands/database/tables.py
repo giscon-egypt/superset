@@ -32,7 +32,6 @@ from superset.daos.database import DatabaseDAO
 from superset.exceptions import SupersetException
 from superset.extensions import db, security_manager
 from superset.models.core import Database
-from superset.utils.core import DatasourceName
 
 logger = logging.getLogger(__name__)
 
@@ -60,11 +59,7 @@ class TablesDatabaseCommand(BaseCommand):
                 catalog=self._catalog_name,
                 schema=self._schema_name,
                 datasource_names=sorted(
-                    # get_all_table_names_in_schema may return raw (unserialized) cached
-                    # results, so we wrap them as DatasourceName objects here instead of
-                    # directly in the method to ensure consistency.
-                    DatasourceName(*datasource_name)
-                    for datasource_name in self._model.get_all_table_names_in_schema(
+                    self._model.get_all_table_names_in_schema(
                         catalog=self._catalog_name,
                         schema=self._schema_name,
                         force=self._force,
@@ -79,11 +74,7 @@ class TablesDatabaseCommand(BaseCommand):
                 catalog=self._catalog_name,
                 schema=self._schema_name,
                 datasource_names=sorted(
-                    # get_all_view_names_in_schema may return raw (unserialized) cached
-                    # results, so we wrap them as DatasourceName objects here instead of
-                    # directly in the method to ensure consistency.
-                    DatasourceName(*datasource_name)
-                    for datasource_name in self._model.get_all_view_names_in_schema(
+                    self._model.get_all_view_names_in_schema(
                         catalog=self._catalog_name,
                         schema=self._schema_name,
                         force=self._force,
@@ -139,7 +130,7 @@ class TablesDatabaseCommand(BaseCommand):
         except SupersetException:
             raise
         except Exception as ex:
-            raise DatabaseTablesUnexpectedError(str(ex)) from ex
+            raise DatabaseTablesUnexpectedError(ex) from ex
 
     def validate(self) -> None:
         self._model = cast(Database, DatabaseDAO.find_by_id(self._db_id))

@@ -59,7 +59,7 @@ def compare(  # pylint: disable=too-many-arguments
     if len(source_columns) == 0:
         return df
 
-    for s_col, c_col in zip(source_columns, compare_columns, strict=False):
+    for s_col, c_col in zip(source_columns, compare_columns):
         s_df = df.loc[:, [s_col]]
         s_df.rename(columns={s_col: "__intermediate"}, inplace=True)
         c_df = df.loc[:, [c_col]]
@@ -81,10 +81,5 @@ def compare(  # pylint: disable=too-many-arguments
         df = pd.concat([df, diff_df], axis=1)
 
     if drop_original_columns:
-        level = (
-            0
-            if isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels > 1
-            else None
-        )
-        df = df.drop(source_columns + compare_columns, axis=1, level=level)
+        df = df.drop(source_columns + compare_columns, axis=1)
     return df

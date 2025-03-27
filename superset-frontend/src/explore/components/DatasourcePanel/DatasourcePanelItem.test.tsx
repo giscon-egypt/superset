@@ -124,8 +124,8 @@ test('can collapse metrics and columns', () => {
     { useDnd: true },
   );
   fireEvent.click(getByRole('button'));
-  expect(mockData.onCollapseMetricsChange).toHaveBeenCalled();
-  expect(mockData.onCollapseColumnsChange).not.toHaveBeenCalled();
+  expect(mockData.onCollapseMetricsChange).toBeCalled();
+  expect(mockData.onCollapseColumnsChange).not.toBeCalled();
 
   const startIndexOfColumnSection = mockData.metricSlice.length + 3;
   rerender(
@@ -136,7 +136,7 @@ test('can collapse metrics and columns', () => {
     />,
   );
   fireEvent.click(getByRole('button'));
-  expect(mockData.onCollapseColumnsChange).toHaveBeenCalled();
+  expect(mockData.onCollapseColumnsChange).toBeCalled();
 
   rerender(
     <DatasourcePanelItem

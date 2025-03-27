@@ -23,18 +23,17 @@ import {
   MouseEventHandler,
 } from 'react';
 
-import { extendedDayjs } from 'src/utils/dates';
-import { t, styled, css } from '@superset-ui/core';
+import moment, { Moment, MomentInput } from 'moment';
+import { t, styled } from '@superset-ui/core';
 import Icons from 'src/components/Icons';
-import dayjs from 'dayjs';
 
 const REFRESH_INTERVAL = 60000; // every minute
 
 interface LastUpdatedProps {
-  updatedAt: string | number | Date | undefined;
+  updatedAt: MomentInput;
   update?: MouseEventHandler<HTMLSpanElement>;
 }
-extendedDayjs.updateLocale('en', {
+moment.updateLocale('en', {
   calendar: {
     lastDay: '[Yesterday at] LTS',
     sameDay: '[Today at] LTS',
@@ -49,31 +48,28 @@ const TextStyles = styled.span`
   color: ${({ theme }) => theme.colors.grayscale.base};
 `;
 
-const RefreshIcon = styled(Icons.SyncOutlined)`
-  ${({ theme }) => `
+const Refresh = styled(Icons.Refresh)`
+  color: ${({ theme }) => theme.colors.primary.base};
   width: auto;
-  height: ${theme.gridUnit * 5}px;
+  height: ${({ theme }) => theme.gridUnit * 5}px;
   position: relative;
-  top: ${theme.gridUnit}px;
-  left: ${theme.gridUnit}px;
+  top: ${({ theme }) => theme.gridUnit}px;
+  left: ${({ theme }) => theme.gridUnit}px;
   cursor: pointer;
-`};
 `;
 
 export const LastUpdated: FunctionComponent<LastUpdatedProps> = ({
   updatedAt,
   update,
 }) => {
-  const [timeSince, setTimeSince] = useState<dayjs.Dayjs>(
-    extendedDayjs(updatedAt),
-  );
+  const [timeSince, setTimeSince] = useState<Moment>(moment(updatedAt));
 
   useEffect(() => {
-    setTimeSince(() => extendedDayjs(updatedAt));
+    setTimeSince(() => moment(updatedAt));
 
     // update UI every minute in case day changes
     const interval = setInterval(() => {
-      setTimeSince(() => extendedDayjs(updatedAt));
+      setTimeSince(() => moment(updatedAt));
     }, REFRESH_INTERVAL);
 
     return () => clearInterval(interval);
@@ -82,15 +78,7 @@ export const LastUpdated: FunctionComponent<LastUpdatedProps> = ({
   return (
     <TextStyles>
       {t('Last Updated %s', timeSince.isValid() ? timeSince.calendar() : '--')}
-      {update && (
-        <RefreshIcon
-          iconSize="l"
-          css={css`
-            vertical-align: text-bottom;
-          `}
-          onClick={update}
-        />
-      )}
+      {update && <Refresh onClick={update} />}
     </TextStyles>
   );
 };

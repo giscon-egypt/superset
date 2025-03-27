@@ -88,12 +88,19 @@ function TimeoutErrorMessage({
     </>
   );
 
+  const copyText = t('%(subtitle)s\nThis may be triggered by:\n %(issue)s', {
+    subtitle,
+    issue: extra.issue_codes.map(issueCode => issueCode.message).join('\n'),
+  });
+
   return (
     <ErrorAlert
-      errorType={t('Timeout error')}
-      message={subtitle}
-      type={level}
-      descriptionDetails={body}
+      title={t('Timeout error')}
+      subtitle={subtitle}
+      level={level}
+      source={source}
+      copyText={copyText}
+      body={body}
     />
   );
 }

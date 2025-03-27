@@ -48,7 +48,6 @@ export interface ControlItemsProps {
   datasetId: number;
   disabled: boolean;
   forceUpdate: Function;
-  formChanged: Function;
   form: FormInstance<NativeFiltersForm>;
   filterId: string;
   filterType: string;
@@ -66,7 +65,6 @@ export default function getControlItemsMap({
   datasetId,
   disabled,
   forceUpdate,
-  formChanged,
   form,
   filterId,
   filterType,
@@ -139,7 +137,6 @@ export default function getControlItemsMap({
                   defaultDataMask: null,
                 });
                 forceUpdate();
-                formChanged();
               }}
             />
           </StyledFormItem>
@@ -203,7 +200,6 @@ export default function getControlItemsMap({
                       defaultDataMask: null,
                     });
                   }
-                  formChanged();
                   forceUpdate();
                 }}
               >

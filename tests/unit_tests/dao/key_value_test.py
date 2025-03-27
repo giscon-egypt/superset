@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import pickle
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING
+from typing import Generator, TYPE_CHECKING
 from uuid import UUID
 
 import pytest
@@ -54,7 +54,7 @@ NEW_VALUE = {"foo": "baz"}
 
 
 @pytest.fixture
-def key_value_entry() -> KeyValueEntry:
+def key_value_entry() -> Generator[KeyValueEntry, None, None]:
     from superset.key_value.models import KeyValueEntry
 
     entry = KeyValueEntry(
@@ -65,7 +65,7 @@ def key_value_entry() -> KeyValueEntry:
     )
     db.session.add(entry)
     db.session.flush()
-    return entry
+    yield entry
 
 
 def test_create_id_entry(
@@ -143,7 +143,7 @@ def test_create_pickle_entry(
         found_entry = (
             db.session.query(KeyValueEntry).filter_by(id=created_entry.id).one()
         )
-        assert isinstance(pickle.loads(found_entry.value), type(PICKLE_VALUE))  # noqa: S301
+        assert type(pickle.loads(found_entry.value)) == type(PICKLE_VALUE)
         assert found_entry.created_by_fk == admin_user.id
 
 

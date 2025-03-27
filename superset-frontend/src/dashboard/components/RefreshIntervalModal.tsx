@@ -28,7 +28,7 @@ import { FormLabel } from 'src/components/Form';
 import { propertyComparator } from 'src/components/Select/utils';
 
 const StyledModalTrigger = styled(ModalTrigger)`
-  .antd5-modal-body {
+  .ant-modal-body {
     overflow: visible;
   }
 `;

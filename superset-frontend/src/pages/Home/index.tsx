@@ -46,7 +46,7 @@ import {
   loadingCardCount,
   mq,
 } from 'src/views/CRUD/utils';
-import { Switch } from 'src/components/Switch';
+import { AntdSwitch } from 'src/components';
 import getBootstrapData from 'src/utils/getBootstrapData';
 import { TableTab } from 'src/views/CRUD/types';
 import SubMenu, { SubMenuProps } from 'src/features/home/SubMenu';
@@ -94,14 +94,17 @@ const WelcomeContainer = styled.div`
         margin: 0px 2px;
       }
     }
+    .ant-menu.ant-menu-light.ant-menu-root.ant-menu-horizontal {
+      padding-left: ${({ theme }) => theme.gridUnit * 8}px;
+    }
     button {
       padding: 3px 21px;
     }
   }
-  .antd5-card-meta-description {
+  .ant-card-meta-description {
     margin-top: ${({ theme }) => theme.gridUnit}px;
   }
-  .antd5-card.ant-card-bordered {
+  .ant-card.ant-card-bordered {
     border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
   }
   .ant-collapse-item .ant-collapse-content {
@@ -116,7 +119,7 @@ const WelcomeContainer = styled.div`
   }
   .loading-cards {
     margin-top: ${({ theme }) => theme.gridUnit * 8}px;
-    .antd5-card-cover > div {
+    .ant-card-cover > div {
       height: 168px;
     }
   }
@@ -156,7 +159,7 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
   const canReadSavedQueries = userHasPermission(user, 'SavedQuery', 'can_read');
   const userid = user.userId;
   const id = userid!.toString(); // confident that user is not a guest user
-  const params = rison.encode({ page_size: 24, distinct: false });
+  const params = rison.encode({ page_size: 6 });
   const recent = `/api/v1/log/recent_activity/?q=${params}`;
   const [activeChild, setActiveChild] = useState('Loading');
   const userKey = dangerouslyGetItemDoNotUse(id, null);
@@ -337,7 +340,7 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
         name: (
           <WelcomeNav>
             <div className="switch">
-              <Switch checked={checked} onClick={handleToggle} />
+              <AntdSwitch checked={checked} onClick={handleToggle} />
               <span>{t('Thumbnails')}</span>
             </div>
           </WelcomeNav>

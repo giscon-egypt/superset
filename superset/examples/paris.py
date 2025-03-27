@@ -15,8 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import logging
-
 import pandas as pd
 from sqlalchemy import inspect, String, Text
 
@@ -26,8 +24,6 @@ from superset.sql_parse import Table
 from superset.utils import json
 
 from .helpers import get_example_url, get_table_connector_registry
-
-logger = logging.getLogger(__name__)
 
 
 def load_paris_iris_geojson(only_metadata: bool = False, force: bool = False) -> None:
@@ -57,7 +53,7 @@ def load_paris_iris_geojson(only_metadata: bool = False, force: bool = False) ->
                 index=False,
             )
 
-    logger.debug(f"Creating table {tbl_name} reference")
+    print(f"Creating table {tbl_name} reference")
     table = get_table_connector_registry()
     tbl = db.session.query(table).filter_by(table_name=tbl_name).first()
     if not tbl:

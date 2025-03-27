@@ -47,7 +47,7 @@ const SqlLabStyles = styled.div`
       left: 0;
       padding: 0 ${theme.gridUnit * 2}px;
 
-      pre:not(.code) {
+      pre {
         padding: 0 !important;
         margin: 0;
         border: none;
@@ -89,11 +89,11 @@ const SqlLabStyles = styled.div`
         }
       }
 
-      .ResultsModal .antd5-modal-body {
+      .ResultsModal .ant-modal-body {
         min-height: ${theme.gridUnit * 140}px;
       }
 
-      .antd5-modal-body {
+      .ant-modal-body {
         overflow: auto;
       }
     }

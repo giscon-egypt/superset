@@ -47,7 +47,7 @@ export default function DownloadScreenshot({
   ...rest
 }: {
   text: string;
-  dashboardId: number;
+  dashboardId: string;
   logEvent?: Function;
   format: string;
 }) {
@@ -156,7 +156,7 @@ export default function DownloadScreenshot({
         anchor,
         activeTabs,
         dataMask,
-        urlParams: getDashboardUrlParams(['edit']),
+        urlParams: getDashboardUrlParams(),
       },
     })
       .then(({ json }) => {

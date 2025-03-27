@@ -90,7 +90,7 @@ function configFromFile(): Partial<ConfigType> {
   const configFile = isTest ? '../config.test.json' : '../config.json';
   try {
     return require(configFile);
-  } catch {
+  } catch (err) {
     console.warn('config.json file not found');
     return {};
   }

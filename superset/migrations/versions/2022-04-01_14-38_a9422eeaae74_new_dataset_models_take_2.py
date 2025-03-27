@@ -80,11 +80,11 @@ class AuxiliaryColumnsMixin(UUIDMixin):
     )
 
     @declared_attr
-    def created_by_fk(cls):  # noqa: N805
+    def created_by_fk(cls):
         return sa.Column(sa.Integer, sa.ForeignKey("ab_user.id"), nullable=True)
 
     @declared_attr
-    def changed_by_fk(cls):  # noqa: N805
+    def changed_by_fk(cls):
         return sa.Column(sa.Integer, sa.ForeignKey("ab_user.id"), nullable=True)
 
 
@@ -324,7 +324,7 @@ def copy_tables(session: Session) -> None:
                 # Tables need different uuid than datasets, since they are different
                 # entities. When INSERT FROM SELECT, we must provide a value for `uuid`,
                 # otherwise it'd use the default generated on Python side, which
-                # will cause duplicate values. They will be replaced by `assign_uuids` later.  # noqa: E501
+                # will cause duplicate values. They will be replaced by `assign_uuids` later.
                 SqlaTable.uuid,
                 SqlaTable.id.label("sqlatable_id"),
                 SqlaTable.created_on,
@@ -502,7 +502,7 @@ def copy_metrics(session: Session) -> None:
     )
 
 
-def postprocess_datasets(session: Session) -> None:  # noqa: C901
+def postprocess_datasets(session: Session) -> None:
     """
     Postprocess datasets after insertion to
       - Quote table names for physical datasets (if needed)
@@ -620,7 +620,7 @@ def postprocess_datasets(session: Session) -> None:  # noqa: C901
         print("")
 
 
-def postprocess_columns(session: Session) -> None:  # noqa: C901
+def postprocess_columns(session: Session) -> None:
     """
     At this step, we will
       - Add engine specific quotes to `expression` of physical columns
@@ -809,7 +809,7 @@ def postprocess_columns(session: Session) -> None:  # noqa: C901
                             updates["expression"] = quoted_expression
                 # duplicate physical columns for tables
                 physical_columns.append(
-                    dict(  # noqa: C408
+                    dict(
                         created_on=created_on,
                         changed_on=changed_on,
                         changed_by_fk=changed_by_fk,
@@ -867,17 +867,15 @@ new_tables: sa.Table = [
 
 
 def reset_postgres_id_sequence(table: str) -> None:
-    """Reset PostgreSQL sequence ID for a table's id column."""
     op.execute(
-        """
+        f"""
         SELECT setval(
-            pg_get_serial_sequence(:table, 'id'),
+            pg_get_serial_sequence('{table}', 'id'),
             COALESCE(max(id) + 1, 1),
             false
         )
-        FROM :table;
-        """,
-        {"table": table},
+        FROM {table};
+    """
     )
 
 
@@ -905,7 +903,7 @@ def upgrade() -> None:
     assign_uuids(NewTable, session)
 
     print(">> Drop intermediate columns...")
-    # These columns are are used during migration, as datasets are independent of tables once created,  # noqa: E501
+    # These columns are are used during migration, as datasets are independent of tables once created,
     # dataset columns also the same to table columns.
     with op.batch_alter_table(NewTable.__tablename__) as batch_op:
         batch_op.drop_column("sqlatable_id")

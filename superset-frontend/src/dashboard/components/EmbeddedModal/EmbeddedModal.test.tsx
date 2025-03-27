@@ -23,6 +23,7 @@ import {
   fireEvent,
   waitFor,
 } from 'spec/helpers/testing-library';
+import '@testing-library/jest-dom';
 import {
   SupersetApiError,
   getExtensionsRegistry,

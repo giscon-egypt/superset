@@ -26,53 +26,53 @@ def test_export_assets_command(mocker: MockerFixture) -> None:
     """
     from superset.commands.export.assets import ExportAssetsCommand
 
-    ExportDatabasesCommand = mocker.patch(  # noqa: N806
+    ExportDatabasesCommand = mocker.patch(
         "superset.commands.export.assets.ExportDatabasesCommand"
     )
     ExportDatabasesCommand.return_value.run.return_value = [
         (
             "metadata.yaml",
-            lambda: "version: 1.0.0\ntype: Database\ntimestamp: '2022-01-01T00:00:00+00:00'\n",  # noqa: E501
+            lambda: "version: 1.0.0\ntype: Database\ntimestamp: '2022-01-01T00:00:00+00:00'\n",
         ),
         ("databases/example.yaml", lambda: "<DATABASE CONTENTS>"),
     ]
-    ExportDatasetsCommand = mocker.patch(  # noqa: N806
+    ExportDatasetsCommand = mocker.patch(
         "superset.commands.export.assets.ExportDatasetsCommand"
     )
     ExportDatasetsCommand.return_value.run.return_value = [
         (
             "metadata.yaml",
-            lambda: "version: 1.0.0\ntype: Dataset\ntimestamp: '2022-01-01T00:00:00+00:00'\n",  # noqa: E501
+            lambda: "version: 1.0.0\ntype: Dataset\ntimestamp: '2022-01-01T00:00:00+00:00'\n",
         ),
         ("datasets/example/dataset.yaml", lambda: "<DATASET CONTENTS>"),
     ]
-    ExportChartsCommand = mocker.patch(  # noqa: N806
+    ExportChartsCommand = mocker.patch(
         "superset.commands.export.assets.ExportChartsCommand"
     )
     ExportChartsCommand.return_value.run.return_value = [
         (
             "metadata.yaml",
-            lambda: "version: 1.0.0\ntype: Slice\ntimestamp: '2022-01-01T00:00:00+00:00'\n",  # noqa: E501
+            lambda: "version: 1.0.0\ntype: Slice\ntimestamp: '2022-01-01T00:00:00+00:00'\n",
         ),
         ("charts/pie.yaml", lambda: "<CHART CONTENTS>"),
     ]
-    ExportDashboardsCommand = mocker.patch(  # noqa: N806
+    ExportDashboardsCommand = mocker.patch(
         "superset.commands.export.assets.ExportDashboardsCommand"
     )
     ExportDashboardsCommand.return_value.run.return_value = [
         (
             "metadata.yaml",
-            lambda: "version: 1.0.0\ntype: Dashboard\ntimestamp: '2022-01-01T00:00:00+00:00'\n",  # noqa: E501
+            lambda: "version: 1.0.0\ntype: Dashboard\ntimestamp: '2022-01-01T00:00:00+00:00'\n",
         ),
         ("dashboards/sales.yaml", lambda: "<DASHBOARD CONTENTS>"),
     ]
-    ExportSavedQueriesCommand = mocker.patch(  # noqa: N806
+    ExportSavedQueriesCommand = mocker.patch(
         "superset.commands.export.assets.ExportSavedQueriesCommand"
     )
     ExportSavedQueriesCommand.return_value.run.return_value = [
         (
             "metadata.yaml",
-            lambda: "version: 1.0.0\ntype: SavedQuery\ntimestamp: '2022-01-01T00:00:00+00:00'\n",  # noqa: E501
+            lambda: "version: 1.0.0\ntype: SavedQuery\ntimestamp: '2022-01-01T00:00:00+00:00'\n",
         ),
         ("queries/example/metric.yaml", lambda: "<SAVED QUERY CONTENTS>"),
     ]

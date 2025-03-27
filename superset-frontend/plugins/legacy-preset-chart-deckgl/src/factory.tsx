@@ -18,7 +18,7 @@
  */
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
-import type { Layer } from '@deck.gl/core';
+import { Layer } from 'deck.gl/typed';
 import {
   Datasource,
   QueryFormData,

@@ -50,9 +50,6 @@ import XAxisSortControl from './XAxisSortControl';
 import CurrencyControl from './CurrencyControl';
 import ColumnConfigControl from './ColumnConfigControl';
 import { ComparisonRangeLabel } from './ComparisonRangeLabel';
-import LayerConfigsControl from './LayerConfigsControl/LayerConfigsControl';
-import MapViewControl from './MapViewControl/MapViewControl';
-import ZoomConfigControl from './ZoomConfigControl/ZoomConfigControl';
 
 const controlMap = {
   AnnotationLayerControl,
@@ -71,8 +68,6 @@ const controlMap = {
   DndMetricSelect,
   FixedOrMetricControl,
   HiddenControl,
-  LayerConfigsControl,
-  MapViewControl,
   SelectAsyncControl,
   SelectControl,
   SliderControl,
@@ -89,7 +84,6 @@ const controlMap = {
   ContourControl,
   ComparisonRangeLabel,
   TimeOffsetControl,
-  ZoomConfigControl,
   ...sharedControlComponents,
 };
 export default controlMap;

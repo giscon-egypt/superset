@@ -75,8 +75,6 @@ export default memo(function ColumnConfigItem({
       >
         <ColumnTypeLabel type={column.type} />
         {column.name}
-        {/* TODO: Remove fa-icon */}
-        {/* eslint-disable-next-line icons/no-fa-icons-usage */}
         <i
           className="fa fa-caret-right"
           css={{

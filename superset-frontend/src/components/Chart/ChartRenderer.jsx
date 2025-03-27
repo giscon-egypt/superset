@@ -24,13 +24,12 @@ import {
   logging,
   Behavior,
   t,
-  getChartMetadataRegistry,
-  VizType,
   isFeatureEnabled,
   FeatureFlag,
+  getChartMetadataRegistry,
 } from '@superset-ui/core';
 import { Logger, LOG_ACTIONS_RENDER_CHART } from 'src/logger/LogUtils';
-import { EmptyState } from 'src/components/EmptyState';
+import { EmptyStateBig, EmptyStateSmall } from 'src/components/EmptyState';
 import { ChartSource } from 'src/types/ChartSource';
 import ChartContextMenu from './ChartContextMenu/ChartContextMenu';
 
@@ -85,14 +84,11 @@ const defaultProps = {
 class ChartRenderer extends Component {
   constructor(props) {
     super(props);
-    const suppressContextMenu = getChartMetadataRegistry().get(
-      props.formData.viz_type ?? props.vizType,
-    )?.suppressContextMenu;
     this.state = {
       showContextMenu:
         props.source === ChartSource.Dashboard &&
-        !suppressContextMenu &&
-        isFeatureEnabled(FeatureFlag.DrillToDetail),
+        (isFeatureEnabled(FeatureFlag.DrillToDetail) ||
+          isFeatureEnabled(FeatureFlag.DashboardCrossFilters)),
       inContextMenu: false,
       legendState: undefined,
     };
@@ -280,7 +276,7 @@ class ChartRenderer extends Component {
     // to each one of them.
     const snakeCaseVizType = snakeCase(vizType);
     const chartClassName =
-      vizType === VizType.Table
+      vizType === 'table'
         ? `superset-chart-${snakeCaseVizType}`
         : snakeCaseVizType;
 
@@ -307,8 +303,7 @@ class ChartRenderer extends Component {
     const noResultImage = 'chart.svg';
     if (width > BIG_NO_RESULT_MIN_WIDTH && height > BIG_NO_RESULT_MIN_HEIGHT) {
       noResultsComponent = (
-        <EmptyState
-          size="large"
+        <EmptyStateBig
           title={noResultTitle}
           description={noResultDescription}
           image={noResultImage}
@@ -316,7 +311,7 @@ class ChartRenderer extends Component {
       );
     } else {
       noResultsComponent = (
-        <EmptyState size="small" title={noResultTitle} image={noResultImage} />
+        <EmptyStateSmall title={noResultTitle} image={noResultImage} />
       );
     }
 

@@ -36,45 +36,6 @@ if (process.env.NODE_ENV === 'production') {
   ];
 }
 
-const restrictedImportsRules = {
-  'no-design-icons': {
-    name: '@ant-design/icons',
-    message:
-      'Avoid importing icons directly from @ant-design/icons. Use the src/components/Icons component instead.',
-  },
-  'no-moment': {
-    name: 'moment',
-    message:
-      'Please use the dayjs library instead of moment.js. See https://day.js.org',
-  },
-  'no-lodash-memoize': {
-    name: 'lodash/memoize',
-    message: 'Lodash Memoize is unsafe! Please use memoize-one instead',
-  },
-  'no-testing-library-react': {
-    name: '@testing-library/react',
-    message: 'Please use spec/helpers/testing-library instead',
-  },
-  'no-testing-library-react-dom-utils': {
-    name: '@testing-library/react-dom-utils',
-    message: 'Please use spec/helpers/testing-library instead',
-  },
-  'no-antd': {
-    name: 'antd',
-    message: 'Please import Ant components from the index of src/components',
-  },
-  'no-antd-v5': {
-    name: 'antd-v5',
-    message: 'Please import Ant v5 components from the index of src/components',
-  },
-  'no-superset-theme': {
-    name: '@superset-ui/core',
-    importNames: ['supersetTheme'],
-    message:
-      'Please use the theme directly from the ThemeProvider rather than importing supersetTheme.',
-  },
-};
-
 module.exports = {
   extends: [
     'airbnb',
@@ -113,8 +74,7 @@ module.exports = {
     'file-progress',
     'lodash',
     'theme-colors',
-    'icons',
-    'i18n-strings',
+    'translation-vars',
     'react-prefer-function-component',
     'prettier',
   ],
@@ -233,19 +193,6 @@ module.exports = {
             message:
               'Default React import is not required due to automatic JSX runtime in React 16.4',
           },
-          {
-            // this disallows wildcard imports from modules (but allows them for local files with `./` or `src/`)
-            selector:
-              'ImportNamespaceSpecifier[parent.source.value!=/^(\\.|src)/]',
-            message: 'Wildcard imports are not allowed',
-          },
-        ],
-        'no-restricted-imports': [
-          'error',
-          {
-            paths: Object.values(restrictedImportsRules).filter(Boolean),
-            patterns: ['antd/*'],
-          },
         ],
       },
       settings: {
@@ -255,51 +202,6 @@ module.exports = {
         react: {
           version: 'detect',
         },
-      },
-    },
-    {
-      files: ['packages/**'],
-      rules: {
-        'no-restricted-imports': [
-          'error',
-          {
-            paths: [
-              restrictedImportsRules['no-moment'],
-              restrictedImportsRules['no-lodash-memoize'],
-              restrictedImportsRules['no-superset-theme'],
-            ],
-            patterns: [],
-          },
-        ],
-      },
-    },
-    {
-      files: ['plugins/**'],
-      rules: {
-        'no-restricted-imports': [
-          'error',
-          {
-            paths: [
-              restrictedImportsRules['no-moment'],
-              restrictedImportsRules['no-lodash-memoize'],
-            ],
-            patterns: [],
-          },
-        ],
-      },
-    },
-    {
-      files: ['src/components/**', 'src/theme/**'],
-      rules: {
-        'no-restricted-imports': [
-          'error',
-          {
-            paths: Object.values(restrictedImportsRules).filter(
-              r => r.name !== 'antd-v5',
-            ),
-            patterns: ['antd/*'],
-          },
-        ],
       },
     },
     {
@@ -359,7 +261,6 @@ module.exports = {
               'Default React import is not required due to automatic JSX runtime in React 16.4',
           },
         ],
-        'no-restricted-imports': 0,
       },
     },
     {
@@ -377,17 +278,16 @@ module.exports = {
       ],
       rules: {
         'theme-colors/no-literal-colors': 0,
-        'icons/no-fa-icons-usage': 0,
-        'i18n-strings/no-template-vars': 0,
+        'translation-vars/no-template-vars': 0,
         'no-restricted-imports': 0,
+        'jest/no-alias-methods': 0,
         'react/no-void-elements': 0,
       },
     },
   ],
   rules: {
     'theme-colors/no-literal-colors': 'error',
-    'icons/no-fa-icons-usage': 'error',
-    'i18n-strings/no-template-vars': ['error', true],
+    'translation-vars/no-template-vars': ['error', true],
     camelcase: [
       'error',
       {
@@ -425,6 +325,29 @@ module.exports = {
     'no-nested-ternary': 0,
     'no-prototype-builtins': 0,
     'no-restricted-properties': 0,
+    'no-restricted-imports': [
+      'warn',
+      {
+        paths: [
+          {
+            name: 'antd',
+            message:
+              'Please import Ant components from the index of src/components',
+          },
+          {
+            name: '@superset-ui/core',
+            importNames: ['supersetTheme'],
+            message:
+              'Please use the theme directly from the ThemeProvider rather than importing supersetTheme.',
+          },
+          {
+            name: 'lodash/memoize',
+            message: 'Lodash Memoize is unsafe! Please use memoize-one instead',
+          },
+        ],
+        patterns: ['antd/*'],
+      },
+    ],
     'no-shadow': 0, // re-enable up for discussion
     'padded-blocks': 0,
     'prefer-arrow-callback': 0,
@@ -448,6 +371,7 @@ module.exports = {
     'react-prefer-function-component/react-prefer-function-component': 1,
     'prettier/prettier': 'error',
     // disabling some things that come with the eslint 7->8 upgrade. Will address these in a separate PR
+    'jest/no-alias-methods': 0,
     'react/no-unknown-property': 0,
     'react/no-void-elements': 0,
     'react/function-component-definition': [
@@ -465,13 +389,6 @@ module.exports = {
     'no-promise-executor-return': 0,
     'react/no-unused-class-component-methods': 0,
     'react/react-in-jsx-scope': 0,
-    'no-restricted-imports': [
-      'error',
-      {
-        paths: Object.values(restrictedImportsRules).filter(Boolean),
-        patterns: ['antd/*'],
-      },
-    ],
   },
   ignorePatterns,
 };

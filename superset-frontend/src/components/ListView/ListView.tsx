@@ -37,7 +37,7 @@ import {
   ViewModeType,
 } from './types';
 import { ListViewError, useListViewState } from './utils';
-import { EmptyState, EmptyStateProps } from '../EmptyState';
+import { EmptyStateBig, EmptyStateProps } from '../EmptyState';
 
 const ListViewStyles = styled.div`
   text-align: center;
@@ -67,8 +67,8 @@ const ListViewStyles = styled.div`
       overflow-x: auto;
     }
 
-    .antd5-empty {
-      .antd5-empty-image {
+    .ant-empty {
+      .ant-empty-image {
         height: auto;
       }
     }
@@ -130,7 +130,6 @@ const bulkSelectColumnConfig = {
     <IndeterminateCheckbox
       {...getToggleAllRowsSelectedProps()}
       id="header-toggle-all"
-      data-test="header-toggle-all"
     />
   ),
   id: 'selection',
@@ -187,7 +186,7 @@ const ViewModeToggle = ({
       }}
       className={cx('toggle-button', { active: mode === 'card' })}
     >
-      <Icons.AppstoreOutlined iconSize="xl" />
+      <Icons.CardView />
     </div>
     <div
       role="button"
@@ -198,7 +197,7 @@ const ViewModeToggle = ({
       }}
       className={cx('toggle-button', { active: mode === 'table' })}
     >
-      <Icons.UnorderedListOutlined iconSize="xl" />
+      <Icons.ListView />
     </div>
   </ViewModeContainer>
 );
@@ -347,7 +346,7 @@ function ListView<T extends object = any>({
           {cardViewEnabled && (
             <ViewModeToggle mode={viewMode} setMode={setViewMode} />
           )}
-          <div className="controls" data-test="filters-select">
+          <div className="controls">
             {filterable && (
               <FilterControls
                 ref={filterControlsRef}
@@ -446,21 +445,19 @@ function ListView<T extends object = any>({
             />
           )}
           {!loading && rows.length === 0 && (
-            <EmptyWrapper className={viewMode} data-test="empty-state">
+            <EmptyWrapper className={viewMode}>
               {query.filters ? (
-                <EmptyState
+                <EmptyStateBig
                   title={t('No results match your filter criteria')}
                   description={t('Try different criteria to display results.')}
-                  size="large"
                   image="filter-results.svg"
                   buttonAction={() => handleClearFilterControls()}
                   buttonText={t('clear all filters')}
                 />
               ) : (
-                <EmptyState
+                <EmptyStateBig
                   {...emptyState}
                   title={emptyState?.title || t('No Data')}
-                  size="large"
                   image={emptyState?.image || 'filter-results.svg'}
                 />
               )}

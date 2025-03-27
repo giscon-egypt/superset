@@ -19,13 +19,13 @@
 import { useMemo, useState, useCallback, ReactElement } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import {
-  css,
   QueryState,
   styled,
   SupersetClient,
   t,
   useTheme,
 } from '@superset-ui/core';
+import moment from 'moment';
 import {
   createFetchRelated,
   createFetchDistinct,
@@ -54,7 +54,6 @@ import Icons from 'src/components/Icons';
 import QueryPreviewModal from 'src/features/queries/QueryPreviewModal';
 import { addSuccessToast } from 'src/components/MessageToasts/actions';
 import getOwnerName from 'src/utils/getOwnerName';
-import { extendedDayjs } from 'src/utils/dates';
 
 const PAGE_SIZE = 25;
 const SQL_PREVIEW_MAX_LINES = 4;
@@ -160,13 +159,7 @@ function QueryList({ addDangerToast }: QueryListProps) {
           };
           if (status === QueryState.Success) {
             statusConfig.name = (
-              <Icons.CheckOutlined
-                iconSize="m"
-                iconColor={theme.colors.success.base}
-                css={css`
-                  vertical-align: -webkit-baseline-middle;
-                `}
-              />
+              <Icons.Check iconColor={theme.colors.success.base} />
             );
             statusConfig.label = t('Success');
           } else if (
@@ -174,8 +167,7 @@ function QueryList({ addDangerToast }: QueryListProps) {
             status === QueryState.Stopped
           ) {
             statusConfig.name = (
-              <Icons.CloseOutlined
-                iconSize="xs"
+              <Icons.XSmall
                 iconColor={
                   status === QueryState.Failed
                     ? theme.colors.error.base
@@ -191,14 +183,16 @@ function QueryList({ addDangerToast }: QueryListProps) {
             statusConfig.label = t('Running');
           } else if (status === QueryState.TimedOut) {
             statusConfig.name = (
-              <Icons.CircleSolid iconColor={theme.colors.grayscale.light1} />
+              <Icons.Offline iconColor={theme.colors.grayscale.light1} />
             );
             statusConfig.label = t('Offline');
           } else if (
             status === QueryState.Scheduled ||
             status === QueryState.Pending
           ) {
-            statusConfig.name = <Icons.Queued />;
+            statusConfig.name = (
+              <Icons.Queued iconColor={theme.colors.grayscale.base} />
+            );
             statusConfig.label = t('Scheduled');
           }
           return (
@@ -220,8 +214,8 @@ function QueryList({ addDangerToast }: QueryListProps) {
             original: { start_time },
           },
         }: any) => {
-          const start = extendedDayjs.utc(start_time).local();
-          const formattedStartTimeData = start
+          const startMoment = moment.utc(start_time).local();
+          const formattedStartTimeData = startMoment
             .format(DATETIME_WITH_TIME_ZONE)
             .split(' ');
 
@@ -244,9 +238,7 @@ function QueryList({ addDangerToast }: QueryListProps) {
         }: any) => {
           const timerType = status === QueryState.Failed ? 'danger' : status;
           const timerTime = end_time
-            ? extendedDayjs(extendedDayjs.utc(end_time - start_time)).format(
-                TIME_WITH_MS,
-              )
+            ? moment(moment.utc(end_time - start_time)).format(TIME_WITH_MS)
             : '00:00:00.000';
           return (
             <TimerLabel type={timerType} role="timer">
@@ -358,7 +350,7 @@ function QueryList({ addDangerToast }: QueryListProps) {
         }: any) => (
           <Tooltip title={t('Open query in SQL Lab')} placement="bottom">
             <Link to={`/sqllab?queryId=${id}`}>
-              <Icons.Full iconSize="l" />
+              <Icons.Full iconColor={theme.colors.grayscale.base} />
             </Link>
           </Tooltip>
         ),

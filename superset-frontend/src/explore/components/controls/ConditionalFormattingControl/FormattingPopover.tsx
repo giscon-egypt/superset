@@ -51,8 +51,8 @@ export const FormattingPopover = ({
           extraColorChoices={extraColorChoices}
         />
       }
-      open={visible}
-      onOpenChange={setVisible}
+      visible={visible}
+      onVisibleChange={setVisible}
       trigger={['click']}
       overlayStyle={{ width: '450px' }}
       {...props}

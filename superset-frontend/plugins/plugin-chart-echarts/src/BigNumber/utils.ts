@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
+import moment from 'moment';
 import {
   getTimeFormatter,
   getTimeFormatterForGranularity,
@@ -26,11 +25,9 @@ import {
   TimeGranularity,
 } from '@superset-ui/core';
 
-dayjs.extend(utc);
-
 export const parseMetricValue = (metricValue: number | string | null) => {
   if (typeof metricValue === 'string') {
-    const dateObject = dayjs.utc(metricValue, undefined, true);
+    const dateObject = moment.utc(metricValue, moment.ISO_8601, true);
     if (dateObject.isValid()) {
       return dateObject.valueOf();
     }
